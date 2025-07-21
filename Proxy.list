@@ -1,2 +1,2 @@
 DOMAIN-SUFFIX,itch.io
-DOMAIN-WILDCARD,*.itch.io
+DOMAIN-REGEX,.*itch.io
