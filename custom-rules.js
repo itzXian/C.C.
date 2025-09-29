@@ -55,8 +55,8 @@ const ruleProviders = {
   Proxy : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Proxy.list",
-    "path" : "./Proxy.list"
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
+    "path" : "./Bypass.list"
   }
 }
 
@@ -79,9 +79,11 @@ const prependProxyGroups = [
     "proxies" : [ "🚀 手动切换", "♻️ 自动选择", "🇯🇵 日本", "DIRECT" ]
   },
   {
-    "name" : "PROXY",
+    "name" : "BYPASS",
     "type" : "select",
-    "proxies" : [ "🚀 手动切换", "♻️ 自动选择", "REJECT", "DIRECT" ]
+    "include-all": true,
+    "filter" : "-1x",
+    "proxies" : [ "DIRECT", "🚀 手动切换", "♻️ 自动选择", "REJECT" ]
   },
 ];
 const prependRule = [
@@ -94,7 +96,7 @@ const prependRule = [
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
   "RULE-SET,JP,JP_DOMAIN",
-  "RULE-SET,Proxy,PROXY",
+  "RULE-SET,Bypass,BYPASS",
 ];
 function main(config) {
   let oldRules = config["rules"];
