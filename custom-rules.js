@@ -52,7 +52,7 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
     "path" : "./JP.list"
   },
-  Proxy : {
+  Bypass : {
     ...ruleProvidersBase,
     "behavior": "classical",
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
