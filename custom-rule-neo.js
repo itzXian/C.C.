@@ -94,7 +94,7 @@ const prependProxyGroups = [
     "name" : "AI",
     "type" : "select",
     "include-all": true,
-    "proxies" : [ "DIRECT", "MANUAL", "AUTO", "JP-AUTO", "JP" ]
+    "proxies" : [ "JP-AUTO", "JP", "DIRECT", "MANUAL", "AUTO", "REJECT"  ]
   },
 ];
 const prependRule = [
@@ -280,12 +280,13 @@ function overwriteProxyGroups(config) {
     ];
 
     autoProxyGroups.length &&
-        groups[1].proxies.unshift(...autoProxyGroups.map((item) => item.name));
+        // groups[1].proxies.unshift(...autoProxyGroups.map((item) => item.name));
+        groups[1].proxies.push(...autoProxyGroups.map((item) => item.name));
     groups.push(...autoProxyGroups);
     groups.push(...manualProxyGroupsConfig);
     // config["proxy-groups"] = groups;
     let oldProxyGroups = config["proxy-groups"];
-    oldProxyGroups[0].proxies.unshift(...autoProxyGroups.map((item) => item.name));
+    oldProxyGroups[0].proxies.unshift('AUTO');
     config["proxy-groups"] = oldProxyGroups.concat(groups);
 }
 function getProxiesByRegex(params, regex) {
