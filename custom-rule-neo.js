@@ -83,7 +83,18 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaIpV6.list",
     "path" : "./ChinaIpV6.list"
   },
-
+  Local : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Local.list",
+    "path" : "./Local.list"
+  },
+  LocalAreaNetwork : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/LocalAreaNetwork.list",
+    "path" : "./LocalAreaNetwork.list"
+  },
   JP : {
     ...ruleProvidersBase,
     "behavior": "classical",
@@ -152,10 +163,6 @@ const prependProxyGroups = [
     "name" : "BYPASS",
   },
   {
-    ...proxyGroupsBase.directFirst,
-    "name" : "CN_DOMAIN",
-  },
-  {
     ...proxyGroupsBase.jpAutoFirst,
     "name" : "JP_DOMAIN",
     "include-all": true,
@@ -192,12 +199,14 @@ const prependRule = [
   "RULE-SET,BanProgramAD,AD_BLOCK",
 
   "RULE-SET,Bypass,BYPASS",
-  "RULE-SET,ChinaCompanyIp,CN_DOMAIN",
-  "RULE-SET,ChinaDomain,CN_DOMAIN",
-  "RULE-SET,ChinaMedia,CN_DOMAIN",
-  "RULE-SET,ChinaIp,CN_DOMAIN",
-  "RULE-SET,ChinaIpV6,CN_DOMAIN",
-  //"GEOIP,CN,CN_DOMAIN",
+  "RULE-SET,Local,BYPASS",
+  "RULE-SET,LocalAreaNetwork,BYPASS",
+  "RULE-SET,ChinaCompanyIp,BYPASS",
+  "RULE-SET,ChinaDomain,BYPASS",
+  "RULE-SET,ChinaMedia,BYPASS",
+  "RULE-SET,ChinaIp,BYPASS",
+  "RULE-SET,ChinaIpV6,BYPASS",
+  //"GEOIP,CN,BYPASS",
 
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
