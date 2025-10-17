@@ -3,6 +3,7 @@ const ruleProvidersBase = {
     "format": "text",
     "interval": "3600",
 };
+
 const ruleProviders = {
   MIUI_Bloatware : {
     ...ruleProvidersBase,
@@ -46,17 +47,48 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
     "path" : "./BanProgramAD.list"
   },
-  JP : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
-    "path" : "./JP.list"
-  },
   Bypass : {
     ...ruleProvidersBase,
     "behavior": "classical",
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
     "path" : "./Bypass.list"
+  },
+  ChinaCompanyIp : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaCompanyIp.list",
+    "path" : "./ChinaCompanyIp.list"
+  },
+  ChinaDomain : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaDomain.list",
+    "path" : "./ChinaDomain.list"
+  },
+  ChinaMedia : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaMedia.list",
+    "path" : "./ChinaMedia.list"
+  },
+  ChinaIp : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaIp.list",
+    "path" : "./ChinaIp.list"
+  },
+  ChinaIpV6 : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaIpV6.list",
+    "path" : "./ChinaIpV6.list"
+  },
+
+  JP : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
+    "path" : "./JP.list"
   },
   AI : {
     ...ruleProvidersBase,
@@ -64,37 +96,90 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
     "path" : "./AI.list"
   },
+  Microsoft : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
+    "path" : "./Microsoft.list"
+  },
+  Apple : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
+    "path" : "./Apple.list"
+  },
+  GoogleCNProxyIP : {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
+    "path" : "./GoogleCNProxyIP.list"
+  },
 }
 
+const proxyGroupsBase = {
+    "jpAutoFirst" : {
+        "type" : "select",
+        "proxies" : [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
+    "autoFirst" : {
+        "type" : "select",
+        "proxies" : [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
+    "manualFirst" : {
+        "type" : "select",
+        "proxies" : [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
+    },
+    "directFirst" : {
+        "type" : "select",
+        "proxies" : [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
+    },
+    "rejectFirst" : {
+        "type" : "select",
+        "proxies" : [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
+    },
+}
 const prependProxyGroups = [
   {
+    ...proxyGroupsBase.rejectFirst,
     "name" : "MIUI_BLOATWARE",
-    "type" : "select",
-    "proxies" : [ "REJECT", "DIRECT" ]
   },
   {
+    ...proxyGroupsBase.rejectFirst,
     "name" : "AD_BLOCK",
-    "type" : "select",
-    "proxies" : [ "REJECT", "DIRECT" ]
   },
   {
+    ...proxyGroupsBase.directFirst,
+    "name" : "BYPASS",
+  },
+  {
+    ...proxyGroupsBase.directFirst,
+    "name" : "CN_DOMAIN",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
     "name" : "JP_DOMAIN",
-    "type" : "select",
     "include-all": true,
     "filter" : "JP|日本",
-    "proxies" : [ "JP-AUTO", "JP", "DIRECT", "MANUAL", "AUTO", "REJECT"  ]
   },
   {
-    "name" : "BYPASS",
-    "type" : "select",
-    "include-all": true,
-    "proxies" : [ "DIRECT", "MANUAL", "AUTO", "REJECT" ]
-  },
-  {
+    ...proxyGroupsBase.jpAutoFirst,
     "name" : "AI",
-    "type" : "select",
-    "include-all": true,
-    "proxies" : [ "JP-AUTO", "JP", "DIRECT", "MANUAL", "AUTO", "REJECT"  ]
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name" : "MS",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name" : "APPLE",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name" : "GOOGLE_CN_PROXY",
+  },
+  {
+    ...proxyGroupsBase.manualFirst,
+    "name" : "FINAL"
   },
 ];
 const prependRule = [
@@ -105,16 +190,31 @@ const prependRule = [
   "RULE-SET,BanEasyListChina,AD_BLOCK",
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
-  "RULE-SET,JP,JP_DOMAIN",
+
   "RULE-SET,Bypass,BYPASS",
+  "RULE-SET,ChinaCompanyIp,CN_DOMAIN",
+  "RULE-SET,ChinaDomain,CN_DOMAIN",
+  "RULE-SET,ChinaMedia,CN_DOMAIN",
+  "RULE-SET,ChinaIp,CN_DOMAIN",
+  "RULE-SET,ChinaIpV6,CN_DOMAIN",
+  //"GEOIP,CN,CN_DOMAIN",
+
+  "RULE-SET,JP,JP_DOMAIN",
+  "RULE-SET,AI,AI",
+
+  "RULE-SET,Microsoft,MS",
+  "RULE-SET,Apple,APPLE",
+  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
+
+  "MATCH,FINAL",
 ];
 
 function main(config) {
     if (!config.proxies) return config;
     overwriteProxyGroups(config);
 
-  let oldRules = config["rules"];
-  config["rules"] = prependRule.concat(oldRules);
+  //let oldRules = config["rules"];
+  config["rules"] = prependRule//.concat(oldRules);
 
   let oldProxyGroups = config["proxy-groups"];
   config["proxy-groups"] = prependProxyGroups.concat(oldProxyGroups);
@@ -126,10 +226,10 @@ function main(config) {
   return config;
 }
 
-// 以下代码来自
+// 以下代码源自
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
 
-// 覆写代理组
+// 覆盖代理组
 function overwriteProxyGroups(config) {
     // 所有代理
     const allProxies = config["proxies"].map((e) => e.name);
@@ -233,7 +333,8 @@ function overwriteProxyGroups(config) {
             type: "select",
             proxies: getManualProxiesByRegex(config, item.regex),
             icon: item.icon,
-            hidden: false,
+            //hidden: false,
+            hidden: true,
         }))
         .filter((item) => item.proxies.length > 0);
 
@@ -251,7 +352,8 @@ function overwriteProxyGroups(config) {
             type: "select",
             "include-all": true,
             icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/Cylink.png",
-            proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
+            //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
+            proxies: [ "AUTO", "LOAD-BALANCING" ],
         },
         {
             name: "AUTO",
@@ -284,10 +386,15 @@ function overwriteProxyGroups(config) {
         groups[1].proxies.push(...autoProxyGroups.map((item) => item.name));
     groups.push(...autoProxyGroups);
     groups.push(...manualProxyGroupsConfig);
-    // config["proxy-groups"] = groups;
+
+    config["proxy-groups"] = groups;
+
+// 原配置基础上追加而非覆盖
+/***
     let oldProxyGroups = config["proxy-groups"];
-    oldProxyGroups[0].proxies.unshift('AUTO');
+    oldProxyGroups[0].proxies.unshift('AUTO', 'MANUAL', 'LOAD-BALANCING');
     config["proxy-groups"] = oldProxyGroups.concat(groups);
+***/
 }
 function getProxiesByRegex(params, regex) {
     const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
