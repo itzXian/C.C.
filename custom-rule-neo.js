@@ -212,7 +212,7 @@ const prependRule = [
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
-  "AND,((DOMAIN,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osasiadispatch.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osuspider.yuanshen.com,HOYO_PROXY",
