@@ -5,6 +5,7 @@ const ruleProvidersBase = {
 };
 
 const ruleProviders = {
+// BLOCK
   MIUI_Bloatware : {
     ...ruleProvidersBase,
     "behavior": "classical",
@@ -47,6 +48,7 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
     "path" : "./BanProgramAD.list"
   },
+// BYPASS
   Bypass : {
     ...ruleProvidersBase,
     "behavior": "classical",
@@ -83,18 +85,13 @@ const ruleProviders = {
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIpV6.list",
     "path" : "./ChinaIpV6.list"
   },
-  Local : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Local.list",
-    "path" : "./Local.list"
-  },
   LocalAreaNetwork : {
     ...ruleProvidersBase,
     "behavior": "classical",
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
     "path" : "./LocalAreaNetwork.list"
   },
+// PROXY
   JP : {
     ...ruleProvidersBase,
     "behavior": "classical",
@@ -178,8 +175,16 @@ const prependProxyGroups = [
   },
   {
     ...proxyGroupsBase.asiaAutoFirst,
-    "name" : "HOYO",
+    "name" : "HOYO_PROXY",
     "include-all": true,
+  },
+  {
+    ...proxyGroupsBase.directFirst,
+    "name" : "HOYO_BYPASS",
+  },
+  {
+    ...proxyGroupsBase.rejectFirst,
+    "name" : "HOYO_BLOCK",
   },
   {
     ...proxyGroupsBase.autoFirst,
@@ -199,6 +204,17 @@ const prependProxyGroups = [
   },
 ];
 const prependRule = [
+// CUSTOM
+  "RULE-SET,JP,JP_DOMAIN",
+  "RULE-SET,AI,AI",
+  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
+  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,osuspider.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+  "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
+  "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
+  "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BLOCK",
 // BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",
@@ -209,7 +225,6 @@ const prependRule = [
   "RULE-SET,BanProgramAD,AD_BLOCK",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
-  "RULE-SET,Local,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
   "RULE-SET,ChinaCompanyIp,BYPASS",
   "RULE-SET,ChinaDomain,BYPASS",
@@ -217,11 +232,6 @@ const prependRule = [
   "RULE-SET,ChinaIp,BYPASS",
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
-// CUSTOM
-  "RULE-SET,JP,JP_DOMAIN",
-  "RULE-SET,AI,AI",
-  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO",
-  "DOMAIN,osasiadispatch.yuanshen.com,HOYO",
 // PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
