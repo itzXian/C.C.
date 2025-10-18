@@ -56,31 +56,31 @@ const ruleProviders = {
   ChinaCompanyIp : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaCompanyIp.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaCompanyIp.list",
     "path" : "./ChinaCompanyIp.list"
   },
   ChinaDomain : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaDomain.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaDomain.list",
     "path" : "./ChinaDomain.list"
   },
   ChinaMedia : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaMedia.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaMedia.list",
     "path" : "./ChinaMedia.list"
   },
   ChinaIp : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaIp.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIp.list",
     "path" : "./ChinaIp.list"
   },
   ChinaIpV6 : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/ChinaIpV6.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIpV6.list",
     "path" : "./ChinaIpV6.list"
   },
   Local : {
@@ -92,7 +92,7 @@ const ruleProviders = {
   LocalAreaNetwork : {
     ...ruleProvidersBase,
     "behavior": "classical",
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/LocalAreaNetwork.list",
+    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
     "path" : "./LocalAreaNetwork.list"
   },
   JP : {
@@ -128,6 +128,10 @@ const ruleProviders = {
 }
 
 const proxyGroupsBase = {
+    "asiaAutoFirst" : {
+        "type" : "select",
+        "proxies" : [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
     "jpAutoFirst" : {
         "type" : "select",
         "proxies" : [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
@@ -173,6 +177,11 @@ const prependProxyGroups = [
     "name" : "AI",
   },
   {
+    ...proxyGroupsBase.asiaAutoFirst,
+    "name" : "HOYO",
+    "include-all": true,
+  },
+  {
     ...proxyGroupsBase.autoFirst,
     "name" : "MS",
   },
@@ -190,6 +199,7 @@ const prependProxyGroups = [
   },
 ];
 const prependRule = [
+// BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",
   "RULE-SET,BanAD,AD_BLOCK",
@@ -197,7 +207,7 @@ const prependRule = [
   "RULE-SET,BanEasyListChina,AD_BLOCK",
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
-
+// BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,Local,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
@@ -207,14 +217,16 @@ const prependRule = [
   "RULE-SET,ChinaIp,BYPASS",
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
-
+// CUSTOM
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
-
+  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO",
+  "DOMAIN,osasiadispatch.yuanshen.com,HOYO",
+// PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
   "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
-
+// FINAL
   "MATCH,FINAL",
 ];
 
