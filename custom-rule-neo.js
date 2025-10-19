@@ -1,124 +1,117 @@
 const ruleProvidersBase = {
-    "type": "http",
-    "format": "text",
-    "interval": "3600",
+  "type": "http",
+  "format": "text",
+  "interval": "3600",
+};
+const ruleProvidersBaseClassical = {
+  ...ruleProvidersBase,
+  "behavior": "classical",
+};
+const ruleProvidersBaseDomain = {
+  ...ruleProvidersBase,
+  "behavior": "domain",
+};
+const ruleProvidersBaseIpcodr = {
+  ...ruleProvidersBase,
+  "behavior": "ipcidr",
 };
 
 const ruleProviders = {
 // BLOCK
   MIUI_Bloatware : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/MIUI_Bloatware.list",
     "path": "./MIUI_Bloatware.yaml"
   },
   Block : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Block.list",
     "path" : "./Block.list"
   },
   BanAD : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list",
     "path" : "./BanAD.list"
   },
   BanEasyList : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyList.list",
     "path" : "./BanEasyList.list"
   },
   BanEasyListChina : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyListChina.list",
     "path" : "./BanEasyListChina.list"
   },
   BanEasyPrivacy : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyPrivacy.list",
     "path" : "./BanEasyPrivacy.list"
   },
   BanProgramAD : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
     "path" : "./BanProgramAD.list"
   },
 // BYPASS
   Bypass : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
     "path" : "./Bypass.list"
   },
   ChinaCompanyIp : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaCompanyIp.list",
     "path" : "./ChinaCompanyIp.list"
   },
   ChinaDomain : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaDomain.list",
     "path" : "./ChinaDomain.list"
   },
   ChinaMedia : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaMedia.list",
     "path" : "./ChinaMedia.list"
   },
   ChinaIp : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIp.list",
     "path" : "./ChinaIp.list"
   },
   ChinaIpV6 : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIpV6.list",
     "path" : "./ChinaIpV6.list"
   },
   LocalAreaNetwork : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
     "path" : "./LocalAreaNetwork.list"
   },
 // PROXY
   JP : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
     "path" : "./JP.list"
   },
   AI : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
     "path" : "./AI.list"
   },
   Microsoft : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
     "path" : "./Microsoft.list"
   },
   Apple : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
     "path" : "./Apple.list"
   },
   GoogleCNProxyIP : {
-    ...ruleProvidersBase,
-    "behavior": "classical",
+    ...ruleProvidersBaseClassical,
     "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
     "path" : "./GoogleCNProxyIP.list"
   },
