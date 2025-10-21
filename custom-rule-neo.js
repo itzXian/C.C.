@@ -208,6 +208,7 @@ const prependRule = [
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osasiadispatch.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,autopatchhk.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osuspider.yuanshen.com,HOYO_PROXY",
   "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
   "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
