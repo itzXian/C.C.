@@ -18,186 +18,188 @@ const ruleProvidersBaseIpcodr = {
 
 const ruleProviders = {
 // BLOCK
-  MIUI_Bloatware : {
+  MIUI_Bloatware: {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/MIUI_Bloatware.list",
     "path": "./MIUI_Bloatware.yaml"
   },
-  Block : {
+  Block: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Block.list",
-    "path" : "./Block.list"
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Block.list",
+    "path": "./Block.list"
   },
-  BanAD : {
+  BanAD: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list",
-    "path" : "./BanAD.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list",
+    "path": "./BanAD.list"
   },
-  BanEasyList : {
+  BanEasyList: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyList.list",
-    "path" : "./BanEasyList.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyList.list",
+    "path": "./BanEasyList.list"
   },
-  BanEasyListChina : {
+  BanEasyListChina: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyListChina.list",
-    "path" : "./BanEasyListChina.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyListChina.list",
+    "path": "./BanEasyListChina.list"
   },
-  BanEasyPrivacy : {
+  BanEasyPrivacy: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyPrivacy.list",
-    "path" : "./BanEasyPrivacy.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyPrivacy.list",
+    "path": "./BanEasyPrivacy.list"
   },
-  BanProgramAD : {
+  BanProgramAD: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
-    "path" : "./BanProgramAD.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
+    "path": "./BanProgramAD.list"
   },
 // BYPASS
-  Bypass : {
+  Bypass: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
-    "path" : "./Bypass.list"
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
+    "path": "./Bypass.list"
   },
-  ChinaCompanyIp : {
+  ChinaCompanyIp: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaCompanyIp.list",
-    "path" : "./ChinaCompanyIp.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaCompanyIp.list",
+    "path": "./ChinaCompanyIp.list"
   },
-  ChinaDomain : {
+  ChinaDomain: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaDomain.list",
-    "path" : "./ChinaDomain.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaDomain.list",
+    "path": "./ChinaDomain.list"
   },
-  ChinaMedia : {
+  ChinaMedia: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaMedia.list",
-    "path" : "./ChinaMedia.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaMedia.list",
+    "path": "./ChinaMedia.list"
   },
-  ChinaIp : {
+  ChinaIp: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIp.list",
-    "path" : "./ChinaIp.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIp.list",
+    "path": "./ChinaIp.list"
   },
-  ChinaIpV6 : {
+  ChinaIpV6: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIpV6.list",
-    "path" : "./ChinaIpV6.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/ChinaIpV6.list",
+    "path": "./ChinaIpV6.list"
   },
-  LocalAreaNetwork : {
+  LocalAreaNetwork: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
-    "path" : "./LocalAreaNetwork.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
+    "path": "./LocalAreaNetwork.list"
   },
 // PROXY
-  JP : {
+  JP: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
-    "path" : "./JP.list"
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
+    "path": "./JP.list"
   },
-  AI : {
+  AI: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
-    "path" : "./AI.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
+    "path": "./AI.list"
   },
-  Microsoft : {
+  Microsoft: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
-    "path" : "./Microsoft.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
+    "path": "./Microsoft.list"
   },
-  Apple : {
+  Apple: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
-    "path" : "./Apple.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
+    "path": "./Apple.list"
   },
-  GoogleCNProxyIP : {
+  GoogleCNProxyIP: {
     ...ruleProvidersBaseClassical,
-    "url" : "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
-    "path" : "./GoogleCNProxyIP.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
+    "path": "./GoogleCNProxyIP.list"
   },
 }
 
 const proxyGroupsBase = {
-    "asiaAutoFirst" : {
-        "type" : "select",
-        "proxies" : [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    "asiaAutoFirst": {
+        "type": "select",
+        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
     },
-    "jpAutoFirst" : {
-        "type" : "select",
-        "proxies" : [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    "jpAutoFirst": {
+        "type": "select",
+        "proxies": [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
     },
-    "autoFirst" : {
-        "type" : "select",
-        "proxies" : [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    "autoFirst": {
+        "type": "select",
+        "proxies": [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
     },
-    "manualFirst" : {
-        "type" : "select",
-        "proxies" : [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
+    "manualFirst": {
+        "type": "select",
+        "proxies": [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
     },
-    "directFirst" : {
-        "type" : "select",
-        "proxies" : [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
+    "directFirst": {
+        "type": "select",
+        "proxies": [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
     },
-    "rejectFirst" : {
-        "type" : "select",
-        "proxies" : [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
+    "rejectFirst": {
+        "type": "select",
+        "proxies": [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
     },
 }
 const prependProxyGroups = [
   {
     ...proxyGroupsBase.rejectFirst,
-    "name" : "MIUI_BLOATWARE",
+    "name": "MIUI_BLOATWARE",
   },
   {
     ...proxyGroupsBase.rejectFirst,
-    "name" : "AD_BLOCK",
+    "name": "AD_BLOCK",
   },
   {
     ...proxyGroupsBase.directFirst,
-    "name" : "BYPASS",
+    "name": "BYPASS",
   },
   {
     ...proxyGroupsBase.directFirst,
-    "name" : "GITHUB_SSH",
+    "name": "GITHUB_SSH",
   },
   {
     ...proxyGroupsBase.jpAutoFirst,
-    "name" : "JP_DOMAIN",
+    "name": "JP_DOMAIN",
     "include-all": true,
-    "filter" : "JP|日本",
+    "filter": "JP|日本",
   },
   {
     ...proxyGroupsBase.jpAutoFirst,
-    "name" : "AI",
+    "name": "AI",
   },
   {
     ...proxyGroupsBase.asiaAutoFirst,
-    "name" : "HOYO_PROXY",
+    "name": "HOYO_PROXY",
     "include-all": true,
   },
   {
     ...proxyGroupsBase.directFirst,
-    "name" : "HOYO_BYPASS",
+    "name": "HOYO_BYPASS",
   },
   {
-    ...proxyGroupsBase.rejectFirst,
-    "name" : "HOYO_BLOCK",
-  },
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name" : "MS",
-  },
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name" : "APPLE",
+    ...proxyGroupsBase.asiaAutoFirst,
+    "name": "HOYO_TEST",
+    "include-all": true,
+    "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
   },
   {
     ...proxyGroupsBase.autoFirst,
-    "name" : "GOOGLE_CN_PROXY",
+    "name": "MS",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "APPLE",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "GOOGLE_CN_PROXY",
   },
   {
     ...proxyGroupsBase.manualFirst,
-    "name" : "FINAL"
+    "name": "FINAL"
   },
 ];
 const prependRule = [
@@ -206,14 +208,28 @@ const prependRule = [
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+/// HOYO_PROXY
   "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osasiadispatch.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_PROXY",
+  "DOMAIN,osusadispatch.yuanshen.com,HOYO_PROXY",
   "DOMAIN,autopatchhk.yuanshen.com,HOYO_PROXY",
   "DOMAIN,osuspider.yuanshen.com,HOYO_PROXY",
+  "DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com,HOYO_PROXY",
+  "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
+/// HOYO_BYPASS
   "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+  "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
+  "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+  "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+  "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
   "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
   "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
-  "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BLOCK",
+  "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
+/// HOYO_TEST
+/// HOYO_PROXY(FINAL)
+  "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
+  "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
 // BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",
@@ -291,7 +307,7 @@ function overwriteProxyGroups(config) {
         { name: "FR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
         { name: "DE-AUTO", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
         {
-            name: "其它-AUTO",
+            name: "ALL-COUNTRIES-AUTO",
             regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i")
         }
     ];
@@ -428,9 +444,9 @@ function overwriteProxyGroups(config) {
 }
 function getProxiesByRegex(params, regex) {
     const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
-    return matchedProxies.length > 0 ? matchedProxies : ["COMPATIBLE"];
+    return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
 }
 function getManualProxiesByRegex(params, regex) {
     const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
-    return matchedProxies.length > 0 ? matchedProxies : ["COMPATIBLE"];
+    return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
 }
