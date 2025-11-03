@@ -172,7 +172,7 @@ const prependProxyGroups = [
   },
   {
     ...proxyGroupsBase.asiaAutoFirst,
-    "name": "HOYO_YS",
+    "name": "HOYO_CN_PROXY",
     "include-all": true,
     "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
   },
@@ -208,12 +208,12 @@ const prependRule = [
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
-/// HOYO_YS
-  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_YS",
-  "DOMAIN,autopatchhk.yuanshen.com,HOYO_YS",
-  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_YS",
-  "DOMAIN,osusadispatch.yuanshen.com,HOYO_YS",
-  "DOMAIN,osuspider.yuanshen.com,HOYO_YS",
+/// HOYO_CN_PROXY
+  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_CN_PROXY",
+  "DOMAIN,autopatchhk.yuanshen.com,HOYO_CN_PROXY",
+  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_CN_PROXY",
+  "DOMAIN,osusadispatch.yuanshen.com,HOYO_CN_PROXY",
+  "DOMAIN,osuspider.yuanshen.com,HOYO_CN_PROXY",
 /// HOYO_PROXY
   //"DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com,HOYO_PROXY",
   "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
