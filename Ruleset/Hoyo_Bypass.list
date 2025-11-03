@@ -1,0 +1,9 @@
+DOMAIN,dispatchosglobal.yuanshen.com
+DOMAIN,sdk-log-upload-os.hoyoverse.com
+DOMAIN,log-upload-os.hoyoverse.com
+DOMAIN,ad-log-upload-os.hoyoverse.com
+DOMAIN,ys-log-upload-os.hoyoverse.com
+DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com
+DOMAIN-SUFFIX,yuanshen.com
+DOMAIN-SUFFIX,mihoyo.com
+AND,((DST-PORT,22101-22102),(NETWORK,udp))

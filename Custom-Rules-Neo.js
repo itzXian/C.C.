@@ -20,12 +20,12 @@ const ruleProviders = {
 // BLOCK
   MIUI_Bloatware: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/MIUI_Bloatware.list",
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
     "path": "./MIUI_Bloatware.yaml"
   },
   Block: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Block.list",
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Block.list",
     "path": "./Block.list"
   },
   BanAD: {
@@ -56,7 +56,7 @@ const ruleProviders = {
 // BYPASS
   Bypass: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Bypass.list",
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Bypass.list",
     "path": "./Bypass.list"
   },
   ChinaCompanyIp: {
@@ -92,7 +92,7 @@ const ruleProviders = {
 // PROXY
   JP: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/JP.list",
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/JP.list",
     "path": "./JP.list"
   },
   AI: {
@@ -114,6 +114,22 @@ const ruleProviders = {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
     "path": "./GoogleCNProxyIP.list"
+  },
+// HOYO
+  Hoyo_CN_Proxy: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
+    "path": "./Hoyo_CN_Proxy.list"
+  },
+  Hoyo_Proxy: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
+    "path": "./Hoyo_Proxy.list"
+  },
+  Hoyo_Bypass: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
+    "path": "./Hoyo_Bypass.list"
   },
 }
 
@@ -208,28 +224,10 @@ const prependRule = [
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
-/// HOYO_CN_PROXY
-  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_CN_PROXY",
-  "DOMAIN,autopatchhk.yuanshen.com,HOYO_CN_PROXY",
-  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_CN_PROXY",
-  "DOMAIN,osusadispatch.yuanshen.com,HOYO_CN_PROXY",
-  "DOMAIN,osuspider.yuanshen.com,HOYO_CN_PROXY",
-/// HOYO_PROXY
-  //"DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com,HOYO_PROXY",
-  "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
-/// HOYO_BYPASS
-  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
-  "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-  "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
-  "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-  "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-  "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
-  "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
-  "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
-  "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
-/// HOYO_PROXY(FINAL)
-  "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
-  "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
+/// HOYO
+  "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
+  "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
+  "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
 // BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",

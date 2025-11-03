@@ -1,0 +1,3 @@
+AND,((DST-PORT,8999),(NETWORK,tcp))
+DOMAIN-SUFFIX,hoyoverse.com
+DOMAIN-SUFFIX,hoyolab.com
