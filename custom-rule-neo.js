@@ -172,18 +172,18 @@ const prependProxyGroups = [
   },
   {
     ...proxyGroupsBase.asiaAutoFirst,
+    "name": "HOYO_YS",
+    "include-all": true,
+    "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
+  },
+  {
+    ...proxyGroupsBase.asiaAutoFirst,
     "name": "HOYO_PROXY",
     "include-all": true,
   },
   {
     ...proxyGroupsBase.directFirst,
     "name": "HOYO_BYPASS",
-  },
-  {
-    ...proxyGroupsBase.asiaAutoFirst,
-    "name": "HOYO_TEST",
-    "include-all": true,
-    "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
   },
   {
     ...proxyGroupsBase.autoFirst,
@@ -208,16 +208,17 @@ const prependRule = [
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+/// HOYO_YS
+  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_YS",
+  "DOMAIN,autopatchhk.yuanshen.com,HOYO_YS",
+  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_YS",
+  "DOMAIN,osusadispatch.yuanshen.com,HOYO_YS",
+  "DOMAIN,osuspider.yuanshen.com,HOYO_YS",
 /// HOYO_PROXY
-  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_PROXY",
-  "DOMAIN,osasiadispatch.yuanshen.com,HOYO_PROXY",
-  "DOMAIN,oseurodispatch.yuanshen.com,HOYO_PROXY",
-  "DOMAIN,osusadispatch.yuanshen.com,HOYO_PROXY",
-  "DOMAIN,autopatchhk.yuanshen.com,HOYO_PROXY",
-  "DOMAIN,osuspider.yuanshen.com,HOYO_PROXY",
-  "DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com,HOYO_PROXY",
+  //"DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com,HOYO_PROXY",
   "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
 /// HOYO_BYPASS
+  "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
   "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
   "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
   "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
@@ -226,7 +227,6 @@ const prependRule = [
   "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
   "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
   "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
-/// HOYO_TEST
 /// HOYO_PROXY(FINAL)
   "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
   "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
@@ -389,12 +389,13 @@ function overwriteProxyGroups(config) {
             type: "select",
             "include-all": true,
             //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
-            proxies: [ "AUTO", "LOAD-BALANCING" ],
+            proxies: [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "LOAD-BALANCING", "DIRECT" ],
         },
         {
             name: "AUTO",
             type: "select",
             proxies: ["ALL-AUTO"],
+            hidden: true,
         },
         {
             name: "LOAD-BALANCING",
@@ -403,6 +404,7 @@ function overwriteProxyGroups(config) {
             interval: 300,
             strategy: loadBalanceStrategy,
             proxies: allProxies,
+            hidden: true,
         },
         {
             name: "ALL-AUTO",
