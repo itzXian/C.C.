@@ -6,4 +6,6 @@ DOMAIN,ys-log-upload-os.hoyoverse.com
 DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com
 DOMAIN-SUFFIX,yuanshen.com
 DOMAIN-SUFFIX,mihoyo.com
-AND,((DST-PORT,22101-22102),(NETWORK,udp))
+# GI: 22101-22102
+# HSR: 23301
+AND,((DST-PORT,22101-22102/23301),(NETWORK,udp))
