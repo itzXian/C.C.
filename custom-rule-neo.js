@@ -329,47 +329,38 @@ function overwriteProxyGroups(config) {
         {
             name: "HK",
             regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/HK.png"
         },
         {
             name: "JP",
             regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/JP.png"
         },
         {
             name: "KR",
             regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/KR.png"
         },
         {
             name: "SG",
             regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/SG.png"
         },
         {
             name: "US",
             regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/US.png"
         },
         {
             name: "UK",
             regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/UK.png"
         },
         {
             name: "FR",
             regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/FR.png"
         },
         {
             name: "DE",
             regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/DE.png"
         },
         {
             name: "TW",
             regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i"),
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/TW.png"
         }
     ];
 
@@ -397,14 +388,12 @@ function overwriteProxyGroups(config) {
             name: "MANUAL",
             type: "select",
             "include-all": true,
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/Cylink.png",
             //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
             proxies: [ "AUTO", "LOAD-BALANCING" ],
         },
         {
             name: "AUTO",
             type: "select",
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/Urltest.png",
             proxies: ["ALL-AUTO"],
         },
         {
@@ -414,7 +403,6 @@ function overwriteProxyGroups(config) {
             interval: 300,
             strategy: loadBalanceStrategy,
             proxies: allProxies,
-            icon: "https://raw.githubusercontent.com/Orz-3/mini/master/Color/Available.png"
         },
         {
             name: "ALL-AUTO",
