@@ -226,8 +226,8 @@ const prependRule = [
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
 /// HOYO
   "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
-  "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
   "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
+  "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
 // BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",
