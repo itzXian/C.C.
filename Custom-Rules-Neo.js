@@ -253,15 +253,17 @@ const prependRule = [
   "MATCH,FINAL",
 ];
 
+// 以下代码参照
+// https://www.clashverge.dev/guide/script.html
 function main(config) {
-    if (!config.proxies) return config;
-    overwriteProxyGroups(config);
+  if (!config.proxies) return config;
+  overwriteProxyGroups(config);
 
   //let oldRules = config["rules"];
   config["rules"] = prependRule//.concat(oldRules);
 
   let oldProxyGroups = config["proxy-groups"];
-  config["proxy-groups"] = prependProxyGroups.concat(oldProxyGroups);
+  config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
 
   Object.assign(config, {
     "rule-providers": ruleProviders
