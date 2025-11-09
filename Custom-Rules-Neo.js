@@ -267,6 +267,8 @@ function main(config) {
     "rule-providers": ruleProviders
   });
 
+  removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
+
   return config;
 }
 
@@ -437,4 +439,15 @@ function getProxiesByRegex(params, regex) {
 function getManualProxiesByRegex(params, regex) {
     const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
     return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
+}
+
+// 以下代码源自
+// https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
+function removeNodeByName(config, regExp) {
+    config.proxies = config.proxies.filter(proxy => !proxy.name.match(regExp));
+    config['proxy-groups'] = config['proxy-groups'].map(it => {
+        it.proxies = it.proxies.filter(name => !name.match(regExp));
+        return it;
+    });
+    return config;
 }
