@@ -115,6 +115,16 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
     "path": "./GoogleCNProxyIP.list"
   },
+  Google: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google.list",
+    "path": "./Google.list"
+  },
+  YouTube: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.list",
+    "path": "./YouTube.list"
+  },
 // HOYO
   Hoyo_CN_Proxy: {
     ...ruleProvidersBaseClassical,
@@ -210,8 +220,16 @@ const prependProxyGroups = [
     "name": "APPLE",
   },
   {
-    ...proxyGroupsBase.autoFirst,
+    ...proxyGroupsBase.jpAutoFirst,
     "name": "GOOGLE_CN_PROXY",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "GOOGLE",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "YOUTUBE",
   },
   {
     ...proxyGroupsBase.manualFirst,
@@ -249,6 +267,8 @@ const prependRule = [
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
   "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
+  "RULE-SET,Google,GOOGLE",
+  "RULE-SET,YouTube,YOUTUBE",
 // FINAL
   "MATCH,FINAL",
 ];
