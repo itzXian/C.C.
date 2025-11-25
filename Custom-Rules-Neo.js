@@ -16,7 +16,128 @@ const ruleProvidersBaseIpcodr = {
   "behavior": "ipcidr",
 };
 
+const proxyGroupsBase = {
+    "asiaAutoFirst": {
+        "type": "select",
+        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
+    "jpAutoFirst": {
+        "type": "select",
+        "proxies": [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
+    "autoFirst": {
+        "type": "select",
+        "proxies": [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+    },
+    "manualFirst": {
+        "type": "select",
+        "proxies": [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
+    },
+    "directFirst": {
+        "type": "select",
+        "proxies": [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
+    },
+    "rejectFirst": {
+        "type": "select",
+        "proxies": [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
+    },
+}
+
+const prependProxyGroups = [
+// HOYO
+   {
+    ...proxyGroupsBase.asiaAutoFirst,
+    "name": "HOYO_CN_PROXY",
+    "include-all": true,
+    "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
+  },
+  {
+    ...proxyGroupsBase.asiaAutoFirst,
+    "name": "HOYO_PROXY",
+    "include-all": true,
+  },
+  {
+    ...proxyGroupsBase.directFirst,
+    "name": "HOYO_BYPASS",
+  },
+// BLOCK
+ {
+    ...proxyGroupsBase.rejectFirst,
+    "name": "MIUI_BLOATWARE",
+  },
+  {
+    ...proxyGroupsBase.rejectFirst,
+    "name": "AD_BLOCK",
+  },
+// BYPASS
+  {
+    ...proxyGroupsBase.directFirst,
+    "name": "BYPASS",
+  },
+// CUSTOM
+  {
+    ...proxyGroupsBase.directFirst,
+    "name": "GITHUB_SSH",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "JP_DOMAIN",
+    "include-all": true,
+    "filter": "JP|日本",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "AI",
+  },
+// PROXY
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "MS",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "APPLE",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "GOOGLE_CN_PROXY",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "GOOGLE",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "YOUTUBE",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "TWITTER",
+  },
+// FINAL
+  {
+    ...proxyGroupsBase.manualFirst,
+    "name": "FINAL"
+  },
+];
+
 const ruleProviders = {
+// HOYO
+  Hoyo_CN_Proxy: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
+    "path": "./Hoyo_CN_Proxy.list"
+  },
+  Hoyo_Proxy: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
+    "path": "./Hoyo_Proxy.list"
+  },
+  Hoyo_Bypass: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
+    "path": "./Hoyo_Bypass.list"
+  },
 // BLOCK
   MIUI_Bloatware: {
     ...ruleProvidersBaseClassical,
@@ -89,7 +210,7 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
     "path": "./LocalAreaNetwork.list"
   },
-// PROXY
+// CUSTOM
   JP: {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/JP.list",
@@ -99,6 +220,7 @@ const ruleProviders = {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
     "path": "./AI.list"
+// PROXY
   },
   Microsoft: {
     ...ruleProvidersBaseClassical,
@@ -125,117 +247,13 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.list",
     "path": "./YouTube.list"
   },
-// HOYO
-  Hoyo_CN_Proxy: {
+  Twitter: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
-    "path": "./Hoyo_CN_Proxy.list"
-  },
-  Hoyo_Proxy: {
-    ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
-    "path": "./Hoyo_Proxy.list"
-  },
-  Hoyo_Bypass: {
-    ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
-    "path": "./Hoyo_Bypass.list"
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.list",
+    "path": "./Twitter.list"
   },
 }
 
-const proxyGroupsBase = {
-    "asiaAutoFirst": {
-        "type": "select",
-        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
-    },
-    "jpAutoFirst": {
-        "type": "select",
-        "proxies": [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
-    },
-    "autoFirst": {
-        "type": "select",
-        "proxies": [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
-    },
-    "manualFirst": {
-        "type": "select",
-        "proxies": [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
-    },
-    "directFirst": {
-        "type": "select",
-        "proxies": [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
-    },
-    "rejectFirst": {
-        "type": "select",
-        "proxies": [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
-    },
-}
-const prependProxyGroups = [
-  {
-    ...proxyGroupsBase.rejectFirst,
-    "name": "MIUI_BLOATWARE",
-  },
-  {
-    ...proxyGroupsBase.rejectFirst,
-    "name": "AD_BLOCK",
-  },
-  {
-    ...proxyGroupsBase.directFirst,
-    "name": "BYPASS",
-  },
-  {
-    ...proxyGroupsBase.directFirst,
-    "name": "GITHUB_SSH",
-  },
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "JP_DOMAIN",
-    "include-all": true,
-    "filter": "JP|日本",
-  },
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "AI",
-  },
-  {
-    ...proxyGroupsBase.asiaAutoFirst,
-    "name": "HOYO_CN_PROXY",
-    "include-all": true,
-    "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
-  },
-  {
-    ...proxyGroupsBase.asiaAutoFirst,
-    "name": "HOYO_PROXY",
-    "include-all": true,
-  },
-  {
-    ...proxyGroupsBase.directFirst,
-    "name": "HOYO_BYPASS",
-  },
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name": "MS",
-  },
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name": "APPLE",
-  },
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "GOOGLE_CN_PROXY",
-  },
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "GOOGLE",
-  },
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "YOUTUBE",
-  },
-  {
-    ...proxyGroupsBase.manualFirst,
-    "name": "FINAL"
-  },
-];
 const prependRule = [
 /// HOYO
   "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
@@ -259,17 +277,18 @@ const prependRule = [
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
 // CUSTOM
+  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "RULE-SET,JP,JP_DOMAIN",
   "GEOIP,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
-  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
 // PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
   "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
+  "RULE-SET,Twitter,TWITTER",
 // FINAL
   "MATCH,FINAL",
 ];
