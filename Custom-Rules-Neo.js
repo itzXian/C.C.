@@ -255,7 +255,7 @@ const ruleProviders = {
 }
 
 const prependRule = [
-/// HOYO
+// HOYO
   "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
   "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
   "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
@@ -267,6 +267,9 @@ const prependRule = [
   "RULE-SET,BanEasyListChina,AD_BLOCK",
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
+// CUSTOM(BEFORE BYPASS)
+  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
+  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
@@ -276,16 +279,14 @@ const prependRule = [
   "RULE-SET,ChinaIp,BYPASS",
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
-// CUSTOM
+// CUSTOM(AFTER BYPASS)
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "RULE-SET,JP,JP_DOMAIN",
   "GEOIP,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
-  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
 // PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
-  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
