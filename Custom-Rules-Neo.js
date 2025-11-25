@@ -239,6 +239,7 @@ const prependProxyGroups = [
 const prependRule = [
 // CUSTOM
   "RULE-SET,JP,JP_DOMAIN",
+  "GEOIP,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
