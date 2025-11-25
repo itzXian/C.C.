@@ -237,12 +237,6 @@ const prependProxyGroups = [
   },
 ];
 const prependRule = [
-// CUSTOM
-  "RULE-SET,JP,JP_DOMAIN",
-  "GEOIP,JP,JP_DOMAIN",
-  "RULE-SET,AI,AI",
-  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
-  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
 /// HOYO
   "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
   "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
@@ -264,6 +258,12 @@ const prependRule = [
   "RULE-SET,ChinaIp,BYPASS",
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
+// CUSTOM
+  "RULE-SET,JP,JP_DOMAIN",
+  "GEOIP,JP,JP_DOMAIN",
+  "RULE-SET,AI,AI",
+  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
+  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
 // PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
