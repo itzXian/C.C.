@@ -282,7 +282,6 @@ const prependRule = [
 // CUSTOM(AFTER BYPASS)
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "RULE-SET,JP,JP_DOMAIN",
-  "GEOIP,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
 // PROXY
   "RULE-SET,Microsoft,MS",
@@ -290,6 +289,8 @@ const prependRule = [
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
+// CUSTOM(BEFORE FINAL)
+  "GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
 ];
