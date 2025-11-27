@@ -290,7 +290,8 @@ const prependRule = [
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
 // CUSTOM(BEFORE FINAL)
-  "GEOIP,JP,JP_DOMAIN",
+/// GEOIP cause slow connection
+  //"GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
 ];
