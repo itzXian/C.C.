@@ -267,19 +267,9 @@ const prependRule = [
   "RULE-SET,BanEasyListChina,AD_BLOCK",
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
-// CUSTOM(BEFORE BYPASS)
+// CUSTOM
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
-// BYPASS
-  "RULE-SET,Bypass,BYPASS",
-  "RULE-SET,LocalAreaNetwork,BYPASS",
-  "RULE-SET,ChinaCompanyIp,BYPASS",
-  "RULE-SET,ChinaDomain,BYPASS",
-  "RULE-SET,ChinaMedia,BYPASS",
-  "RULE-SET,ChinaIp,BYPASS",
-  "RULE-SET,ChinaIpV6,BYPASS",
-  //"GEOIP,CN,BYPASS",
-// CUSTOM(AFTER BYPASS)
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
@@ -289,6 +279,15 @@ const prependRule = [
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
+// BYPASS
+  "RULE-SET,Bypass,BYPASS",
+  "RULE-SET,LocalAreaNetwork,BYPASS",
+  "RULE-SET,ChinaCompanyIp,BYPASS",
+  "RULE-SET,ChinaDomain,BYPASS",
+  "RULE-SET,ChinaMedia,BYPASS",
+  "RULE-SET,ChinaIp,BYPASS",
+  "RULE-SET,ChinaIpV6,BYPASS",
+  //"GEOIP,CN,BYPASS",
 // CUSTOM(BEFORE FINAL)
 /// GEOIP cause slow connection
   //"GEOIP,JP,JP_DOMAIN",
