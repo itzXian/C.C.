@@ -1,7 +1,5 @@
-DOMAIN-SUFFIX,co.jp
-DOMAIN-REGEX,.*co.jp
+DOMAIN-SUFFIX,jp
 DOMAIN-REGEX,.*jp
-DOMAIN-KEYWORD,abema
 ## > AbemaTV
 USER-AGENT,AbemaTV*
 DOMAIN-SUFFIX,abema-tv.com
@@ -27,3 +25,4 @@ DOMAIN-SUFFIX,ds-linear-abematv.akamaized.net
 DOMAIN-SUFFIX,ds-vod-abematv.akamaized.net
 DOMAIN-SUFFIX,linear-abematv.akamaized.net
 DOMAIN-SUFFIX,vod-abematv.akamaized.net
+DOMAIN-KEYWORD,abema
