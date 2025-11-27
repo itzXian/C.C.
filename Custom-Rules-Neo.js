@@ -81,6 +81,10 @@ const prependProxyGroups = [
   },
   {
     ...proxyGroupsBase.jpAutoFirst,
+    "name": "GITHUB",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
     "name": "JP_DOMAIN",
     "include-all": true,
     "filter": "JP|日本",
@@ -211,6 +215,11 @@ const ruleProviders = {
     "path": "./LocalAreaNetwork.list"
   },
 // CUSTOM
+  GitHub: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list",
+    "path": "./GitHub.list"
+  },
   JP: {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/JP.list",
@@ -271,6 +280,7 @@ const prependRule = [
   "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
   "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
   "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+  "RULE-SET,GitHub,GITHUB",
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
 // PROXY
