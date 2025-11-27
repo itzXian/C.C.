@@ -118,6 +118,14 @@ const prependProxyGroups = [
     ...proxyGroupsBase.jpAutoFirst,
     "name": "TWITTER",
   },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "TELEGRAM",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "DISCORD",
+  },
 // FINAL
   {
     ...proxyGroupsBase.manualFirst,
@@ -261,6 +269,16 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.list",
     "path": "./Twitter.list"
   },
+  Telegram: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Telegram/Telegram.list",
+    "path": "./Telegram.list"
+  },
+  Discord: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Discord/Discord.list",
+    "path": "./Discord.list"
+  },
 }
 
 const prependRule = [
@@ -289,6 +307,8 @@ const prependRule = [
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
+  "RULE-SET,Telegram,TELEGRAM",
+  "RULE-SET,Discord,DISCORD",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
