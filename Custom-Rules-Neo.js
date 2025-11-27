@@ -126,6 +126,10 @@ const prependProxyGroups = [
     ...proxyGroupsBase.jpAutoFirst,
     "name": "DISCORD",
   },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "PIXIV",
+  },
 // FINAL
   {
     ...proxyGroupsBase.manualFirst,
@@ -279,6 +283,11 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Discord/Discord.list",
     "path": "./Discord.list"
   },
+  Pixiv: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Pixiv/Pixiv.list",
+    "path": "./Pixiv.list"
+  },
 }
 
 const prependRule = [
@@ -309,6 +318,8 @@ const prependRule = [
   "RULE-SET,Twitter,TWITTER",
   "RULE-SET,Telegram,TELEGRAM",
   "RULE-SET,Discord,DISCORD",
+  "RULE-SET,Pixiv,PIXIV",
+  "DOMAIN-SUFFIX,pixivision.net,PIXIV",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
