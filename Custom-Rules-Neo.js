@@ -127,7 +127,7 @@ const prependProxyGroups = [
     "name": "DISCORD",
   },
   {
-    ...proxyGroupsBase.jpAutoFirst,
+    ...proxyGroupsBase.autoFirst,
     "name": "PIXIV",
   },
 // FINAL
