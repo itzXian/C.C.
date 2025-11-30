@@ -75,10 +75,17 @@ const prependProxyGroups = [
     "name": "BYPASS",
   },
 // CUSTOM
+/* Use port 443 instead
   {
     ...proxyGroupsBase.directFirst,
     "name": "GITHUB_SSH",
   },
+*/
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "PIXIV",
+  },
+// CUSTOM_JP
   {
     ...proxyGroupsBase.jpAutoFirst,
     "name": "GITHUB",
@@ -92,15 +99,6 @@ const prependProxyGroups = [
   {
     ...proxyGroupsBase.jpAutoFirst,
     "name": "AI",
-  },
-// PROXY
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name": "MS",
-  },
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name": "APPLE",
   },
   {
     ...proxyGroupsBase.jpAutoFirst,
@@ -126,9 +124,14 @@ const prependProxyGroups = [
     ...proxyGroupsBase.jpAutoFirst,
     "name": "DISCORD",
   },
+// PROXY
   {
     ...proxyGroupsBase.autoFirst,
-    "name": "PIXIV",
+    "name": "MS",
+  },
+  {
+    ...proxyGroupsBase.autoFirst,
+    "name": "APPLE",
   },
 // FINAL
   {
@@ -227,6 +230,12 @@ const ruleProviders = {
     "path": "./LocalAreaNetwork.list"
   },
 // CUSTOM
+  Pixiv: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Pixiv/Pixiv.list",
+    "path": "./Pixiv.list"
+  },
+// CUSTOM_JP
   GitHub: {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list",
@@ -241,17 +250,6 @@ const ruleProviders = {
     ...ruleProvidersBaseClassical,
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
     "path": "./AI.list"
-// PROXY
-  },
-  Microsoft: {
-    ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
-    "path": "./Microsoft.list"
-  },
-  Apple: {
-    ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
-    "path": "./Apple.list"
   },
   GoogleCNProxyIP: {
     ...ruleProvidersBaseClassical,
@@ -283,10 +281,16 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Discord/Discord.list",
     "path": "./Discord.list"
   },
-  Pixiv: {
+// PROXY
+  Microsoft: {
     ...ruleProvidersBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Pixiv/Pixiv.list",
-    "path": "./Pixiv.list"
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
+    "path": "./Microsoft.list"
+  },
+  Apple: {
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
+    "path": "./Apple.list"
   },
 }
 
@@ -304,22 +308,26 @@ const prependRule = [
   "RULE-SET,BanEasyPrivacy,AD_BLOCK",
   "RULE-SET,BanProgramAD,AD_BLOCK",
 // CUSTOM
-  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
-  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
-  "AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+  // Use port 443 instead
+  //"AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+  "RULE-SET,Pixiv,PIXIV",
+  "DOMAIN-SUFFIX,pixivision.net,PIXIV",
+  "DOMAIN-SUFFIX,ads-pixiv.net,AD_BLOCK",
+// CUSTOM_JP
   "RULE-SET,GitHub,GITHUB",
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
-// PROXY
-  "RULE-SET,Microsoft,MS",
-  "RULE-SET,Apple,APPLE",
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
   "RULE-SET,Telegram,TELEGRAM",
   "RULE-SET,Discord,DISCORD",
-  "RULE-SET,Pixiv,PIXIV",
-  "DOMAIN-SUFFIX,pixivision.net,PIXIV",
+// PROXY
+  "RULE-SET,Microsoft,MS",
+  "RULE-SET,Apple,APPLE",
+// PROXY(BEFORE BYPASS)
+  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
+  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
@@ -329,8 +337,8 @@ const prependRule = [
   "RULE-SET,ChinaIp,BYPASS",
   "RULE-SET,ChinaIpV6,BYPASS",
   //"GEOIP,CN,BYPASS",
-// CUSTOM(BEFORE FINAL)
-/// GEOIP cause slow connection
+// CUSTOM_JP(BEFORE FINAL)
+  // GEOIP cause slow connection
   //"GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
