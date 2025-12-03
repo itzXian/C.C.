@@ -365,7 +365,7 @@ function main(config) {
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
 
 // 覆写Basic Options
-function overwriteBasicOptions(params) {
+function overwriteBasicOptions(config) {
     const otherOptions = {
         "mixed-port": 7890,
         "allow-lan": true,
@@ -398,7 +398,7 @@ function overwriteBasicOptions(params) {
         },
     };
     Object.keys(otherOptions).forEach((key) => {
-        params[key] = otherOptions[key];
+        config[key] = otherOptions[key];
     });
 }
 
