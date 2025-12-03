@@ -1,19 +1,19 @@
 const ruleProvidersBase = {
-  "type": "http",
-  "format": "text",
-  "interval": "3600",
+    "type": "http",
+    "format": "text",
+    "interval": "3600",
 };
 const ruleProvidersBaseClassical = {
-  ...ruleProvidersBase,
-  "behavior": "classical",
+    ...ruleProvidersBase,
+    "behavior": "classical",
 };
 const ruleProvidersBaseDomain = {
-  ...ruleProvidersBase,
-  "behavior": "domain",
+    ...ruleProvidersBase,
+    "behavior": "domain",
 };
 const ruleProvidersBaseIpcodr = {
-  ...ruleProvidersBase,
-  "behavior": "ipcidr",
+    ...ruleProvidersBase,
+    "behavior": "ipcidr",
 };
 
 const proxyGroupsBase = {
@@ -347,26 +347,60 @@ const prependRule = [
 // 以下代码参照
 // https://www.clashverge.dev/guide/script.html
 function main(config) {
-  if (!config.proxies) return config;
-  overwriteProxyGroups(config);
-
-  //let oldRules = config["rules"];
-  config["rules"] = prependRule//.concat(oldRules);
-
-  let oldProxyGroups = config["proxy-groups"];
-  config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
-
-  Object.assign(config, {
-    "rule-providers": ruleProviders
-  });
-
-  removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
-
-  return config;
+    if (!config.proxies) return config;
+    overwriteBasicOptions(config);
+    overwriteProxyGroups(config);
+    //let oldRules = config["rules"];
+    config["rules"] = prependRule//.concat(oldRules);
+    let oldProxyGroups = config["proxy-groups"];
+    config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
+    Object.assign(config, {
+        "rule-providers": ruleProviders
+    });
+    removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
+    return config;
 }
 
 // 以下代码源自
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
+
+// 覆写Basic Options
+function overwriteBasicOptions(params) {
+    const otherOptions = {
+        "mixed-port": 7890,
+        "allow-lan": true,
+        mode: "rule",
+        "log-level": "warning",
+        ipv6: false,
+        "find-process-mode": "strict",
+        profile: {
+            "store-selected": true,
+            "store-fake-ip": true,
+        },
+        "unified-delay": true,
+        "tcp-concurrent": true,
+        "global-client-fingerprint": "chrome",
+        sniffer: {
+            enable: true,
+            sniff: {
+                HTTP: {
+                    ports: [80, "8080-8880"],
+                    "override-destination": true,
+                },
+                TLS: {
+                    ports: [443, 8443],
+                },
+                QUIC: {
+                    ports: [443, 8443],
+                },
+            },
+            "skip-domain": ["Mijia Cloud", "+.push.apple.com"]
+        },
+    };
+    Object.keys(otherOptions).forEach((key) => {
+        params[key] = otherOptions[key];
+    });
+}
 
 // 覆盖代理组
 function overwriteProxyGroups(config) {
