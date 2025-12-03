@@ -1,3 +1,19 @@
+// 以下代码参照
+// https://www.clashverge.dev/guide/script.html
+function main(config) {
+    if (!config.proxies) return config;
+    overwriteBasicOptions(config);
+    overwriteProxyGroups(config);
+    config["rules"] = prependRule;
+    let oldProxyGroups = config["proxy-groups"];
+    config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
+    Object.assign(config, {
+        "rule-providers": ruleProviders
+    });
+    removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
+    return config;
+}
+
 const ruleProvidersBase = {
     "type": "http",
     "format": "text",
@@ -19,27 +35,27 @@ const ruleProvidersBaseIpcodr = {
 const proxyGroupsBase = {
     "asiaAutoFirst": {
         "type": "select",
-        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "JP-LOAD-BALANCING", "KR-AUTO", "SG-AUTO", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
     },
     "jpAutoFirst": {
         "type": "select",
-        "proxies": [ "JP-AUTO", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+        "proxies": [ "JP-AUTO", "JP-LOAD-BALANCING", "AUTO", "MANUAL", "DIRECT", "REJECT" ]
     },
     "autoFirst": {
         "type": "select",
-        "proxies": [ "AUTO", "MANUAL", "DIRECT", "REJECT" ]
+        "proxies": [ "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
     },
     "manualFirst": {
         "type": "select",
-        "proxies": [ "MANUAL", "AUTO", "DIRECT", "REJECT" ]
+        "proxies": [ "MANUAL", "AUTO", "ALL-LOAD-BALANCING", "DIRECT", "REJECT" ]
     },
     "directFirst": {
         "type": "select",
-        "proxies": [ "DIRECT", "AUTO", "MANUAL", "REJECT" ]
+        "proxies": [ "DIRECT", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "REJECT" ]
     },
     "rejectFirst": {
         "type": "select",
-        "proxies": [ "REJECT", "AUTO", "MANUAL", "DIRECT" ]
+        "proxies": [ "REJECT", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT" ]
     },
 }
 
@@ -344,23 +360,6 @@ const prependRule = [
   "MATCH,FINAL",
 ];
 
-// 以下代码参照
-// https://www.clashverge.dev/guide/script.html
-function main(config) {
-    if (!config.proxies) return config;
-    overwriteBasicOptions(config);
-    overwriteProxyGroups(config);
-    //let oldRules = config["rules"];
-    config["rules"] = prependRule//.concat(oldRules);
-    let oldProxyGroups = config["proxy-groups"];
-    config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
-    Object.assign(config, {
-        "rule-providers": ruleProviders
-    });
-    removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
-    return config;
-}
-
 // 以下代码源自
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
 
@@ -516,7 +515,7 @@ function overwriteProxyGroups(config) {
             type: "select",
             "include-all": true,
             //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
-            proxies: [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "LOAD-BALANCING", "DIRECT" ],
+            proxies: [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "KR-AUTO", "SG-AUTO", "AUTO", "ALL-LOAD-BALANCING", "JP-LOAD-BALANCING", "DIRECT" ],
         },
         {
             name: "AUTO",
@@ -525,12 +524,21 @@ function overwriteProxyGroups(config) {
             hidden: true,
         },
         {
-            name: "LOAD-BALANCING",
+            name: "ALL-LOAD-BALANCING",
             type: "load-balance",
             url: "https://cp.cloudflare.com",
             interval: 300,
             strategy: loadBalanceStrategy,
             proxies: allProxies,
+            hidden: true,
+        },
+        {
+            name: "JP-LOAD-BALANCING",
+            type: "load-balance",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            strategy: loadBalanceStrategy,
+            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i")),
             hidden: true,
         },
         {
@@ -545,19 +553,12 @@ function overwriteProxyGroups(config) {
     ];
 
     autoProxyGroups.length &&
-        // groups[1].proxies.unshift(...autoProxyGroups.map((item) => item.name));
         groups[1].proxies.push(...autoProxyGroups.map((item) => item.name));
     groups.push(...autoProxyGroups);
     groups.push(...manualProxyGroupsConfig);
 
     config["proxy-groups"] = groups;
 
-// 原配置基础上追加而非覆盖
-/***
-    let oldProxyGroups = config["proxy-groups"];
-    oldProxyGroups[0].proxies.unshift('AUTO', 'MANUAL', 'LOAD-BALANCING');
-    config["proxy-groups"] = oldProxyGroups.concat(groups);
-***/
 }
 function getProxiesByRegex(params, regex) {
     const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
