@@ -14,24 +14,6 @@ function main(config) {
     return config;
 }
 
-const ruleProvidersBase = {
-    "type": "http",
-    "format": "text",
-    "interval": "3600",
-};
-const ruleProvidersBaseClassical = {
-    ...ruleProvidersBase,
-    "behavior": "classical",
-};
-const ruleProvidersBaseDomain = {
-    ...ruleProvidersBase,
-    "behavior": "domain",
-};
-const ruleProvidersBaseIpcodr = {
-    ...ruleProvidersBase,
-    "behavior": "ipcidr",
-};
-
 const proxyGroupsBase = {
     "asiaAutoFirst": {
         "type": "select",
@@ -156,6 +138,41 @@ const prependProxyGroups = [
   },
 ];
 
+const ruleProvidersBase = {
+    "type": "http",
+    "format": "text",
+    "interval": "3600",
+};
+const ruleProvidersBaseClassical = {
+    ...ruleProvidersBase,
+    "behavior": "classical",
+};
+const ruleProvidersBaseDomain = {
+    ...ruleProvidersBase,
+    "behavior": "domain",
+};
+const ruleProvidersBaseIpcodr = {
+    ...ruleProvidersBase,
+    "behavior": "ipcidr",
+};
+const ruleProvidersBaseYaml = {
+    "type": "http",
+    "format": "yaml",
+    "interval": "3600",
+};
+const ruleProvidersBaseClassicalYaml = {
+    ...ruleProvidersBaseYaml,
+    "behavior": "classical",
+};
+const ruleProvidersBaseDomainYaml = {
+    ...ruleProvidersBaseYaml,
+    "behavior": "domain",
+};
+const ruleProvidersBaseIpcodrYaml = {
+    ...ruleProvidersBaseYaml,
+    "behavior": "ipcidr",
+};
+
 const ruleProviders = {
 // HOYO
   Hoyo_CN_Proxy: {
@@ -216,9 +233,9 @@ const ruleProviders = {
     "path": "./Bypass.list"
   },
   ChinaMax: {
-  ...ruleProvidersBaseClassical,
-  "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax.list",
-  "path": "./ChinaMax.list"
+    ...ruleProvidersBaseClassical,
+    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax.list",
+    "path": "./ChinaMax.list"
   },
   LocalAreaNetwork: {
     ...ruleProvidersBaseClassical,
@@ -949,6 +966,7 @@ function overwriteProxyGroups(config) {
             interval: 300,
             strategy: loadBalanceStrategy,
             proxies: allProxies,
+            "exclude-filter": "0.[0-9]",
             hidden: true,
         },
         {
@@ -958,6 +976,7 @@ function overwriteProxyGroups(config) {
             interval: 300,
             strategy: loadBalanceStrategy,
             proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i")),
+            "exclude-filter": "0.[0-9]",
             hidden: true,
         },
         {
