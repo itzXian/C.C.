@@ -3,6 +3,11 @@
 function main(config) {
     if (!config.proxies) return config;
     overwriteBasicOptions(config);
+    overwriteDns(config);
+    overwriteHosts(config);
+    overwriteTunnel(config);
+    overwriteFakeIpFilter(config);
+    overwriteNameserverPolicy(config);
     overwriteProxyGroups(config);
     config["rules"] = prependRule;
     let oldProxyGroups = config["proxy-groups"];
