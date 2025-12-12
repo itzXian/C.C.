@@ -77,6 +77,10 @@ const prependProxyGroups = [
     ...proxyGroupsBase.directFirst,
     "name": "BYPASS",
   },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "PIXIV",
+  },
 // CUSTOM
 /* Use port 443 instead
   {
@@ -84,15 +88,7 @@ const prependProxyGroups = [
     "name": "GITHUB_SSH",
   },
 */
-  {
-    ...proxyGroupsBase.autoFirst,
-    "name": "PIXIV",
-  },
 // CUSTOM_JP
-  {
-    ...proxyGroupsBase.jpAutoFirst,
-    "name": "GITHUB",
-  },
   {
     ...proxyGroupsBase.jpAutoFirst,
     "name": "JP_DOMAIN",
@@ -126,6 +122,10 @@ const prependProxyGroups = [
   {
     ...proxyGroupsBase.jpAutoFirst,
     "name": "DISCORD",
+  },
+  {
+    ...proxyGroupsBase.jpAutoFirst,
+    "name": "GITHUB",
   },
 // PROXY
   {
