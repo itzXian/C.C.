@@ -11,7 +11,7 @@ function main(config) {
     overwriteProxyGroups(config);
     config["rules"] = customRules;
     config["rule-providers"] = ruleProviders;
-    removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
+    //removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     return config;
 }
 
@@ -855,16 +855,13 @@ function overwriteProxyGroups(config) {
         { name: "SG-AUTO", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "KR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKTWSG-AUTO", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ASIA-AUTO", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
         { name: "US-AUTO", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
         { name: "UK-AUTO", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "FR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
         { name: "DE-AUTO", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
-        {
-            name: "ALL-COUNTRIES-AUTO",
-            regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i")
-        }
+        { name: "ALL-COUNTRIES-AUTO", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
+        { name: "HKTWSG-AUTO", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ASIA-AUTO", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
     ];
 
     const autoProxyGroups = autoProxyGroupRegexs
@@ -953,50 +950,43 @@ function overwriteProxyGroups(config) {
             type: "select",
             "include-all": true,
             //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
-            proxies: [ "HK-AUTO", "TW-AUTO", "SG-AUTO", "HKTWSG-AUTO", "HKTWSG-LOAD-BALANCING", "JP-AUTO", "JP-LOAD-BALANCING", "KR-AUTO", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "DIRECT" ],
+            proxies: [ "HKTWSG-AUTO", "HKTWSG-LOAD-BALANCING", "JP-AUTO", "JP-LOAD-BALANCING", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "DIRECT" ],
         },
         {
             name: "AUTO",
-            type: "select",
-            proxies: ["ALL-AUTO"],
+            type: "url-test",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            tolerance: 80,
+            proxies: getProxiesByRegex(config, new RegExp(`^((?!.*${excludeTerms}).)*$`, "i")),
             hidden: true,
         },
         {
             ...loadBalanceBase,
             name: "ALL-LOAD-BALANCING",
-            proxies: allProxies,
+            proxies: getProxiesByRegex(config, new RegExp(`^((?!.*${excludeTerms}).)*$`, "i")),
         },
         {
             ...loadBalanceBase,
             name: "ASIA-LOAD-BALANCING",
-            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i")),
+            proxies: getProxiesByRegex(config, new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i")),
         },
         {
             ...loadBalanceBase,
             name: "HKTWSG-LOAD-BALANCING",
-            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i")),
+            proxies: getProxiesByRegex(config, new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i")),
         },
         {
             ...loadBalanceBase,
             name: "JP-LOAD-BALANCING",
-            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i")),
+            proxies: getProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i")),
         },
-        {
-            name: "ALL-AUTO",
-            type: "url-test",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tolerance: 80,
-            proxies: allProxies,
-            hidden: true,
-        },
-        ...customProxyGroups,
     ];
 
-    autoProxyGroups.length &&
-        groups[1].proxies.push(...autoProxyGroups.map((item) => item.name));
+    //autoProxyGroups.length && groups[1].proxies.push(...autoProxyGroups.map((item) => item.name));
     groups.push(...autoProxyGroups);
     groups.push(...manualProxyGroupsConfig);
+    groups.push(...customProxyGroups);
 
     config["proxy-groups"] = groups;
 
