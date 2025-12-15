@@ -442,7 +442,7 @@ function overwriteProxyGroups(config) {
         { name: "JP-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HKTWSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ASIA-LOAD-BALANCING", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ALL-LOAD-BALANCING", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+        { name: "LOAD-BALANCING", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
     const loadBalanceGroups = loadBalanceGroupRegexs
@@ -482,7 +482,7 @@ function overwriteProxyGroups(config) {
         },
         "autoFirst": {
             "type": "select",
-            "proxies": [ "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
+            "proxies": [ "AUTO", "LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
         },
         "manualFirst": {
             "type": "select",
