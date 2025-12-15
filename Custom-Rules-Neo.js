@@ -9,24 +9,16 @@ function main(config) {
     overwriteFakeIpFilter(config);
     overwriteNameserverPolicy(config);
     overwriteProxyGroups(config);
-    config["rules"] = prependRule;
-    let oldProxyGroups = config["proxy-groups"];
-    config["proxy-groups"] = oldProxyGroups.concat(prependProxyGroups);
-    Object.assign(config, {
-        "rule-providers": ruleProviders
-    });
+    config["rules"] = customRules;
+    config["rule-providers"] = ruleProviders;
     removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     return config;
 }
 
 const proxyGroupsBase = {
-    "asiaAutoFirst": {
-        "type": "select",
-        "proxies": [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "JP-LOAD-BALANCING", "KR-AUTO", "SG-AUTO", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
-    },
     "jpAutoFirst": {
         "type": "select",
-        "proxies": [ "JP-AUTO", "JP-LOAD-BALANCING", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
+        "proxies": [ "JP-AUTO", "JP-LOAD-BALANCING", "HKTWSG-AUTO", "HKTWSG-LOAD-BALANCING", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
     },
     "autoFirst": {
         "type": "select",
@@ -34,30 +26,28 @@ const proxyGroupsBase = {
     },
     "manualFirst": {
         "type": "select",
-        "proxies": [ "MANUAL", "AUTO", "ALL-LOAD-BALANCING", "DIRECT", "REJECT" ]
+        "proxies": [ "MANUAL", "DIRECT", "REJECT" ]
     },
     "directFirst": {
         "type": "select",
-        "proxies": [ "DIRECT", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "REJECT" ]
+        "proxies": [ "DIRECT", "MANUAL", "REJECT" ]
     },
     "rejectFirst": {
         "type": "select",
-        "proxies": [ "REJECT", "AUTO", "ALL-LOAD-BALANCING", "MANUAL", "DIRECT" ]
+        "proxies": [ "REJECT", "MANUAL", "DIRECT" ]
     },
 }
 
-const prependProxyGroups = [
+const customProxyGroups = [
 // HOYO
    {
-    ...proxyGroupsBase.asiaAutoFirst,
+    ...proxyGroupsBase.jpAutoFirst,
     "name": "HOYO_CN_PROXY",
-    "include-all": true,
     "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
   },
   {
-    ...proxyGroupsBase.asiaAutoFirst,
+    ...proxyGroupsBase.jpAutoFirst,
     "name": "HOYO_PROXY",
-    "include-all": true,
   },
   {
     ...proxyGroupsBase.directFirst,
@@ -305,7 +295,7 @@ const ruleProviders = {
   },
 }
 
-const prependRule = [
+const customRules = [
 // HOYO
   "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
   "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
@@ -326,6 +316,7 @@ const prependRule = [
   "DOMAIN-SUFFIX,ads-pixiv.net,AD_BLOCK",
 // CUSTOM_JP
   "RULE-SET,GitHub,GITHUB",
+  "DOMAIN-SUFFIX,hinative.com,JP_DOMAIN",
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
   "RULE-SET,Google,GOOGLE",
@@ -848,7 +839,6 @@ function overwriteProxyGroups(config) {
         SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
         JP: "(日本|JP|Japan|🇯🇵)",
         KR: "(韩国|韓|KR|Korea|🇰🇷)",
-        ASIA: "(香港|HK|Hong|🇭🇰|台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳|新加坡|狮城|SG|Singapore|🇸🇬|日本|JP|Japan|🇯🇵)",
         US: "(美国|US|United States|America|🇺🇸)",
         UK: "(英国|UK|United Kingdom|🇬🇧)",
         FR: "(法国|FR|France|🇫🇷)",
@@ -856,6 +846,8 @@ function overwriteProxyGroups(config) {
     };
     // 合并所有国家关键词，供"其它"条件使用
     const allCountryTerms = Object.values(includeTerms).join("|");
+    const hktwsgTerms = includeTerms.HK + '|' + includeTerms.TW + '|' + includeTerms.SG;
+    const asiaTerms = hktwsgTerms + '|' + includeTerms.JP;
     // 自动代理组正则表达式配置
     const autoProxyGroupRegexs = [
         { name: "HK-AUTO", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
@@ -863,7 +855,8 @@ function overwriteProxyGroups(config) {
         { name: "SG-AUTO", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "KR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ASIA-AUTO", regex: new RegExp(`^(?=.*${includeTerms.ASIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKTWSG-AUTO", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ASIA-AUTO", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
         { name: "US-AUTO", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
         { name: "UK-AUTO", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "FR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
@@ -880,7 +873,7 @@ function overwriteProxyGroups(config) {
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
-            tolerance: 50,
+            tolerance: 80,
             proxies: getProxiesByRegex(config, item.regex),
             hidden: true,
         }))
@@ -943,7 +936,16 @@ function overwriteProxyGroups(config) {
     // consistent-hashing：散列 根据请求的哈希值将请求分配到固定的节点
     // sticky-sessions：缓存 对「你的设备IP + 目标地址」组合计算哈希值，根据哈希值将请求分配到固定的节点 缓存 10 分钟过期
     // 默认值：consistent-hashing
-    const loadBalanceStrategy = "consistent-hashing";
+    //const loadBalanceStrategy = "consistent-hashing";
+    const loadBalanceBase = {
+         type: "load-balance",
+         url: "https://cp.cloudflare.com",
+         interval: 300,
+         tolerance: 80,
+         strategy: "consistent-hashing",
+         hidden: true,
+         "exclude-filter": "0.[0-9]",
+    }
 
     const groups = [
         {
@@ -951,7 +953,7 @@ function overwriteProxyGroups(config) {
             type: "select",
             "include-all": true,
             //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
-            proxies: [ "HK-AUTO", "TW-AUTO", "JP-AUTO", "JP-LOAD-BALANCING", "KR-AUTO", "SG-AUTO", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "DIRECT" ],
+            proxies: [ "HK-AUTO", "TW-AUTO", "SG-AUTO", "HKTWSG-AUTO", "HKTWSG-LOAD-BALANCING", "JP-AUTO", "JP-LOAD-BALANCING", "KR-AUTO", "ASIA-AUTO", "ASIA-LOAD-BALANCING", "AUTO", "ALL-LOAD-BALANCING", "DIRECT" ],
         },
         {
             name: "AUTO",
@@ -960,44 +962,35 @@ function overwriteProxyGroups(config) {
             hidden: true,
         },
         {
+            ...loadBalanceBase,
             name: "ALL-LOAD-BALANCING",
-            type: "load-balance",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            strategy: loadBalanceStrategy,
             proxies: allProxies,
-            "exclude-filter": "0.[0-9]",
-            hidden: true,
         },
         {
+            ...loadBalanceBase,
             name: "ASIA-LOAD-BALANCING",
-            type: "load-balance",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            strategy: loadBalanceStrategy,
-            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.ASIA})(?!.*${excludeTerms}).*$`, "i")),
-            "exclude-filter": "0.[0-9]",
-            hidden: true,
+            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i")),
         },
         {
+            ...loadBalanceBase,
+            name: "HKTWSG-LOAD-BALANCING",
+            proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i")),
+        },
+        {
+            ...loadBalanceBase,
             name: "JP-LOAD-BALANCING",
-            type: "load-balance",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            strategy: loadBalanceStrategy,
             proxies: getManualProxiesByRegex(config, new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i")),
-            "exclude-filter": "0.[0-9]",
-            hidden: true,
         },
         {
             name: "ALL-AUTO",
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
-            tolerance: 50,
+            tolerance: 80,
             proxies: allProxies,
             hidden: true,
         },
+        ...customProxyGroups,
     ];
 
     autoProxyGroups.length &&
