@@ -7,10 +7,10 @@ function main(config) {
     overwriteHosts(config);
     overwriteTunnel(config);
     overwriteFakeIpFilter(config);
+    //removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     overwriteProxyGroups(config);
     config["rules"] = customRules;
     config["rule-providers"] = ruleProviders;
-    //removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     return config;
 }
 
@@ -375,8 +375,6 @@ function overwriteProxyGroups(config) {
     };
     // 合并所有国家关键词，供"其它"条件使用
     const allCountryTerms = Object.values(includeTerms).join("|");
-    const hktwsgTerms = includeTerms.HK + '|' + includeTerms.TW + '|' + includeTerms.SG;
-    const asiaTerms = hktwsgTerms + '|' + includeTerms.JP;
      // 自动代理组正则表达式配置
     const autoProxyGroupRegexs = [
 /*
@@ -391,8 +389,8 @@ function overwriteProxyGroups(config) {
         { name: "ALL-COUNTRIES-AUTO", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
 */
         { name: "JP-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKTWSG-AUTO", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ASIA-AUTO", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSGTW-AUTO", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTW-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
         { name: "AUTO", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
@@ -402,7 +400,7 @@ function overwriteProxyGroups(config) {
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
-            tolerance: 80,
+            tolerance: 50,
             proxies: getProxiesByRegex(config, item.regex),
             hidden: true,
         }))
@@ -440,24 +438,48 @@ function overwriteProxyGroups(config) {
     //const loadBalanceStrategy = "consistent-hashing";
    const loadBalanceGroupRegexs = [
         { name: "JP-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKTWSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${hktwsgTerms})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ASIA-LOAD-BALANCING", regex: new RegExp(`^(?=.*${asiaTerms})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSG-AUTO-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSG-AUTO-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "LOAD-BALANCING", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
-    const loadBalanceGroups = loadBalanceGroupRegexs
+    const loadBalanceBase = {
+        type: "load-balance",
+        url: "https://cp.cloudflare.com",
+        interval: 300,
+        tunnelOptionserance: 50,
+        hidden: true,
+        "exclude-filter": "0.[0-9]",
+    }
+    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
+            ...loadBalanceBase,
             name: item.name,
-            type: "load-balance",
             proxies: getProxiesByRegex(config, item.regex),
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tunnelOptionserance: 80,
             strategy: "consistent-hashing",
-            hidden: true,
-            "exclude-filter": "0.[0-9]",
         }))
         .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: item.name + "-RR",
+            proxies: getProxiesByRegex(config, item.regex),
+            strategy: "round-robin",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: item.name + "-SS",
+            proxies: getProxiesByRegex(config, item.regex),
+            strategy: "sticky-sessions",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroups = [
+        ...loadBalanceGroupsConsistentHashing,
+        ...loadBalanceGroupsStickySession,
+        ...loadBalanceGroupsRoundRobin,
+    ]
 
     const groups = [
         {
@@ -528,8 +550,8 @@ function overwriteProxyGroups(config) {
         { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", },
         { ...proxyGroupsBase.jpAutoFirst, "name": "GITHUB", },
         // PROXY
-        { ...proxyGroupsBase.autoFirst, "name": "MS", },
-        { ...proxyGroupsBase.autoFirst, "name": "APPLE", },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "MS", },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE", },
         // FINAL
         { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
     ];
