@@ -199,6 +199,7 @@ const customRules = [
 // CUSTOM
   // Use port 443 instead
   //"AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
+  "DOMAIN-SUFFIX,hinative.com,FINAL",
   "RULE-SET,Pixiv,PIXIV",
   "DOMAIN-SUFFIX,pixivision.net,PIXIV",
   "DOMAIN-SUFFIX,ads-pixiv.net,AD_BLOCK",
