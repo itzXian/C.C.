@@ -70,7 +70,7 @@ const ruleProviders = {
   MIUI_Bloatware: {
     ...ruleProviderBaseClassical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
-    "path": "./MIUI_Bloatware.yaml"
+    "path": "./MIUI_Bloatware.list"
   },
   Block: {
     ...ruleProviderBaseClassical,
@@ -140,11 +140,6 @@ const ruleProviders = {
     "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
     "path": "./AI.list"
   },
-  GoogleCNProxyIP: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/GoogleCNProxyIP.list",
-    "path": "./GoogleCNProxyIP.list"
-  },
   Google: {
     ...ruleProviderBaseClassical,
     "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google.list",
@@ -208,6 +203,7 @@ const customRules = [
   "DOMAIN-SUFFIX,hinative.com,JP_DOMAIN",
   "RULE-SET,JP,JP_DOMAIN",
   "RULE-SET,AI,AI",
+  "DOMAIN,services.googleapis.cn,GOOGLE",
   "RULE-SET,Google,GOOGLE",
   "RULE-SET,YouTube,YOUTUBE",
   "RULE-SET,Twitter,TWITTER",
@@ -216,17 +212,14 @@ const customRules = [
 // PROXY
   "RULE-SET,Microsoft,MS",
   "RULE-SET,Apple,APPLE",
-// PROXY(BEFORE BYPASS)
-  "DOMAIN,services.googleapis.cn,GOOGLE_CN_PROXY",
-  "RULE-SET,GoogleCNProxyIP,GOOGLE_CN_PROXY",
 // BYPASS
   "RULE-SET,Bypass,BYPASS",
   "RULE-SET,LocalAreaNetwork,BYPASS",
   "RULE-SET,ChinaMax,BYPASS",
   //"GEOIP,CN,BYPASS",
 // CUSTOM_JP(BEFORE FINAL)
-  // GEOIP cause slow connection
-  //"GEOIP,JP,JP_DOMAIN",
+  // GEOIP may cause slow connection
+  "GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
 ];
@@ -549,7 +542,6 @@ function overwriteProxyGroups(config) {
             "filter": "JP|日本",
         },
         { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE_CN_PROXY", "icon": iconUrl("google"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
