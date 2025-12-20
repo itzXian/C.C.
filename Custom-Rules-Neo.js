@@ -14,167 +14,69 @@ function main(config) {
     return config;
 }
 
-const ruleProviderBase = {
+const ruleProviderText = {
     "type": "http",
     "format": "text",
     "interval": "3600",
 };
-const ruleProviderBaseClassical = {
-    ...ruleProviderBase,
-    "behavior": "classical",
-};
-const ruleProviderBaseDomain = {
-    ...ruleProviderBase,
-    "behavior": "domain",
-};
-const ruleProviderBaseIpcodr = {
-    ...ruleProviderBase,
-    "behavior": "ipcidr",
-};
-const ruleProviderBaseYaml = {
+const ruleProviderYaml = {
     "type": "http",
     "format": "yaml",
     "interval": "3600",
 };
-const ruleProviderBaseClassicalYaml = {
-    ...ruleProviderBaseYaml,
-    "behavior": "classical",
-};
-const ruleProviderBaseDomainYaml = {
-    ...ruleProviderBaseYaml,
-    "behavior": "domain",
-};
-const ruleProviderBaseIpcodrYaml = {
-    ...ruleProviderBaseYaml,
-    "behavior": "ipcidr",
-};
-
+const ruleProviderBase = {
+    Classical: {
+        ...ruleProviderText,
+        "behavior": "classical",
+    },
+    Domain: {
+        ...ruleProviderText,
+        "behavior": "domain",
+    },
+    Ipcodr: {
+        ...ruleProviderText,
+        "behavior": "ipcidr",
+    },
+    ClassicalYaml: {
+        ...ruleProviderYaml,
+        "behavior": "classical",
+    },
+    DomainYaml: {
+        ...ruleProviderYaml,
+        "behavior": "domain",
+    },
+    IpcodrYaml: {
+        ...ruleProviderYaml,
+        "behavior": "ipcidr",
+    },
+}
 const ruleProviders = {
 // HOYO
   Hoyo_CN_Proxy: {
-    ...ruleProviderBaseClassical,
+    ...ruleProviderBase.Classical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
     "path": "./Hoyo_CN_Proxy.list"
   },
   Hoyo_Proxy: {
-    ...ruleProviderBaseClassical,
+    ...ruleProviderBase.Classical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
     "path": "./Hoyo_Proxy.list"
   },
   Hoyo_Bypass: {
-    ...ruleProviderBaseClassical,
+    ...ruleProviderBase.Classical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
     "path": "./Hoyo_Bypass.list"
   },
 // BLOCK
   MIUI_Bloatware: {
-    ...ruleProviderBaseClassical,
+    ...ruleProviderBase.Classical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
     "path": "./MIUI_Bloatware.list"
   },
   Block: {
-    ...ruleProviderBaseClassical,
+    ...ruleProviderBase.Classical,
     "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Block.list",
     "path": "./Block.list"
-  },
-  BanAD: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanAD.list",
-    "path": "./BanAD.list"
-  },
-  BanEasyList: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyList.list",
-    "path": "./BanEasyList.list"
-  },
-  BanEasyListChina: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyListChina.list",
-    "path": "./BanEasyListChina.list"
-  },
-  BanEasyPrivacy: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanEasyPrivacy.list",
-    "path": "./BanEasyPrivacy.list"
-  },
-  BanProgramAD: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/BanProgramAD.list",
-    "path": "./BanProgramAD.list"
-  },
-// BYPASS
-  Bypass: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Bypass.list",
-    "path": "./Bypass.list"
-  },
-  ChinaMax: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/ChinaMax/ChinaMax.list",
-    "path": "./ChinaMax.list"
-  },
-  LocalAreaNetwork: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/LocalAreaNetwork.list",
-    "path": "./LocalAreaNetwork.list"
-  },
-// CUSTOM
-  Pixiv: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Pixiv/Pixiv.list",
-    "path": "./Pixiv.list"
-  },
-// CUSTOM_JP
-  GitHub: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/GitHub/GitHub.list",
-    "path": "./GitHub.list"
-  },
-  JP: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/JP.list",
-    "path": "./JP.list"
-  },
-  AI: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/AI.list",
-    "path": "./AI.list"
-  },
-  Google: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google.list",
-    "path": "./Google.list"
-  },
-  YouTube: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.list",
-    "path": "./YouTube.list"
-  },
-  Twitter: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitter/Twitter.list",
-    "path": "./Twitter.list"
-  },
-  Telegram: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Telegram/Telegram.list",
-    "path": "./Telegram.list"
-  },
-  Discord: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Discord/Discord.list",
-    "path": "./Discord.list"
-  },
-// PROXY
-  Microsoft: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Microsoft.list",
-    "path": "./Microsoft.list"
-  },
-  Apple: {
-    ...ruleProviderBaseClassical,
-    "url": "https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/refs/heads/master/Clash/Ruleset/Apple.list",
-    "path": "./Apple.list"
   },
 }
 
@@ -186,39 +88,29 @@ const customRules = [
 // BLOCK
   "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
   "RULE-SET,Block,AD_BLOCK",
-  "RULE-SET,BanAD,AD_BLOCK",
-  "RULE-SET,BanEasyList,AD_BLOCK",
-  "RULE-SET,BanEasyListChina,AD_BLOCK",
-  "RULE-SET,BanEasyPrivacy,AD_BLOCK",
-  "RULE-SET,BanProgramAD,AD_BLOCK",
+  "GEOSITE,category-ads-all,AD_BLOCK",
 // CUSTOM
-  // Use port 443 instead
-  //"AND,((DOMAIN-SUFFIX,github.com),(DST-PORT,22),(NETWORK,tcp)),GITHUB_SSH",
   "DOMAIN-SUFFIX,hinative.com,FINAL",
-  "RULE-SET,Pixiv,PIXIV",
-  "DOMAIN-SUFFIX,pixivision.net,PIXIV",
-  "DOMAIN-SUFFIX,ads-pixiv.net,AD_BLOCK",
 // CUSTOM_JP
-  "RULE-SET,GitHub,GITHUB",
-  "DOMAIN-SUFFIX,hinative.com,JP_DOMAIN",
-  "RULE-SET,JP,JP_DOMAIN",
-  "RULE-SET,AI,AI",
-  "DOMAIN,services.googleapis.cn,GOOGLE",
-  "RULE-SET,Google,GOOGLE",
-  "RULE-SET,YouTube,YOUTUBE",
-  "RULE-SET,Twitter,TWITTER",
-  "RULE-SET,Telegram,TELEGRAM",
-  "RULE-SET,Discord,DISCORD",
+  "GEOSITE,pixiv,PIXIV",
+  "GEOSITE,category-ai-!cn,AI",
+  "GEOIP,google,GOOGLE",
+  "GEOSITE,google,GOOGLE",
+  "GEOSITE,youTube,YOUTUBE",
+  "GEOIP,twitter,TWITTER",
+  "GEOSITE,twitter,TWITTER",
 // PROXY
-  "RULE-SET,Microsoft,MS",
-  "RULE-SET,Apple,APPLE",
+  "GEOIP,telegram,TELEGRAM",
+  "GEOSITE,telegram,TELEGRAM",
+  "GEOSITE,discord,DISCORD",
+  "GEOSITE,microsoft,MS",
+  "GEOSITE,apple,APPLE",
+  "GEOSITE,apple-intelligence,APPLE",
 // BYPASS
-  "RULE-SET,Bypass,BYPASS",
-  "RULE-SET,LocalAreaNetwork,BYPASS",
-  "RULE-SET,ChinaMax,BYPASS",
-  //"GEOIP,CN,BYPASS",
+  "GEOIP,private,BYPASS",
+  "GEOSITE,private,BYPASS",
+  "GEOIP,CN,BYPASS",
 // CUSTOM_JP(BEFORE FINAL)
-  // GEOIP may cause slow connection
   "GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
@@ -530,9 +422,18 @@ function overwriteProxyGroups(config) {
         // BLOCK
         { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE", "icon": "https://upload.wikimedia.org/wikipedia/commons/2/29/Xiaomi_logo.svg", },
         { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK", "icon": iconUrl("adblock"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV", "icon": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Pixiv_Icon.svg", },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM", "icon": iconUrl("telegram"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", "icon": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", },
+        // PROXY
+        { ...proxyGroupsBase.jpAutoFirst, "name": "MS", "icon": iconUrl("microsoft"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE", "icon": iconUrl("apple"), },
         // BYPASS
         { ...proxyGroupsBase.directFirst, "name": "BYPASS", "icon": iconUrl("cn"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV", "icon": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Pixiv_Icon.svg", },
         // CUSTOM_JP
         {
             ...proxyGroupsBase.jpAutoFirst,
@@ -541,16 +442,6 @@ function overwriteProxyGroups(config) {
             "include-all": true,
             "filter": "JP|日本",
         },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM", "icon": iconUrl("telegram"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", "icon": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GITHUB", "icon": iconUrl("github"), },
-        // PROXY
-        { ...proxyGroupsBase.jpAutoFirst, "name": "MS", "icon": iconUrl("microsoft"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE", "icon": iconUrl("apple"), },
         // FINAL
         { ...proxyGroupsBase.manualFirst, "name": "FINAL", "icon": iconUrl("final"), },
     ];
