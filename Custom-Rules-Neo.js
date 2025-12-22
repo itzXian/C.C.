@@ -106,12 +106,12 @@ const customRules = [
   "GEOSITE,microsoft,MS",
   "GEOSITE,apple,APPLE",
   "GEOSITE,apple-intelligence,APPLE",
+// CUSTOM_JP(BEFORE FINAL)
+  "GEOIP,JP,JP_DOMAIN",
 // BYPASS
   "GEOIP,private,BYPASS",
   "GEOSITE,private,BYPASS",
   "GEOIP,CN,BYPASS",
-// CUSTOM_JP(BEFORE FINAL)
-  "GEOIP,JP,JP_DOMAIN",
 // FINAL
   "MATCH,FINAL",
 ];
@@ -324,8 +324,8 @@ function overwriteProxyGroups(config) {
     //const loadBalanceStrategy = "consistent-hashing";
    const loadBalanceGroupRegexs = [
         { name: "JP-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSG-AUTO-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSG-AUTO-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "LOAD-BALANCING", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
