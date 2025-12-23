@@ -830,10 +830,5 @@ const getProxiesByRegexSafe = (config, regex) => {
 // https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
 const removeProxyByRegex = (config, regex) => {
     const unmatchedProxies = config.proxies.filter((proxy) => !proxy.name.match(regex));
-    return unmatchedProxies.length > 0 && matchedProxies;
-/*
-    config['proxy-groups'] = config['proxy-groups'].map((item) => {
-        item.proxies = item.proxies.filter((name) => !name.match(regex));
-    });
-*/
+    return unmatchedProxies.length > 0 && unmatchedProxies;
 }
