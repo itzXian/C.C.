@@ -12,6 +12,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     overrideRuleProviders(config);
     overrideRules(config);
+    return config;
 }
 
 const overrideRuleProviders = (config) => {
