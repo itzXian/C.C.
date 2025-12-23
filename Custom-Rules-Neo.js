@@ -832,4 +832,9 @@ const getProxiesByRegexSafe = (config, regex) => {
 const removeProxyByRegex = (config, regex) => {
     const unmatchedProxies = config.proxies.filter((proxy) => !proxy.name.match(regex));
     return unmatchedProxies.length > 0 && unmatchedProxies;
+/*
+    config['proxy-groups'] = config['proxy-groups'].map((item) => {
+        item.proxies = item.proxies.filter((name) => !name.match(regex));
+    });
+*/
 }
