@@ -1,127 +1,134 @@
 // 以下代码参照
 // https://www.clashverge.dev/guide/script.html
-function main(config) {
+const main = (config) => {
     if (!config.proxies) return config;
-    overwriteBasicOptions(config);
-    overwriteDns(config);
-    overwriteFakeIpFilter(config);
-    overwriteNameserverPolicy(config);
-    overwriteHosts(config);
-    overwriteTunnel(config);
-    //removeNodeByName(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
-    overwriteProxyGroups(config);
+    overrideBasicOptions(config);
+    overrideDns(config);
+    overrideFakeIpFilter(config);
+    overrideNameserverPolicy(config);
+    overrideHosts(config);
+    overrideTunnel(config);
+    //removeProxyByRegex(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
+    overrideProxyGroups(config);
+    overrideRuleProviders(config);
+    overrideRules(config);
+}
+
+const overrideRuleProviders = (config) => {
+    const ruleProviderConfig = {
+        "type": "http",
+        "interval": "3600",
+    };
+    ruleProviderConfig.Text = {
+        ...ruleProviderConfig,
+        "format": "text",
+    };
+    ruleProviderConfig.Yaml = {
+        ...ruleProviderConfig,
+        "format": "yaml",
+    };
+    const ruleProviderBase = {
+        Classical: {
+            ...ruleProviderConfig.Text,
+            "behavior": "classical",
+        },
+        Domain: {
+            ...ruleProviderConfig.Text,
+            "behavior": "domain",
+        },
+        Ipcodr: {
+            ...ruleProviderConfig.Text,
+            "behavior": "ipcidr",
+        },
+        ClassicalYaml: {
+            ...ruleProviderConfig.Yaml,
+            "behavior": "classical",
+        },
+        DomainYaml: {
+            ...ruleProviderConfig.Yaml,
+            "behavior": "domain",
+        },
+        IpcodrYaml: {
+            ...ruleProviderConfig.Yaml,
+            "behavior": "ipcidr",
+        },
+    }
+    const ruleProviders = {
+        // HOYO
+        Hoyo_CN_Proxy: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
+            "path": "./Hoyo_CN_Proxy.list"
+        },
+        Hoyo_Proxy: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
+            "path": "./Hoyo_Proxy.list"
+        },
+        Hoyo_Bypass: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
+            "path": "./Hoyo_Bypass.list"
+        },
+        // BLOCK
+        MIUI_Bloatware: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
+            "path": "./MIUI_Bloatware.list"
+        },
+        Block: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Block.list",
+            "path": "./Block.list"
+        },
+    }
     config["rule-providers"] = ruleProviders;
+}
+
+const overrideRules = (config) => {
+    const customRules = [
+    // HOYO
+    "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
+    "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
+    "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
+    // BLOCK
+    "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
+    "RULE-SET,Block,AD_BLOCK",
+    "GEOSITE,category-ads-all,AD_BLOCK",
+    // CUSTOM
+    "DOMAIN-SUFFIX,hinative.com,FINAL",
+    // CUSTOM_JP
+    "GEOSITE,pixiv,PIXIV",
+    "GEOSITE,category-ai-!cn,AI",
+    "GEOIP,google,GOOGLE",
+    "GEOSITE,google,GOOGLE",
+    "GEOSITE,youTube,YOUTUBE",
+    "GEOIP,twitter,TWITTER",
+    "GEOSITE,twitter,TWITTER",
+    // PROXY
+    "GEOIP,telegram,TELEGRAM",
+    "GEOSITE,telegram,TELEGRAM",
+    "GEOSITE,discord,DISCORD",
+    "GEOSITE,microsoft,MS",
+    "GEOSITE,apple,APPLE",
+    "GEOSITE,apple-intelligence,APPLE",
+    // CUSTOM_JP(BEFORE FINAL)
+    "GEOIP,JP,JP_DOMAIN",
+    // BYPASS
+    "GEOIP,private,BYPASS",
+    "GEOSITE,private,BYPASS",
+    "GEOIP,CN,BYPASS",
+    // FINAL
+    "MATCH,FINAL",
+    ];
     config["rules"] = customRules;
-    return config;
 }
-
-const ruleProviderText = {
-    "type": "http",
-    "format": "text",
-    "interval": "3600",
-};
-const ruleProviderYaml = {
-    "type": "http",
-    "format": "yaml",
-    "interval": "3600",
-};
-const ruleProviderBase = {
-    Classical: {
-        ...ruleProviderText,
-        "behavior": "classical",
-    },
-    Domain: {
-        ...ruleProviderText,
-        "behavior": "domain",
-    },
-    Ipcodr: {
-        ...ruleProviderText,
-        "behavior": "ipcidr",
-    },
-    ClassicalYaml: {
-        ...ruleProviderYaml,
-        "behavior": "classical",
-    },
-    DomainYaml: {
-        ...ruleProviderYaml,
-        "behavior": "domain",
-    },
-    IpcodrYaml: {
-        ...ruleProviderYaml,
-        "behavior": "ipcidr",
-    },
-}
-const ruleProviders = {
-// HOYO
-  Hoyo_CN_Proxy: {
-    ...ruleProviderBase.Classical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
-    "path": "./Hoyo_CN_Proxy.list"
-  },
-  Hoyo_Proxy: {
-    ...ruleProviderBase.Classical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
-    "path": "./Hoyo_Proxy.list"
-  },
-  Hoyo_Bypass: {
-    ...ruleProviderBase.Classical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
-    "path": "./Hoyo_Bypass.list"
-  },
-// BLOCK
-  MIUI_Bloatware: {
-    ...ruleProviderBase.Classical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
-    "path": "./MIUI_Bloatware.list"
-  },
-  Block: {
-    ...ruleProviderBase.Classical,
-    "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Block.list",
-    "path": "./Block.list"
-  },
-}
-
-const customRules = [
-// HOYO
-  "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
-  "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
-  "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
-// BLOCK
-  "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
-  "RULE-SET,Block,AD_BLOCK",
-  "GEOSITE,category-ads-all,AD_BLOCK",
-// CUSTOM
-  "DOMAIN-SUFFIX,hinative.com,FINAL",
-// CUSTOM_JP
-  "GEOSITE,pixiv,PIXIV",
-  "GEOSITE,category-ai-!cn,AI",
-  "GEOIP,google,GOOGLE",
-  "GEOSITE,google,GOOGLE",
-  "GEOSITE,youTube,YOUTUBE",
-  "GEOIP,twitter,TWITTER",
-  "GEOSITE,twitter,TWITTER",
-// PROXY
-  "GEOIP,telegram,TELEGRAM",
-  "GEOSITE,telegram,TELEGRAM",
-  "GEOSITE,discord,DISCORD",
-  "GEOSITE,microsoft,MS",
-  "GEOSITE,apple,APPLE",
-  "GEOSITE,apple-intelligence,APPLE",
-// CUSTOM_JP(BEFORE FINAL)
-  "GEOIP,JP,JP_DOMAIN",
-// BYPASS
-  "GEOIP,private,BYPASS",
-  "GEOSITE,private,BYPASS",
-  "GEOIP,CN,BYPASS",
-// FINAL
-  "MATCH,FINAL",
-];
 
 // 以下代码源自
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
 
 // 覆写Basic Options
-function overwriteBasicOptions(config) {
+const overrideBasicOptions = (config) => {
     const otherOptions = {
         "mixed-port": 7890,
         "allow-lan": true,
@@ -158,7 +165,7 @@ function overwriteBasicOptions(config) {
     });
 }
 // 覆写DNS
-function overwriteDns(params) {
+const overrideDns = (config) => {
     const dnsList = [
         "https://223.5.5.5/dns-query",
         "https://doh.pub/dns-query",
@@ -178,11 +185,11 @@ function overwriteDns(params) {
         nameserver: dnsList,
         "proxy-server-nameserver": proxyDnsList,
     };
-    params.dns = { ...dnsOptions };
+    config.dns = { ...dnsOptions };
 }
 
 // 覆写DNS.Fake IP Filter
-function overwriteFakeIpFilter (params) {
+const overrideFakeIpFilter  = (config) => {
     const fakeIpFilter = [
         "+.m2m",
         "injections.adguard.org",
@@ -213,11 +220,11 @@ function overwriteFakeIpFilter (params) {
         "*.127.*.*.*.nip.io",
         "*-127-*-*-*.nip.io"
     ];
-    params.dns["fake-ip-filter"] = fakeIpFilter;
+    config.dns["fake-ip-filter"] = fakeIpFilter;
 }
 
 // 覆写DNS.Nameserver Policy
-function overwriteNameserverPolicy (params) {
+const overrideNameserverPolicy  = (config) => {
     const nameserverPolicy = {
         "dns.alidns.com": "quic://223.5.5.5:853",
         "dot.pub": "119.29.29.29",
@@ -572,22 +579,22 @@ function overwriteNameserverPolicy (params) {
         "+.127.0.0.1.sslip.io": "system",
         "+.127.atlas.skk.moe": "system"
     };
-    params.dns["nameserver-policy"] = nameserverPolicy;
+    config.dns["nameserver-policy"] = nameserverPolicy;
 }
 
 // 覆写hosts
-function overwriteHosts (params) {
+const overrideHosts  = (config) => {
     const hosts = {
         "dns.alidns.com": ['223.5.5.5', '223.6.6.6', '2400:3200:baba::1', '2400:3200::1'],
         "127.0.0.1.sslip.io": "127.0.0.1",
         "127.atlas.skk.moe": "127.0.0.1",
         "cdn.jsdelivr.net": "cdn.jsdelivr.net.cdn.cloudflare.net"
     };
-    params.hosts = hosts;
+    config.hosts = hosts;
 }
 
 // 覆写Tunnel
-function overwriteTunnel(params) {
+const overrideTunnel = (config) => {
     const tunnelOptions = {
         enable: true,
         stack: "system",
@@ -599,11 +606,11 @@ function overwriteTunnel(params) {
         // 根据自己环境来看要排除哪些网段
         "route-exclude-address": [],
     };
-    params.tun = { ...tunnelOptions };
+    config.tun = { ...tunnelOptions };
 }
 
 // 覆盖代理组
-function overwriteProxyGroups(config) {
+const overrideProxyGroups = (config) => {
     // 所有代理
     const allProxies = config["proxies"].map((e) => e.name);
     // 公共的正则片段
@@ -811,21 +818,22 @@ function overwriteProxyGroups(config) {
     config["proxy-groups"] = groups;
 }
 
-function getProxiesByRegex(params, regex) {
-    const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
+const getProxiesByRegex = (config, regex) => {
+    const matchedProxies = config.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
     return matchedProxies.length > 0 && matchedProxies;
 }
-function getProxiesByRegexSafe(params, regex) {
-    const matchedProxies = params.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
+const getProxiesByRegexSafe = (config, regex) => {
+    const matchedProxies = config.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
     return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
 }
 // 以下代码源自
 // https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
-function removeNodeByName(config, regExp) {
-    config.proxies = config.proxies.filter(proxy => !proxy.name.match(regExp));
-    config['proxy-groups'] = config['proxy-groups'].map(it => {
-        it.proxies = it.proxies.filter(name => !name.match(regExp));
-        return it;
+const removeProxyByRegex = (config, regex) => {
+    const unmatchedProxies = config.proxies.filter((proxy) => !proxy.name.match(regex));
+    return unmatchedProxies.length > 0 && matchedProxies;
+/*
+    config['proxy-groups'] = config['proxy-groups'].map((item) => {
+        item.proxies = item.proxies.filter((name) => !name.match(regex));
     });
-    return config;
+*/
 }
