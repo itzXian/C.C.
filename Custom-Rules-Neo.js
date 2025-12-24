@@ -633,25 +633,25 @@ const overrideProxyGroups = (config) => {
      // 自动代理组正则表达式配置
     const autoProxyGroupRegexs = [
 /*
-        { name: "HK-AUTO", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "TW-AUTO", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG-AUTO", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "KR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "US-AUTO", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "UK-AUTO", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "FR-AUTO", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "DE-AUTO", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ALL-COUNTRIES-AUTO", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "TW", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "KR", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "US", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "UK", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "FR", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL-COUNTRIES", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
 */
-        { name: "JP-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSGTW-AUTO", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTW-AUTO", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "AUTO", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
     const autoProxyGroups = autoProxyGroupRegexs
         .map((item) => ({
-            name: item.name,
+            name: `AUTO-${item.name}`,
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
@@ -692,10 +692,10 @@ const overrideProxyGroups = (config) => {
     // 默认值：consistent-hashing
     //const loadBalanceStrategy = "consistent-hashing";
    const loadBalanceGroupRegexs = [
-        { name: "JP-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSG-LOAD-BALANCING", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "LOAD-BALANCING", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSG", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
     const loadBalanceBase = {
@@ -706,34 +706,34 @@ const overrideProxyGroups = (config) => {
         hidden: true,
         "exclude-filter": "0.[0-9]",
     }
-    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: item.name,
-            proxies: getProxiesByRegex(config, item.regex),
-            strategy: "consistent-hashing",
-        }))
-        .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: item.name + "-RR",
+            name: `RR-LOAD-BALANCING-${item.name}`,
             proxies: getProxiesByRegex(config, item.regex),
             strategy: "round-robin",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `LOAD-BALANCING-${item.name}`,
+            proxies: getProxiesByRegex(config, item.regex),
+            strategy: "consistent-hashing",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: item.name + "-SS",
+            name: `SS-LOAD-BALANCING-${item.name}`,
             proxies: getProxiesByRegex(config, item.regex),
             strategy: "sticky-sessions",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroups = [
+        ...loadBalanceGroupsRoundRobin,
         ...loadBalanceGroupsConsistentHashing,
         ...loadBalanceGroupsStickySession,
-        ...loadBalanceGroupsRoundRobin,
     ]
 
     const iconUrl = (name) => {
