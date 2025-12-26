@@ -12,7 +12,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     overrideRuleProviders(config);
     overrideRules(config);
-    toDailerProxy(config);
+    toDailerProxy(config, config.proxies);
     return config;
 }
 
@@ -102,9 +102,9 @@ const overrideRules = (config) => {
     // CUSTOM_JP
     "GEOSITE,pixiv,PIXIV",
     "GEOSITE,category-ai-!cn,AI",
+    "GEOSITE,youTube,YOUTUBE",
     "GEOIP,google,GOOGLE",
     "GEOSITE,google,GOOGLE",
-    "GEOSITE,youTube,YOUTUBE",
     "GEOIP,twitter,TWITTER",
     "GEOSITE,twitter,TWITTER",
     // PROXY
@@ -795,8 +795,8 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK", "icon": iconUrl("adblock"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV", "icon": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Pixiv_Icon.svg", },
         { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM", "icon": iconUrl("telegram"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", "icon": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", },
@@ -841,8 +841,8 @@ const removeProxyByRegex = (config, regex) => {
 */
 }
 
-const toDailerProxy = (config) => {
-    let toDailerProxies = JSON.parse(JSON.stringify(config.proxies))
+const toDailerProxy = (config, proxies) => {
+    let toDailerProxies = JSON.parse(JSON.stringify(proxies))
     toDailerProxies.forEach((e) => {
         e.name = `-=> ${e.name}`
     })
@@ -865,6 +865,7 @@ const toDailerProxy = (config) => {
         if (!e.hidden && !e.proxies.includes(toDailerProxyGroup.name) && e.name!='MANUAL') e.proxies.unshift(toDailerProxyGroup.name);
     })
     config["proxy-groups"].unshift(toDailerProxyGroup)
+    if (!toDailerProxies.filter((e) => /(?!日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
     config["proxy-groups"].unshift({
         name: "-=> AUTO-JP",
         type: "url-test",
