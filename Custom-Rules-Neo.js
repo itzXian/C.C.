@@ -12,6 +12,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     overrideRuleProviders(config);
     overrideRules(config);
+    toDailerProxy(config);
     return config;
 }
 
@@ -610,6 +611,10 @@ const overrideTunnel = (config) => {
     config.tun = { ...tunnelOptions };
 }
 
+const iconUrl = (name) => {
+    return `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`
+}
+
 // 覆盖代理组
 const overrideProxyGroups = (config) => {
     // 所有代理
@@ -679,7 +684,7 @@ const overrideProxyGroups = (config) => {
             name: item.name,
             type: "select",
             proxies: getProxiesByRegex(config, item.regex),
-            icon: item.icon,
+            icon: iconUrl(item.name),
             hidden: true,
         }))
         .filter((item) => item.proxies.length > 0);
@@ -736,9 +741,6 @@ const overrideProxyGroups = (config) => {
         ...loadBalanceGroupsStickySession,
     ]
 
-    const iconUrl = (name) => {
-        return `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`
-    }
     const groups = [
         {
             name: "MANUAL",
@@ -837,4 +839,40 @@ const removeProxyByRegex = (config, regex) => {
         item.proxies = item.proxies.filter((name) => !name.match(regex));
     });
 */
+}
+
+const toDailerProxy = (config) => {
+    let toDailerProxies = JSON.parse(JSON.stringify(config.proxies))
+    toDailerProxies.forEach((e) => {
+        e.name = `-=> ${e.name}`
+    })
+    config["proxy-providers"] = {
+        "to-dailer-provider": {
+            type: "inline",
+            override: {
+                "dialer-proxy": "MANUAL"
+            },
+            payload: toDailerProxies
+        }
+    }
+    const toDailerProxyGroup = {
+        "name": "-=>",
+        "type": "select",
+        "proxies": ["-=> AUTO-JP"],
+        "use": ["to-dailer-provider"]
+    }
+    config["proxy-groups"].forEach((e) => {
+        if (!e.hidden && !e.proxies.includes(toDailerProxyGroup.name) && e.name!='MANUAL') e.proxies.unshift(toDailerProxyGroup.name);
+    })
+    config["proxy-groups"].unshift(toDailerProxyGroup)
+    config["proxy-groups"].unshift({
+        name: "-=> AUTO-JP",
+        type: "url-test",
+        url: "https://cp.cloudflare.com",
+        interval: 300,
+        tolerance: 50,
+        use: ["to-dailer-provider"],
+        filter: "(?i)日本|Japan|JP",
+        hidden: true,
+    })
 }
