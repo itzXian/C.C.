@@ -62,15 +62,15 @@ const overrideRuleProviders = (config) => {
             "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
             "path": "./Hoyo_CN_Proxy.list"
         },
-        Hoyo_Proxy: {
-            ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
-            "path": "./Hoyo_Proxy.list"
-        },
         Hoyo_Bypass: {
             ...ruleProviderBase.Classical,
             "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
             "path": "./Hoyo_Bypass.list"
+        },
+        Hoyo_Proxy: {
+            ...ruleProviderBase.Classical,
+            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
+            "path": "./Hoyo_Proxy.list"
         },
         // BLOCK
         MIUI_Bloatware: {
@@ -761,26 +761,28 @@ const overrideProxyGroups = (config) => {
     const proxyGroupsBase = {
         "jpAutoFirst": {
             "type": "select",
-            "proxies": [ ...groups[0].proxies, "MANUAL", "DIRECT", "REJECT" ]
-        },
-        "autoFirst": {
-            "type": "select",
-            "proxies": [ "AUTO", "LOAD-BALANCING", "MANUAL", "DIRECT", "REJECT" ]
+            "proxies": [ ...groups[0].proxies, "MANUAL", "CUSTOM", "DIRECT", "REJECT" ]
         },
         "manualFirst": {
             "type": "select",
-            "proxies": [ "MANUAL", "DIRECT", "REJECT" ]
+            "proxies": [ "MANUAL", "CUSTOM", "DIRECT", "REJECT" ]
         },
         "directFirst": {
             "type": "select",
-            "proxies": [ "DIRECT", "MANUAL", "REJECT" ]
+            "proxies": [ "DIRECT", "MANUAL", "CUSTOM", "REJECT" ]
         },
         "rejectFirst": {
             "type": "select",
-            "proxies": [ "REJECT", "MANUAL", "DIRECT" ]
+            "proxies": [ "REJECT", "MANUAL", "CUSTOM", "DIRECT" ]
         },
     }
     const customProxyGroups = [
+        {
+            "name": "CUSTOM",
+            "icon": iconUrl("manual"),
+            "type": "select",
+            "proxies": [ ...groups[0].proxies, "MANUAL", "DIRECT", "REJECT" ]
+        },
         // HOYO
         {
             ...proxyGroupsBase.jpAutoFirst,
@@ -788,8 +790,8 @@ const overrideProxyGroups = (config) => {
             "icon": iconUrl("mihoyo"),
             "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
         },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "HOYO_PROXY", "icon": iconUrl("mihoyo"), },
         { ...proxyGroupsBase.directFirst, "name": "HOYO_BYPASS", "icon": iconUrl("mihoyo"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "HOYO_PROXY", "icon": iconUrl("mihoyo"), },
         // BLOCK
         { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE", "icon": "https://upload.wikimedia.org/wikipedia/commons/2/29/Xiaomi_logo.svg", },
         { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK", "icon": iconUrl("adblock"), },
