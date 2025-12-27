@@ -12,7 +12,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     overrideRuleProviders(config);
     overrideRules(config);
-    toDailerProxy(config, config.proxies);
+    dailerProxy(config, config.proxies, "MANUAL");
     return config;
 }
 
@@ -746,14 +746,14 @@ const overrideProxyGroups = (config) => {
             name: "MANUAL",
             type: "select",
             icon: iconUrl("manual"),
-            "include-all": true,
-            //proxies: ["HK", "JP", "KR", "SG", "US", "UK", "FR", "DE", "TW"],
+            //"include-all": true,
             proxies: [],
         },
     ];
 
     autoProxyGroups.length && groups[0].proxies.push(...autoProxyGroups.map((item) => item.name));
     loadBalanceGroups.length && groups[0].proxies.push(...loadBalanceGroups.map((item) => item.name));
+    groups[0].proxies.push(...allProxies);
     groups.push(...autoProxyGroups);
     groups.push(...manualProxyGroups);
     groups.push(...loadBalanceGroups);
@@ -843,38 +843,39 @@ const removeProxyByRegex = (config, regex) => {
 */
 }
 
-const toDailerProxy = (config, proxies) => {
-    let toDailerProxies = JSON.parse(JSON.stringify(proxies))
-    toDailerProxies.forEach((e) => {
-        e.name = `-=> ${e.name}`
+const dailerProxy = (config, proxies, dailer) => {
+    let exitNode = JSON.parse(JSON.stringify(proxies))
+    exitNode.forEach((e) => {
+        e.name = `ExitNode | ${e.name}`
     })
     config["proxy-providers"] = {
-        "to-dailer-provider": {
+        "provider123": {
             type: "inline",
             override: {
-                "dialer-proxy": "MANUAL"
+                "dialer-proxy": dailer
             },
-            payload: toDailerProxies
+            payload: exitNode
         }
     }
-    const toDailerProxyGroup = {
-        "name": "-=>",
+    const proxyGroup = {
+        "name": "RELAY",
         "type": "select",
-        "proxies": ["-=> AUTO-JP"],
-        "use": ["to-dailer-provider"]
+        "proxies": ["ExitNode | AUTO-JP"],
+        "use": ["provider123"],
+        "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
     }
     config["proxy-groups"].forEach((e) => {
-        if (!e.hidden && !e.proxies.includes(toDailerProxyGroup.name) && e.name!='MANUAL') e.proxies.unshift(toDailerProxyGroup.name);
+        if (!e.hidden && !e.proxies.includes(proxyGroup.name) && e.name!=dailer) e.proxies.unshift(proxyGroup.name);
     })
-    config["proxy-groups"].unshift(toDailerProxyGroup)
-    if (!toDailerProxies.filter((e) => /(?!日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
+    config["proxy-groups"].unshift(proxyGroup)
+    if (!exitNode.filter((e) => /(?!日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
     config["proxy-groups"].unshift({
-        name: "-=> AUTO-JP",
+        name: "ExitNode | AUTO-JP",
         type: "url-test",
         url: "https://cp.cloudflare.com",
         interval: 300,
         tolerance: 50,
-        use: ["to-dailer-provider"],
+        use: ["provider123"],
         filter: "(?i)日本|Japan|JP",
         hidden: true,
     })
