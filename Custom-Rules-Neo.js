@@ -761,7 +761,7 @@ const overrideProxyGroups = (config) => {
     const proxyGroupsBase = {
         "jpAutoFirst": {
             "type": "select",
-            "proxies": [ ...groups[0].proxies, "MANUAL", "CUSTOM", "DIRECT", "REJECT" ]
+            "proxies": [ "MANUAL", "CUSTOM", "DIRECT", "REJECT", ...groups[0].proxies ]
         },
         "manualFirst": {
             "type": "select",
@@ -781,7 +781,7 @@ const overrideProxyGroups = (config) => {
             "name": "CUSTOM",
             "icon": iconUrl("manual"),
             "type": "select",
-            "proxies": [ ...groups[0].proxies, "MANUAL", "DIRECT", "REJECT" ]
+            "proxies": [ "MANUAL", "DIRECT", "REJECT", ...groups[0].proxies ]
         },
         // HOYO
         {
