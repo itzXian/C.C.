@@ -99,6 +99,9 @@ const overrideRules = (config) => {
     "GEOSITE,category-ads-all,AD_BLOCK",
     // CUSTOM
     "DOMAIN-SUFFIX,hinative.com,FINAL",
+    "GEOSITE,steam@cn,STEAM_CN",
+    "DOMAIN,steamserver.net,STEAM_CN",
+    "GEOSITE,steam,STEAM",
     // CUSTOM_JP
     "GEOSITE,pixiv,PIXIV",
     "GEOSITE,category-ai-!cn,AI",
@@ -795,14 +798,18 @@ const overrideProxyGroups = (config) => {
         // BLOCK
         { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE", "icon": "https://upload.wikimedia.org/wikipedia/commons/2/29/Xiaomi_logo.svg", },
         { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK", "icon": iconUrl("adblock"), },
+        // CUSTOM
+        { ...proxyGroupsBase.directFirst, "name": "STEAM_CN", "icon": iconUrl("steam"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "STEAM", "icon": iconUrl("steam"), },
+        // CUSTOM_JP
         { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV", "icon": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Pixiv_Icon.svg", },
         { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
         { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
+        // PROXY
         { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM", "icon": iconUrl("telegram"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", "icon": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", },
-        // PROXY
         { ...proxyGroupsBase.jpAutoFirst, "name": "MS", "icon": iconUrl("microsoft"), },
         { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE", "icon": iconUrl("apple"), },
         // BYPASS
