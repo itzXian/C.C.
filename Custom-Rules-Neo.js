@@ -10,7 +10,7 @@ const main = (config) => {
     overrideTunnel(config);
     //removeProxyByRegex(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     overrideProxyGroups(config);
-    overrideRuleProviders(config);
+    //overrideRuleProviders(config);
     overrideRules(config);
     dailerProxy(config, config.proxies, "MANUAL");
     return config;
@@ -78,24 +78,142 @@ const overrideRuleProviders = (config) => {
             "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
             "path": "./MIUI_Bloatware.list"
         },
-        Block: {
-            ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Block.list",
-            "path": "./Block.list"
-        },
     }
     config["rule-providers"] = ruleProviders;
 }
 
 const overrideRules = (config) => {
+    const Hoyo_CN_Proxy = [
+        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_CN_PROXY",
+        "DOMAIN,autopatchhk.yuanshen.com,HOYO_CN_PROXY",
+        "DOMAIN,oseurodispatch.yuanshen.com,HOYO_CN_PROXY",
+        "DOMAIN,osusadispatch.yuanshen.com,HOYO_CN_PROXY",
+        "DOMAIN,osuspider.yuanshen.com,HOYO_CN_PROXY",
+        // "DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com",
+    ]
+    const Hoyo_Bypass = [
+        "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
+        "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
+        "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
+        "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
+        // GI: 22101-22102
+        // HSR: 23301/23801
+        // ZZZ: 20501
+        "AND,((DST-PORT,22101-22102/23301/23801/20501),(NETWORK,udp)),HOYO_BYPASS",
+    ]
+    const Hoyo_Proxy = [
+        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
+        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
+        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
+        "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",
+        "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",
+    ]
+    const MIUI_Bloatware = [
+        "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,tracking.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,data.mistat.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,diagnosis.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,log.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,m.track.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,sdkconfig.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,api.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,tracker.ai.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,grayconfig.ai.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,mazu.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,miui-fxcse.avlyun.com,MIUI_BLOATWARE",
+        "DOMAIN,sdkconf.avlyun.com,MIUI_BLOATWARE",
+        "DOMAIN,sdkconf.avlyun.com,MIUI_BLOATWARE",
+        "DOMAIN,miav-cse.avlyun.com,MIUI_BLOATWARE",
+        "DOMAIN,update.avlyun.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,ixav-cse.avlyun.com,MIUI_BLOATWARE",
+        "DOMAIN,logupdate.avlyun.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,api.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,auth.be.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,flash.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,api.hybrid.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,o2o.api.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,api.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,ssl-cdn.static.browser.mi-img.com,MIUI_BLOATWARE",
+        "DOMAIN,security.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,hot.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,r.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,hd.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,c3-cache.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,api-ipv4.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,qsb.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,sentry.d.xiaomi.net,MIUI_BLOATWARE",
+        "DOMAIN,global-search.browser.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,global.search.xiaomi.net,MIUI_BLOATWARE",
+        "DOMAIN,api.developer.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,update.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,port.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,qsb.browser.miui.srv,MIUI_BLOATWARE",
+        "DOMAIN,rom.pt.miui.srv,MIUI_BLOATWARE",
+        "DOMAIN,ccc.sys.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,jupiter.sys.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,metok.sys.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,tmfsdk.m.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tmfsdk4.m.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tbm.snssdk.com,MIUI_BLOATWARE",
+        "DOMAIN,othstr.beacon.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tools.3g.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tmfsdktcp.m.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,h.trace.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,hub5pn.wap.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,tpstelemetry.tencent.com,MIUI_BLOATWARE",
+        "DOMAIN,pssn.alicdn.com,MIUI_BLOATWARE",
+        "DOMAIN,tmfsdktcpv4.m.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tmeadcomm.y.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tangram.e.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,us.l.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,tdid.m.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,h.trace.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,api.yky.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,sdk.e.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,android.bugly.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,toblog.ctobsnssdk.com,MIUI_BLOATWARE",
+        "DOMAIN,tobapplog.ctobsnssdk.com,MIUI_BLOATWARE",
+        "DOMAIN,cfg.imtt.qq.com,MIUI_BLOATWARE",
+        "DOMAIN,statres.quickapp.cn,MIUI_BLOATWARE",
+        "DOMAIN,qr.quickapp.cn,MIUI_BLOATWARE",
+        "DOMAIN,hybrid.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,hybrid.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,s1.irs03.com,MIUI_BLOATWARE",
+        "DOMAIN,up.cm.ksmobile.com,MIUI_BLOATWARE",
+        "DOMAIN,dl.cm.ksmobile.com,MIUI_BLOATWARE",
+        "DOMAIN,dw-online.ksosoft.com,MIUI_BLOATWARE",
+        "DOMAIN,zzhc.vnet.cn,MIUI_BLOATWARE",
+        "DOMAIN,beacon-api.aliyuncs.com,MIUI_BLOATWARE",
+        "DOMAIN,mpush-api.aliyun.com,MIUI_BLOATWARE",
+        "DOMAIN,ug.snssdk.com,MIUI_BLOATWARE",
+        "DOMAIN,t7z.cupid.iqiyi.com,MIUI_BLOATWARE",
+        "DOMAIN,worldwide.sogou.com,MIUI_BLOATWARE",
+        "DOMAIN,www.pangolin-dsp-toutiao.com,MIUI_BLOATWARE",
+        "DOMAIN,master.wap.dphub.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,hub5u.wap.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,idx.m.hub.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,tw13b093.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,adinfo.ra1.xlmc.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,test.ad.xiaomi.com,MIUI_BLOATWARE",
+        "DOMAIN,uploadlog.xlmc.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,t03-api.xlmc.xunlei.com,MIUI_BLOATWARE",
+        "DOMAIN,pre.api.tw06.xlmc.sandai.net,MIUI_BLOATWARE",
+        "DOMAIN,guid-xldw-ssl.n0808.com,MIUI_BLOATWARE",
+        "DOMAIN,data.sec.miui.com,MIUI_BLOATWARE",
+        "DOMAIN,pgdt.gtimg.cn,MIUI_BLOATWARE",
+        "DOMAIN,rdt.tfogc.com,MIUI_BLOATWARE",
+    ]
     const customRules = [
     // HOYO
-    "RULE-SET,Hoyo_CN_Proxy,HOYO_CN_PROXY",
-    "RULE-SET,Hoyo_Bypass,HOYO_BYPASS",
-    "RULE-SET,Hoyo_Proxy,HOYO_PROXY",
+    ...Hoyo_CN_Proxy,
+    ...Hoyo_Bypass,
+    ...Hoyo_Proxy,
     // BLOCK
-    "RULE-SET,MIUI_Bloatware,MIUI_BLOATWARE",
-    "RULE-SET,Block,AD_BLOCK",
+    ...MIUI_Bloatware,
     "GEOSITE,category-ads-all,AD_BLOCK",
     // CUSTOM
     "DOMAIN-SUFFIX,hinative.com,FINAL",
