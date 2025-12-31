@@ -98,6 +98,7 @@ const overrideRules = (config) => {
         "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
+        "DOMAIN,asia-ugc-api.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
         // GI: 22101-22102
@@ -232,7 +233,7 @@ const overrideRules = (config) => {
     "GEOIP,telegram,TELEGRAM",
     "GEOSITE,telegram,TELEGRAM",
     "GEOSITE,discord,DISCORD",
-    "GEOSITE,microsoft,MS",
+    "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     // CUSTOM_JP(BEFORE FINAL)
@@ -777,7 +778,7 @@ const overrideProxyGroups = (config) => {
 
     const autoProxyGroups = autoProxyGroupRegexs
         .map((item) => ({
-            name: `AUTO-${item.name}`,
+            name: `AUTO_${item.name}`,
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
@@ -805,7 +806,6 @@ const overrideProxyGroups = (config) => {
             name: item.name,
             type: "select",
             proxies: getProxiesByRegex(config, item.regex),
-            icon: iconUrl(item.name),
             hidden: true,
         }))
         .filter((item) => item.proxies.length > 0);
@@ -835,7 +835,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `RR-LOAD-BALANCING-${item.name}`,
+            name: `RR_LOAD_BALANCING_${item.name}`,
             proxies: getProxiesByRegex(config, item.regex),
             strategy: "round-robin",
         }))
@@ -843,7 +843,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `LOAD-BALANCING-${item.name}`,
+            name: `LOAD_BALANCING_${item.name}`,
             proxies: getProxiesByRegex(config, item.regex),
             strategy: "consistent-hashing",
         }))
@@ -851,7 +851,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `SS-LOAD-BALANCING-${item.name}`,
+            name: `SS_LOAD_BALANCING_${item.name}`,
             proxies: getProxiesByRegex(config, item.regex),
             strategy: "sticky-sessions",
         }))
@@ -866,8 +866,6 @@ const overrideProxyGroups = (config) => {
         {
             name: "MANUAL",
             type: "select",
-            icon: iconUrl("manual"),
-            //"include-all": true,
             proxies: [],
         },
     ];
@@ -900,7 +898,6 @@ const overrideProxyGroups = (config) => {
     const customProxyGroups = [
         {
             "name": "CUSTOM",
-            "icon": iconUrl("manual"),
             "type": "select",
             "proxies": [ "MANUAL", "DIRECT", "REJECT", ...groups[0].proxies ]
         },
@@ -908,40 +905,37 @@ const overrideProxyGroups = (config) => {
         {
             ...proxyGroupsBase.jpAutoFirst,
             "name": "HOYO_CN_PROXY",
-            "icon": iconUrl("mihoyo"),
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ]
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
         },
-        { ...proxyGroupsBase.directFirst, "name": "HOYO_BYPASS", "icon": iconUrl("mihoyo"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "HOYO_PROXY", "icon": iconUrl("mihoyo"), },
+        { ...proxyGroupsBase.directFirst, "name": "HOYO_BYPASS" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "HOYO_PROXY" },
         // BLOCK
-        { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE", "icon": "https://upload.wikimedia.org/wikipedia/commons/2/29/Xiaomi_logo.svg", },
-        { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK", "icon": iconUrl("adblock"), },
+        { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE" },
+        { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK" },
         // CUSTOM
-        { ...proxyGroupsBase.directFirst, "name": "STEAM_CN", "icon": iconUrl("steam"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "STEAM", "icon": iconUrl("steam"), },
+        { ...proxyGroupsBase.directFirst, "name": "STEAM_CN" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "STEAM" },
         // CUSTOM_JP
-        { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV", "icon": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Pixiv_Icon.svg", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "AI", "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/OpenAI_logo_2025_%28symbol%29.svg/1920px-OpenAI_logo_2025_%28symbol%29.svg.png", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE", "icon": iconUrl("youtube"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE", "icon": iconUrl("google"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER", "icon": iconUrl("twitter"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "AI" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER" },
         // PROXY
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM", "icon": iconUrl("telegram"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD", "icon": "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "MS", "icon": iconUrl("microsoft"), },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE", "icon": iconUrl("apple"), },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "MICROSOFT" },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE" },
         // BYPASS
-        { ...proxyGroupsBase.directFirst, "name": "BYPASS", "icon": iconUrl("cn"), },
+        { ...proxyGroupsBase.directFirst, "name": "BYPASS" },
         // CUSTOM_JP
         {
             ...proxyGroupsBase.jpAutoFirst,
             "name": "JP_DOMAIN",
-            "icon": iconUrl("jp"),
-            "include-all": true,
-            "filter": "JP|日本",
+            "filter": "日本|Japan|JP",
         },
         // FINAL
-        { ...proxyGroupsBase.manualFirst, "name": "FINAL", "icon": iconUrl("final"), },
+        { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
     ];
     groups.push(...customProxyGroups);
 
@@ -971,7 +965,7 @@ const removeProxyByRegex = (config, regex) => {
 const dailerProxy = (config, proxies, dailer) => {
     let exitNode = JSON.parse(JSON.stringify(proxies))
     exitNode.forEach((e) => {
-        e.name = `ExitNode | ${e.name}`
+        e.name = `EXIT_NODE | ${e.name}`
     })
     config["proxy-providers"] = {
         "provider123": {
@@ -985,7 +979,7 @@ const dailerProxy = (config, proxies, dailer) => {
     const proxyGroup = {
         "name": "RELAY",
         "type": "select",
-        "proxies": ["ExitNode | AUTO-JP"],
+        "proxies": [],
         "use": ["provider123"],
         "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
     }
@@ -993,15 +987,17 @@ const dailerProxy = (config, proxies, dailer) => {
         if (!e.hidden && !e.proxies.includes(proxyGroup.name) && e.name!=dailer) e.proxies.unshift(proxyGroup.name);
     })
     config["proxy-groups"].unshift(proxyGroup)
-    if (!exitNode.filter((e) => /(?!日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
+    if (!exitNode.filter((e) => /(日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
     config["proxy-groups"].unshift({
-        name: "ExitNode | AUTO-JP",
+        name: "EXIT_NODE | AUTO_JP",
         type: "url-test",
         url: "https://cp.cloudflare.com",
         interval: 300,
         tolerance: 50,
         use: ["provider123"],
-        filter: "(?i)日本|Japan|JP",
+        filter: "日本|Japan|JP",
+        "exclude-filter": "0.[0-9]",
         hidden: true,
     })
+    proxyGroup.proxies.unshift("EXIT_NODE | AUTO_JP")
 }
