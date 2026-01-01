@@ -13,6 +13,7 @@ const main = (config) => {
     //overrideRuleProviders(config);
     overrideRules(config);
     dailerProxy(config, config.proxies, "MANUAL");
+    setProxyGroupIcon(config);
     return config;
 }
 
@@ -733,10 +734,6 @@ const overrideTunnel = (config) => {
     config.tun = { ...tunnelOptions };
 }
 
-const iconUrl = (name) => {
-    return `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`
-}
-
 // 覆盖代理组
 const overrideProxyGroups = (config) => {
     // 所有代理
@@ -929,11 +926,7 @@ const overrideProxyGroups = (config) => {
         // BYPASS
         { ...proxyGroupsBase.directFirst, "name": "BYPASS" },
         // CUSTOM_JP
-        {
-            ...proxyGroupsBase.jpAutoFirst,
-            "name": "JP_DOMAIN",
-            "filter": "日本|Japan|JP",
-        },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "JP_DOMAIN" },
         // FINAL
         { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
     ];
@@ -1000,4 +993,38 @@ const dailerProxy = (config, proxies, dailer) => {
         hidden: true,
     })
     proxyGroup.proxies.unshift("EXIT_NODE | AUTO_JP")
+}
+
+const generateIconUrl = (name) => {
+    return `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`
+}
+
+const setProxyGroupIcon = (config) => {
+    const iconUrls = {
+        RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/39/Twemoji12_1f517.svg",
+        MANUAL: generateIconUrl("manual"),
+        CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/2/22/Twemoji12_1f537.svg",
+        HOYO_CN_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
+        AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
+        STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+        STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+        PIXIV: "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://pixiv.net&size=256",
+        AI: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://chatgpt.com&size=256",
+        YOUTUBE: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
+        GOOGLE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://google.com&size=256",
+        TWITTER: "https://upload.wikimedia.org/wikipedia/commons/2/20/Coast_twitter.png",
+        TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Telegram_blue_icon.png/2000px-Telegram_blue_icon.png",
+        DISCORD: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://discord.app&size=256",
+        MICROSOFT: "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://microsoft.com&size=256",
+        APPLE: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/AppleComputerLogorainbowBerdaiOthmaneCA.png/2000px-AppleComputerLogorainbowBerdaiOthmaneCA.png",
+        BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
+        JP_DOMAIN: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+        FINAL: generateIconUrl("final"),
+    }
+    config["proxy-groups"].forEach((e) => {
+        if (!e.hidden) e.icon = iconUrls[e.name]
+    })
 }
