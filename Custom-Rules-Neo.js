@@ -1001,9 +1001,9 @@ const generateIconUrl = (name) => {
 
 const setProxyGroupIcon = (config) => {
     const iconUrls = {
-        RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/39/Twemoji12_1f517.svg",
+        RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
         MANUAL: generateIconUrl("manual"),
-        CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/2/22/Twemoji12_1f537.svg",
+        CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
         HOYO_CN_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
         HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
         HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
