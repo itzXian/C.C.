@@ -240,8 +240,9 @@ const overrideRules = (config) => {
     // CUSTOM_JP(BEFORE FINAL)
     "GEOIP,JP,JP_DOMAIN",
     // BYPASS
-    "GEOIP,private,BYPASS",
     "GEOSITE,private,BYPASS",
+    "GEOIP,private,BYPASS",
+    "GEOSITE,CN,BYPASS",
     "GEOIP,CN,BYPASS",
     // FINAL
     "MATCH,FINAL",
@@ -293,14 +294,13 @@ const overrideBasicOptions = (config) => {
 const overrideDns = (config) => {
     const dnsList = [
         "https://doh.pub/dns-query",
-        "https://223.5.5.5/dns-query",
+        "https://dns.alidns.com/dns-query",
     ];
 
     const proxyDnsList = [
+        "https://doh.pub/dns-query",
         "https://dns.google/dns-query",
         "https://cloudflare-dns.com/dns-query",
-        "https://doh.pub/dns-query",
-        "https://223.5.5.5/dns-query",
     ];
 
     const dnsOptions = {
