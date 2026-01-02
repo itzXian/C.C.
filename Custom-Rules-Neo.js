@@ -2,13 +2,13 @@
 // https://www.clashverge.dev/guide/script.html
 const main = (config) => {
     if (!config.proxies) return config;
+    //removeProxyByRegex(config, /^((?!专线).)*$/);
     overrideBasicOptions(config);
     overrideDns(config);
     overrideFakeIpFilter(config);
     overrideNameserverPolicy(config);
     overrideHosts(config);
     overrideTunnel(config);
-    //removeProxyByRegex(config, /.*(剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系).*/g);
     overrideProxyGroups(config);
     //overrideRuleProviders(config);
     overrideRules(config);
@@ -825,7 +825,6 @@ const overrideProxyGroups = (config) => {
         type: "load-balance",
         url: "https://cp.cloudflare.com",
         interval: 300,
-        tunnelOptionserance: 50,
         hidden: true,
         "exclude-filter": "0.[0-9]",
     }
@@ -926,7 +925,11 @@ const overrideProxyGroups = (config) => {
         // BYPASS
         { ...proxyGroupsBase.directFirst, "name": "BYPASS" },
         // CUSTOM_JP
-        { ...proxyGroupsBase.jpAutoFirst, "name": "JP_DOMAIN" },
+        {
+            ...proxyGroupsBase.jpAutoFirst,
+            "name": "JP_DOMAIN",
+            "exclude-filter": "^(?!.*(日本|JP|Japan|🇯🇵)).*$",
+        },
         // FINAL
         { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
     ];
@@ -947,14 +950,8 @@ const getProxiesByRegexSafe = (config, regex) => {
 // https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
 const removeProxyByRegex = (config, regex) => {
     const unmatchedProxies = config.proxies.filter((proxy) => !proxy.name.match(regex));
-    return unmatchedProxies.length > 0 && unmatchedProxies;
-/*
-    config['proxy-groups'] = config['proxy-groups'].map((item) => {
-        item.proxies = item.proxies.filter((name) => !name.match(regex));
-    });
-*/
+    if (unmatchedProxies.length > 0) config.proxies = unmatchedProxies;
 }
-
 const dailerProxy = (config, proxies, dailer) => {
     let exitNode = JSON.parse(JSON.stringify(proxies))
     exitNode.forEach((e) => {
