@@ -292,13 +292,15 @@ const overrideBasicOptions = (config) => {
 // 覆写DNS
 const overrideDns = (config) => {
     const dnsList = [
-        "https://223.5.5.5/dns-query",
         "https://doh.pub/dns-query",
+        "https://223.5.5.5/dns-query",
     ];
 
     const proxyDnsList = [
-        "https://223.5.5.5/dns-query",
+        "https://dns.google/dns-query",
+        "https://cloudflare-dns.com/dns-query",
         "https://doh.pub/dns-query",
+        "https://223.5.5.5/dns-query",
     ];
 
     const dnsOptions = {
@@ -925,11 +927,7 @@ const overrideProxyGroups = (config) => {
         // BYPASS
         { ...proxyGroupsBase.directFirst, "name": "BYPASS" },
         // CUSTOM_JP
-        {
-            ...proxyGroupsBase.jpAutoFirst,
-            "name": "JP_DOMAIN",
-            "exclude-filter": "^(?!.*(日本|JP|Japan|🇯🇵)).*$",
-        },
+        { ...proxyGroupsBase.jpAutoFirst, "name": "JP_DOMAIN" },
         // FINAL
         { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
     ];
@@ -985,7 +983,7 @@ const dailerProxy = (config, proxies, dailer) => {
         interval: 300,
         tolerance: 50,
         use: ["provider123"],
-        filter: "日本|Japan|JP",
+        filter: "(日本|Japan|JP).*(专线)",
         "exclude-filter": "0.[0-9]",
         hidden: true,
     })
