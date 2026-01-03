@@ -964,7 +964,7 @@ const dailerProxy = (config, proxies, dailer) => {
             payload: exitNode
         }
     }
-    const proxyGroup = {
+    const relayProxyGroup = {
         "name": "RELAY",
         "type": "select",
         "proxies": [],
@@ -972,22 +972,38 @@ const dailerProxy = (config, proxies, dailer) => {
         "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
     }
     config["proxy-groups"].forEach((e) => {
-        if (!e.hidden && !e.proxies.includes(proxyGroup.name) && e.name!=dailer) e.proxies.unshift(proxyGroup.name);
+        if (!e.hidden && !e.proxies.includes(relayProxyGroup.name) && e.name!=dailer) e.proxies.unshift(relayProxyGroup.name);
     })
-    config["proxy-groups"].unshift(proxyGroup)
+    config["proxy-groups"].unshift(relayProxyGroup)
     if (!exitNode.filter((e) => /(日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
-    config["proxy-groups"].unshift({
-        name: "EXIT_NODE | AUTO_JP",
-        type: "url-test",
-        url: "https://cp.cloudflare.com",
-        interval: 300,
-        tolerance: 50,
-        use: ["provider123"],
-        filter: "(日本|Japan|JP).*(专线)",
-        "exclude-filter": "0.[0-9]",
-        hidden: true,
+    const proxyGroups = [
+        {
+            name: "EXIT_NODE | AUTO_JP",
+            type: "url-test",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            tolerance: 50,
+            use: ["provider123"],
+            filter: "(日本|Japan|JP).*(专线)",
+            "exclude-filter": "0.[0-9]",
+            hidden: true,
+        },
+        {
+            name: "EXIT_NODE | RR_LOAD_BALANCING_JP",
+            type: "load-balance",
+            strategy: "round-robin",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            use: ["provider123"],
+            filter: "(日本|Japan|JP).*(专线)",
+            "exclude-filter": "0.[0-9]",
+            hidden: true,
+        },
+    ]
+    config["proxy-groups"].unshift(...proxyGroups)
+    proxyGroups.forEach((e) => {
+        relayProxyGroup.proxies.unshift(e.name);
     })
-    proxyGroup.proxies.unshift("EXIT_NODE | AUTO_JP")
 }
 
 const generateIconUrl = (name) => {
