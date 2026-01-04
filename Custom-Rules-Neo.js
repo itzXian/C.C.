@@ -5,8 +5,6 @@ const main = (config) => {
     //removeProxyByRegex(config, /^((?!专线).)*$/);
     overrideBasicOptions(config);
     overrideDns(config);
-    overrideFakeIpFilter(config);
-    overrideNameserverPolicy(config);
     overrideHosts(config);
     overrideTunnel(config);
     overrideProxyGroups(config);
@@ -22,37 +20,37 @@ const overrideRuleProviders = (config) => {
         "type": "http",
         "interval": "3600",
     };
-    ruleProviderConfig.Text = {
+    ruleProviderConfig.text = {
         ...ruleProviderConfig,
         "format": "text",
     };
-    ruleProviderConfig.Yaml = {
+    ruleProviderConfig.yaml = {
         ...ruleProviderConfig,
         "format": "yaml",
     };
     const ruleProviderBase = {
         Classical: {
-            ...ruleProviderConfig.Text,
+            ...ruleProviderConfig.text,
             "behavior": "classical",
         },
         Domain: {
-            ...ruleProviderConfig.Text,
+            ...ruleProviderConfig.text,
             "behavior": "domain",
         },
         Ipcodr: {
-            ...ruleProviderConfig.Text,
+            ...ruleProviderConfig.text,
             "behavior": "ipcidr",
         },
         ClassicalYaml: {
-            ...ruleProviderConfig.Yaml,
+            ...ruleProviderConfig.yaml,
             "behavior": "classical",
         },
         DomainYaml: {
-            ...ruleProviderConfig.Yaml,
+            ...ruleProviderConfig.yaml,
             "behavior": "domain",
         },
         IpcodrYaml: {
-            ...ruleProviderConfig.Yaml,
+            ...ruleProviderConfig.yaml,
             "behavior": "ipcidr",
         },
     }
@@ -296,28 +294,14 @@ const overrideDns = (config) => {
         "https://doh.pub/dns-query",
         "https://dns.alidns.com/dns-query",
     ];
-
     const proxyDnsList = [
-        "https://doh.pub/dns-query",
         "https://dns.google/dns-query",
         "https://cloudflare-dns.com/dns-query",
     ];
-
-    const dnsOptions = {
-        enable: true,
-        "prefer-h3": true,
-        ipv6: false,
-        "enhanced-mode": "fake-ip",
-        "fake-ip-range": "198.18.0.1/16",
-        nameserver: dnsList,
-        "proxy-server-nameserver": proxyDnsList,
-    };
-    config.dns = { ...dnsOptions };
-}
-
-// 覆写DNS.Fake IP Filter
-const overrideFakeIpFilter  = (config) => {
     const fakeIpFilter = [
+        "geosite:private",
+        "geosite:cn",
+        "*.lan",
         "+.m2m",
         "injections.adguard.org",
         "local.adguard.org",
@@ -347,11 +331,6 @@ const overrideFakeIpFilter  = (config) => {
         "*.127.*.*.*.nip.io",
         "*-127-*-*-*.nip.io"
     ];
-    config.dns["fake-ip-filter"] = fakeIpFilter;
-}
-
-// 覆写DNS.Nameserver Policy
-const overrideNameserverPolicy  = (config) => {
     const nameserverPolicy = {
         "dns.alidns.com": "quic://223.5.5.5:853",
         "dot.pub": "119.29.29.29",
@@ -706,7 +685,47 @@ const overrideNameserverPolicy  = (config) => {
         "+.127.0.0.1.sslip.io": "system",
         "+.127.atlas.skk.moe": "system"
     };
-    config.dns["nameserver-policy"] = nameserverPolicy;
+    const fallbackFilter = {
+        geoip: true,
+        "geoip-code": "CN",
+        geosite: [
+            "gfw",
+        ],
+        ipcidr: [
+            "240.0.0.0/4",
+        ],
+        domain: [
+            "+.google.com",
+            "+.facebook.com",
+            "+.youtube.com",
+        ],
+    }
+
+    const dnsOptions = {
+        enable: true,
+        "prefer-h3": false,
+        "use-hosts": true,
+        "use-system-hosts": true,
+        "respect-rules": true,
+        ipv6: false,
+        "default-nameserver": [
+            "223.5.5.5",
+        ],
+        "enhanced-mode": "fake-ip",
+        "fake-ip-range": "198.18.0.1/16",
+        "fake-ip-filter-mode": "blacklist",
+        "fake-ip-filter": fakeIpFilter,
+        "nameserver-policy": nameserverPolicy,
+        nameserver: dnsList,
+        "proxy-server-nameserver": dnsList,
+        "direct-nameserver": [
+            "system",
+        ],
+        "direct-nameserver-follow-policy": false,
+        fallback: proxyDnsList,
+        "fallback-filter": fallbackFilter,
+    };
+    config.dns = { ...dnsOptions };
 }
 
 // 覆写hosts
@@ -875,7 +894,7 @@ const overrideProxyGroups = (config) => {
     groups.push(...manualProxyGroups);
     groups.push(...loadBalanceGroups);
 
-    const proxyGroupsBase = {
+    const proxyGroupBase = {
         "jpAutoFirst": {
             "type": "select",
             "proxies": [ "MANUAL", "CUSTOM", "DIRECT", "REJECT", ...groups[0].proxies ]
@@ -901,35 +920,35 @@ const overrideProxyGroups = (config) => {
         },
         // HOYO
         {
-            ...proxyGroupsBase.jpAutoFirst,
+            ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_CN_PROXY",
             "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
         },
-        { ...proxyGroupsBase.directFirst, "name": "HOYO_BYPASS" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "HOYO_PROXY" },
+        { ...proxyGroupBase.directFirst, "name": "HOYO_BYPASS" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "HOYO_PROXY" },
         // BLOCK
-        { ...proxyGroupsBase.rejectFirst, "name": "MIUI_BLOATWARE" },
-        { ...proxyGroupsBase.rejectFirst, "name": "AD_BLOCK" },
+        { ...proxyGroupBase.rejectFirst, "name": "MIUI_BLOATWARE" },
+        { ...proxyGroupBase.rejectFirst, "name": "AD_BLOCK" },
         // CUSTOM
-        { ...proxyGroupsBase.directFirst, "name": "STEAM_CN" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "STEAM" },
+        { ...proxyGroupBase.directFirst, "name": "STEAM_CN" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "STEAM" },
         // CUSTOM_JP
-        { ...proxyGroupsBase.jpAutoFirst, "name": "PIXIV" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "AI" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "YOUTUBE" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "GOOGLE" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TWITTER" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "PIXIV" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "AI" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "YOUTUBE" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "GOOGLE" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "TWITTER" },
         // PROXY
-        { ...proxyGroupsBase.jpAutoFirst, "name": "TELEGRAM" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "DISCORD" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "MICROSOFT" },
-        { ...proxyGroupsBase.jpAutoFirst, "name": "APPLE" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "TELEGRAM" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "DISCORD" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "MICROSOFT" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "APPLE" },
         // BYPASS
-        { ...proxyGroupsBase.directFirst, "name": "BYPASS" },
+        { ...proxyGroupBase.directFirst, "name": "BYPASS" },
         // CUSTOM_JP
-        { ...proxyGroupsBase.jpAutoFirst, "name": "JP_DOMAIN" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "JP_DOMAIN" },
         // FINAL
-        { ...proxyGroupsBase.manualFirst, "name": "FINAL" },
+        { ...proxyGroupBase.manualFirst, "name": "FINAL" },
     ];
     groups.push(...customProxyGroups);
 
@@ -976,28 +995,44 @@ const dailerProxy = (config, proxies, dailer) => {
     })
     config["proxy-groups"].unshift(relayProxyGroup)
     if (!exitNode.filter((e) => /(日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
+    const proxyGroupBase = {
+        url: "https://cp.cloudflare.com",
+        interval: 300,
+        use: ["provider123"],
+        "exclude-filter": "0.[0-9]",
+        hidden: true,
+    }
+    proxyGroupBase.auto = {
+        ...proxyGroupBase,
+        type: "url-test",
+        tolerance: 50,
+    }
+    proxyGroupBase.loadBalance = {
+        ...proxyGroupBase,
+        type: "load-balance",
+    }
     const proxyGroups = [
         {
+            ...proxyGroupBase.auto,
             name: "EXIT_NODE | AUTO_JP",
-            type: "url-test",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tolerance: 50,
-            use: ["provider123"],
-            filter: "(日本|Japan|JP).*(专线)",
-            "exclude-filter": "0.[0-9]",
-            hidden: true,
+            filter: "(日本|Japan|JP)",
         },
         {
-            name: "EXIT_NODE | RR_LOAD_BALANCING_JP",
-            type: "load-balance",
-            strategy: "round-robin",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            use: ["provider123"],
+            ...proxyGroupBase.auto,
+            name: "EXIT_NODE | AUTO_JP | 专线",
             filter: "(日本|Japan|JP).*(专线)",
-            "exclude-filter": "0.[0-9]",
-            hidden: true,
+        },
+       {
+            ...proxyGroupBase.loadBalance,
+            name: "EXIT_NODE | RR_LOAD_BALANCING_JP",
+            strategy: "round-robin",
+            filter: "(日本|Japan|JP)",
+        },
+        {
+            ...proxyGroupBase.loadBalance,
+            name: "EXIT_NODE | RR_LOAD_BALANCING_JP | 专线",
+            strategy: "round-robin",
+            filter: "(日本|Japan|JP).*(专线)",
         },
     ]
     config["proxy-groups"].unshift(...proxyGroups)
