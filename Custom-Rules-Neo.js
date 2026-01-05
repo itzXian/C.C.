@@ -249,7 +249,7 @@ const overrideRules = (config) => {
 }
 
 // 以下代码源自
-// https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js#L499
+// https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
 // 覆写Basic Options
 const overrideBasicOptions = (config) => {
@@ -716,7 +716,7 @@ const overrideDns = (config) => {
         "fake-ip-filter-mode": "blacklist",
         "fake-ip-filter": fakeIpFilter,
         "nameserver-policy": nameserverPolicy,
-        nameserver: dnsList,
+        nameserver: proxyDnsList,
         "proxy-server-nameserver": dnsList,
         "direct-nameserver": [
             "system",
@@ -755,58 +755,37 @@ const overrideTunnel = (config) => {
     config.tun = { ...tunnelOptions };
 }
 
+const getProxiesByRegex = (proxies, regex) => {
+    const matchedProxies = proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
+    //return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
+    return matchedProxies.length > 0 && matchedProxies;
+}
+
+// 公共的正则片段
+const excludeTerms = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
+// 包含条件：各个国家或地区的关键词
+const includeTerms = {
+    HK: "(香港|HK|Hong|🇭🇰)",
+    TW: "(台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳)",
+    SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
+    JP: "(日本|JP|Japan|🇯🇵)",
+    KR: "(韩国|韓|KR|Korea|🇰🇷)",
+    US: "(美国|US|United States|America|🇺🇸)",
+    UK: "(英国|UK|United Kingdom|🇬🇧)",
+    FR: "(法国|FR|France|🇫🇷)",
+    DE: "(德国|DE|Germany|🇩🇪)",
+    DIA: "(专线)",
+};
+// 合并所有国家关键词，供"其它"条件使用
+const allCountryTerms = Object.values(includeTerms).join("|");
+
 // 覆盖代理组
 const overrideProxyGroups = (config) => {
     // 所有代理
     const allProxies = config["proxies"].map((e) => e.name);
-    // 公共的正则片段
-    const excludeTerms = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
-    // 包含条件：各个国家或地区的关键词
-    const includeTerms = {
-        HK: "(香港|HK|Hong|🇭🇰)",
-        TW: "(台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳)",
-        SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
-        JP: "(日本|JP|Japan|🇯🇵)",
-        KR: "(韩国|韓|KR|Korea|🇰🇷)",
-        US: "(美国|US|United States|America|🇺🇸)",
-        UK: "(英国|UK|United Kingdom|🇬🇧)",
-        FR: "(法国|FR|France|🇫🇷)",
-        DE: "(德国|DE|Germany|🇩🇪)"
-    };
-    // 合并所有国家关键词，供"其它"条件使用
-    const allCountryTerms = Object.values(includeTerms).join("|");
-     // 自动代理组正则表达式配置
-    const autoProxyGroupRegexs = [
-/*
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "TW", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "KR", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "US", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "UK", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "FR", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ALL-COUNTRIES", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
-*/
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-    ];
-
-    const autoProxyGroups = autoProxyGroupRegexs
-        .map((item) => ({
-            name: `AUTO_${item.name}`,
-            type: "url-test",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tolerance: 50,
-            proxies: getProxiesByRegex(config, item.regex),
-            hidden: true,
-        }))
-        .filter((item) => item.proxies.length > 0);
 
     // 手动选择代理组
+    /*
     const manualProxyGroupRegexs = [
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
@@ -823,7 +802,39 @@ const overrideProxyGroups = (config) => {
         .map((item) => ({
             name: item.name,
             type: "select",
-            proxies: getProxiesByRegex(config, item.regex),
+            proxies: getProxiesByRegex(config.proxies, item.regex),
+            hidden: true,
+        }))
+        .filter((item) => item.proxies.length > 0);
+    */
+
+     // 自动代理组正则表达式配置
+    const autoProxyGroupRegexs = [
+    /*
+        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "TW", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "KR", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "US", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "UK", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "FR", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL-COUNTRIES", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
+    */
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+    ];
+
+    const autoProxyGroups = autoProxyGroupRegexs
+        .map((item) => ({
+            name: `AUTO | ${item.name}`,
+            type: "url-test",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            tolerance: 50,
+            proxies: getProxiesByRegex(config.proxies, item.regex),
             hidden: true,
         }))
         .filter((item) => item.proxies.length > 0);
@@ -835,7 +846,7 @@ const overrideProxyGroups = (config) => {
     // sticky-sessions：缓存 对「你的设备IP + 目标地址」组合计算哈希值，根据哈希值将请求分配到固定的节点 缓存 10 分钟过期
     // 默认值：consistent-hashing
     //const loadBalanceStrategy = "consistent-hashing";
-   const loadBalanceGroupRegexs = [
+    const loadBalanceGroupRegexs = [
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HKSG", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -852,24 +863,24 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `RR_LOAD_BALANCING_${item.name}`,
-            proxies: getProxiesByRegex(config, item.regex),
+            name: `LOAD_BA_RR | ${item.name}`,
+            proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "round-robin",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `LOAD_BALANCING_${item.name}`,
-            proxies: getProxiesByRegex(config, item.regex),
+            name: `LOAD_BA_CH | ${item.name}`,
+            proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "consistent-hashing",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `SS_LOAD_BALANCING_${item.name}`,
-            proxies: getProxiesByRegex(config, item.regex),
+            name: `LOAD_BA_SS | ${item.name}`,
+            proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "sticky-sessions",
         }))
         .filter((item) => item.proxies.length > 0);
@@ -889,10 +900,11 @@ const overrideProxyGroups = (config) => {
 
     autoProxyGroups.length && groups[0].proxies.push(...autoProxyGroups.map((item) => item.name));
     loadBalanceGroups.length && groups[0].proxies.push(...loadBalanceGroups.map((item) => item.name));
+    //autoProxyGroups.length && groups[0].proxies.push(...manualProxyGroups.map((item) => item.name));
     groups[0].proxies.push(...allProxies);
     groups.push(...autoProxyGroups);
-    groups.push(...manualProxyGroups);
     groups.push(...loadBalanceGroups);
+    //groups.push(...manualProxyGroups);
 
     const proxyGroupBase = {
         "jpAutoFirst": {
@@ -955,20 +967,6 @@ const overrideProxyGroups = (config) => {
     config["proxy-groups"] = groups;
 }
 
-const getProxiesByRegex = (config, regex) => {
-    const matchedProxies = config.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
-    return matchedProxies.length > 0 && matchedProxies;
-}
-const getProxiesByRegexSafe = (config, regex) => {
-    const matchedProxies = config.proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
-    return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
-}
-// 以下代码源自
-// https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
-const removeProxyByRegex = (config, regex) => {
-    const unmatchedProxies = config.proxies.filter((proxy) => !proxy.name.match(regex));
-    if (unmatchedProxies.length > 0) config.proxies = unmatchedProxies;
-}
 const dailerProxy = (config, proxies, dailer) => {
     let exitNode = JSON.parse(JSON.stringify(proxies))
     exitNode.forEach((e) => {
@@ -983,62 +981,95 @@ const dailerProxy = (config, proxies, dailer) => {
             payload: exitNode
         }
     }
-    const relayProxyGroup = {
-        "name": "RELAY",
-        "type": "select",
-        "proxies": [],
-        "use": ["provider123"],
-        "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
-    }
-    config["proxy-groups"].forEach((e) => {
-        if (!e.hidden && !e.proxies.includes(relayProxyGroup.name) && e.name!=dailer) e.proxies.unshift(relayProxyGroup.name);
-    })
-    config["proxy-groups"].unshift(relayProxyGroup)
-    if (!exitNode.filter((e) => /(日本|Japan|JP)/.test(e.name)).map((e) => { e.name }).length) return
-    const proxyGroupBase = {
+    const autoProxyGroupRegexs = [
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+    ];
+    const autoProxyGroups = autoProxyGroupRegexs
+        .map((item) => ({
+            name: `EXIT_NODE | AUTO | ${item.name}`,
+            type: "url-test",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            tolerance: 50,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(exitNode, item.regex),
+            hidden: true,
+        }))
+        .filter((item) => item.proxies.length > 0);
+
+   const loadBalanceGroupRegexs = [
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HKSG", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+    ];
+    const loadBalanceBase = {
+        type: "load-balance",
         url: "https://cp.cloudflare.com",
         interval: 300,
-        use: ["provider123"],
-        "exclude-filter": "0.[0-9]",
         hidden: true,
+        "exclude-filter": "0.[0-9]",
     }
-    proxyGroupBase.auto = {
-        ...proxyGroupBase,
-        type: "url-test",
-        tolerance: 50,
-    }
-    proxyGroupBase.loadBalance = {
-        ...proxyGroupBase,
-        type: "load-balance",
-    }
-    const proxyGroups = [
-        {
-            ...proxyGroupBase.auto,
-            name: "EXIT_NODE | AUTO_JP",
-            filter: "(日本|Japan|JP)",
-        },
-        {
-            ...proxyGroupBase.auto,
-            name: "EXIT_NODE | AUTO_JP | 专线",
-            filter: "(日本|Japan|JP).*(专线)",
-        },
-       {
-            ...proxyGroupBase.loadBalance,
-            name: "EXIT_NODE | RR_LOAD_BALANCING_JP",
+    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `EXIT_NODE | LOAD_BA_RR | ${item.name}`,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "round-robin",
-            filter: "(日本|Japan|JP)",
-        },
-        {
-            ...proxyGroupBase.loadBalance,
-            name: "EXIT_NODE | RR_LOAD_BALANCING_JP | 专线",
-            strategy: "round-robin",
-            filter: "(日本|Japan|JP).*(专线)",
-        },
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `EXIT_NODE | LOAD_BA_CH | ${item.name}`,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(exitNode, item.regex),
+            strategy: "consistent-hashing",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `EXIT_NODE | LOAD_BA_SS | ${item.name}`,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(exitNode, item.regex),
+            strategy: "sticky-sessions",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroups = [
+        ...loadBalanceGroupsRoundRobin,
+        ...loadBalanceGroupsConsistentHashing,
+        ...loadBalanceGroupsStickySession,
     ]
-    config["proxy-groups"].unshift(...proxyGroups)
-    proxyGroups.forEach((e) => {
-        relayProxyGroup.proxies.unshift(e.name);
+
+    const relayProxyGroups = [
+        {
+            "name": "RELAY",
+            "type": "select",
+            "proxies": [],
+            "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
+        }
+    ]
+    autoProxyGroups.length && relayProxyGroups[0].proxies.push(...autoProxyGroups.map((item) => item.name));
+    loadBalanceGroups.length && relayProxyGroups[0].proxies.push(...loadBalanceGroups.map((item) => item.name));
+    relayProxyGroups.push(...autoProxyGroups);
+    relayProxyGroups.push(...loadBalanceGroups);
+    relayProxyGroups.forEach((e) => {
+        e.use = ["provider123"];
+        if (e.name == "RELAY") return
+        e.proxies = [];
     })
+
+    config["proxy-groups"].forEach((e) => {
+        if (!e.hidden && !e.proxies.includes(relayProxyGroups[0].name) && e.name!=dailer) e.proxies.unshift(relayProxyGroups[0].name);
+    })
+    config["proxy-groups"].unshift(...relayProxyGroups);
 }
 
 const generateIconUrl = (name) => {
@@ -1074,3 +1105,17 @@ const setProxyGroupIcon = (config) => {
         if (!e.hidden) e.icon = iconUrls[e.name]
     })
 }
+
+// 以下代码源自
+// https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
+function removeProxyByRegex(config, regex) {
+    config.proxies = config.proxies.filter((e) => !e.name.match(regex));
+    config['proxy-groups'] = config['proxy-groups'].map((e) => {
+        e.proxies = e.proxies.filter((name) => !name.match(regex));
+    });
+}
+
+const test = () => {
+    module.exports = { main }
+};
+//test()
