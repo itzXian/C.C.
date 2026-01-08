@@ -212,7 +212,6 @@ const overrideRules = (config) => {
     ...Hoyo_CN_Proxy,
     ...Hoyo_Bypass,
     ...Hoyo_Proxy,
-    "GEOSITE,hoyoverse,HOYO_PROXY",
     // BLOCK
     ...MIUI_Bloatware,
     "GEOSITE,category-ads-all,AD_BLOCK",
@@ -331,8 +330,6 @@ const overrideDns = (config) => {
         "127-*-*-*.nip.io",
         "*.127.*.*.*.nip.io",
         "*-127-*-*-*.nip.io",
-        "geosite:category-ddns",
-        "geosite:category-doh",
         "geosite:private",
         "geosite:cn",
     ];
@@ -602,12 +599,10 @@ const overrideDns = (config) => {
         "+.home.arpa": "system",
         "+.127.0.0.1.sslip.io": "system",
         "+.127.atlas.skk.moe": "system",
-        "geosite:private": "system",
         "geosite:cn": directDnsList,
         "geosite:geolocation-cn": directDnsList,
         "geosite:steam@cn": directDnsList,
         "+.steamserver.net": directDnsList,
-        /*
         "geosite:steam": proxyDnsList,
         "geosite:pixiv": proxyDnsList,
         "geosite:category-ai-!cn": proxyDnsList,
@@ -619,7 +614,7 @@ const overrideDns = (config) => {
         "geosite:microsoft": proxyDnsList,
         "geosite:apple": proxyDnsList,
         "geosite:apple-intelligence": proxyDnsList,
-        */
+        "geosite:private": "system",
     };
     const fallbackFilter = {
         geoip: true,
