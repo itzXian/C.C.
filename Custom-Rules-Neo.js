@@ -92,11 +92,13 @@ const overrideRules = (config) => {
     ]
     const Hoyo_Bypass = [
         "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
+        /*
         "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
+        */
         "DOMAIN,asia-ugc-api.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
@@ -290,17 +292,20 @@ const overrideBasicOptions = (config) => {
 }
 // 覆写DNS
 const overrideDns = (config) => {
-    const directDnsList = [
+    const directDns = [
         "https://dns.alidns.com/dns-query",
         "https://doh.pub/dns-query",
     ];
-    const proxyDnsList = [
+    const proxyDns = [
         "tls://8.8.4.4",
         "tls://1.1.1.1",
     ];
-    const adblockDnsList = [
+    const defaultAdblockDns = [
         "dns.adguard-dns.com",
+    ];
+    const overrideAdblockDns = [
     ]
+    let adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
     const fakeIpFilter = [
         "+.m2m",
         "injections.adguard.org",
@@ -599,22 +604,24 @@ const overrideDns = (config) => {
         "+.home.arpa": "system",
         "+.127.0.0.1.sslip.io": "system",
         "+.127.atlas.skk.moe": "system",
-        "geosite:cn": directDnsList,
-        "geosite:geolocation-cn": directDnsList,
-        "geosite:steam@cn": directDnsList,
-        "+.steamserver.net": directDnsList,
-        "geosite:steam": proxyDnsList,
-        "geosite:pixiv": proxyDnsList,
-        "geosite:category-ai-!cn": proxyDnsList,
-        "geosite:youTube": proxyDnsList,
-        "geosite:google": proxyDnsList,
-        "geosite:twitter": proxyDnsList,
-        "geosite:telegram": proxyDnsList,
-        "geosite:discord": proxyDnsList,
-        "geosite:microsoft": proxyDnsList,
-        "geosite:apple": proxyDnsList,
-        "geosite:apple-intelligence": proxyDnsList,
         "geosite:private": "system",
+        "geosite:cn": directDns,
+        "geosite:geolocation-cn": directDns,
+        "geosite:steam@cn": directDns,
+        "+.steamserver.net": directDns,
+        /*
+        "geosite:steam": proxyDns,
+        "geosite:pixiv": proxyDns,
+        "geosite:category-ai-!cn": proxyDns,
+        "geosite:youTube": proxyDns,
+        "geosite:google": proxyDns,
+        "geosite:twitter": proxyDns,
+        "geosite:telegram": proxyDns,
+        "geosite:discord": proxyDns,
+        "geosite:microsoft": proxyDns,
+        "geosite:apple": proxyDns,
+        "geosite:apple-intelligence": proxyDns,
+        */
     };
     const fallbackFilter = {
         geoip: true,
@@ -640,14 +647,14 @@ const overrideDns = (config) => {
         "default-nameserver": [
             "quic://223.5.5.5:853",
         ],
-        "proxy-server-nameserver": directDnsList,
+        "proxy-server-nameserver": directDns,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
         "fake-ip-filter": fakeIpFilter,
         "nameserver-policy": nameserverPolicy,
-        nameserver: adblockDnsList,
-        fallback: adblockDnsList,
+        nameserver: adblockDns,
+        fallback: adblockDns,
         "fallback-filter": fallbackFilter,
     };
     config.dns = { ...dnsOptions };
