@@ -521,7 +521,6 @@ const overrideProxyGroups = (config) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
@@ -549,7 +548,6 @@ const overrideProxyGroups = (config) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSG", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
@@ -564,7 +562,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `LOAD_BA_RR | ${item.name}`,
+            name: `RR_LOAD_BA | ${item.name}`,
             proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "round-robin",
         }))
@@ -572,7 +570,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `LOAD_BA_CH | ${item.name}`,
+            name: `CH_LOAD_BA | ${item.name}`,
             proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "consistent-hashing",
         }))
@@ -580,15 +578,17 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `LOAD_BA_SS | ${item.name}`,
+            name: `SS_LOAD_BA | ${item.name}`,
             proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "sticky-sessions",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroups = [
         ...loadBalanceGroupsRoundRobin,
+        /*
         ...loadBalanceGroupsConsistentHashing,
         ...loadBalanceGroupsStickySession,
+        */
     ]
 
     const groups = [
@@ -638,7 +638,21 @@ const overrideProxyGroups = (config) => {
             "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
         },
         { ...proxyGroupBase.directFirst, "name": "HOYO_BYPASS" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "HOYO_ZZZ" },
+        {
+            ...proxyGroupBase.jpAutoFirst,
+            "name": "HOYO_GI",
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+        },
+        {
+            ...proxyGroupBase.jpAutoFirst,
+            "name": "HOYO_HSR",
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+        },
+        {
+            ...proxyGroupBase.jpAutoFirst,
+            "name": "HOYO_ZZZ",
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+        },
         { ...proxyGroupBase.jpAutoFirst, "name": "HOYO_PROXY" },
         // BLOCK
         { ...proxyGroupBase.rejectFirst, "name": "MIUI_BLOATWARE" },
@@ -763,14 +777,21 @@ const overrideRules = (config) => {
         // ZZZ: 20501
         "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
     ]
+    const Hoyo_GI = [
+        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
+        "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI",
+    ]
+    const Hoyo_HSR = [
+        "DOMAIN-SUFFIX,starrails.com,HOYO_HSR",
+        //"DOMAIN,gs.hoyoverse.com,HOYO_PROXY",
+        //"DOMAIN,globaldp-prod-os01.starrails.com,HOYO_HSR",
+    ]
     const Hoyo_ZZZ = [
         "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
     ]
     const Hoyo_Proxy = [
-        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
         "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
         "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
-        "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",
     ]
     const MIUI_Bloatware = [
         "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
@@ -871,6 +892,8 @@ const overrideRules = (config) => {
     // HOYO
     ...Hoyo_CN_Proxy,
     ...Hoyo_Bypass,
+    ...Hoyo_GI,
+    ...Hoyo_HSR,
     ...Hoyo_ZZZ,
     ...Hoyo_Proxy,
     // BLOCK
@@ -912,7 +935,7 @@ const overrideRules = (config) => {
 const dailerProxy = (config, proxies, dailer) => {
     let exitNode = JSON.parse(JSON.stringify(proxies))
     exitNode.forEach((e) => {
-        e.name = `EXIT_NODE | ${e.name}`
+        e.name = `🛬 | ${e.name}`
     })
     config["proxy-providers"] = {
         "provider123": {
@@ -924,16 +947,19 @@ const dailerProxy = (config, proxies, dailer) => {
         }
     }
     const autoProxyGroupRegexs = [
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        /*
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSGTW", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const autoProxyGroups = autoProxyGroupRegexs
         .map((item) => ({
-            name: `EXIT_NODE | AUTO | ${item.name}`,
+            name: `🛬 | AUTO | ${item.name}`,
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
@@ -946,13 +972,13 @@ const dailerProxy = (config, proxies, dailer) => {
 
     const loadBalanceGroupRegexs = [
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        /*
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HKSG", regex: new RegExp(`^(?=.*${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const loadBalanceBase = {
@@ -965,7 +991,7 @@ const dailerProxy = (config, proxies, dailer) => {
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `EXIT_NODE | LOAD_BA_RR | ${item.name}`,
+            name: `🛬 | RR_LOAD_BA | ${item.name}`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "round-robin",
@@ -974,7 +1000,7 @@ const dailerProxy = (config, proxies, dailer) => {
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `EXIT_NODE | LOAD_BA_CH | ${item.name}`,
+            name: `🛬 | CH_LOAD_BA | ${item.name}`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "consistent-hashing",
@@ -983,7 +1009,7 @@ const dailerProxy = (config, proxies, dailer) => {
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `EXIT_NODE | LOAD_BA_SS | ${item.name}`,
+            name: `🛬 | SS_LOAD_BA | ${item.name}`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "sticky-sessions",
@@ -991,8 +1017,10 @@ const dailerProxy = (config, proxies, dailer) => {
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroups = [
         ...loadBalanceGroupsRoundRobin,
+        /*
         ...loadBalanceGroupsConsistentHashing,
         ...loadBalanceGroupsStickySession,
+        */
     ]
 
     const relayProxyGroups = [
@@ -1009,12 +1037,16 @@ const dailerProxy = (config, proxies, dailer) => {
     relayProxyGroups.push(...loadBalanceGroups);
     relayProxyGroups.forEach((e) => {
         e.use = ["provider123"];
-        if (e.name == "RELAY") return
-        e.proxies = [];
+        if (e.name != "RELAY") e.proxies = [];
     })
 
     config["proxy-groups"].forEach((e) => {
-        if (!e.hidden && !e.proxies.includes(relayProxyGroups[0].name) && e.name!=dailer) e.proxies.unshift(relayProxyGroups[0].name);
+        if (!e.hidden &&
+            !e.proxies.includes(relayProxyGroups[0].name) &&
+            e.type == "select" &&
+            e.name!=dailer) {
+            e.proxies.unshift(relayProxyGroups[0].name);
+        }
     })
     config["proxy-groups"].unshift(...relayProxyGroups);
 }
@@ -1030,6 +1062,8 @@ const setProxyGroupIcon = (config) => {
         CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
         HOYO_CN_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
         HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
+        HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
         HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
         HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
         MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
