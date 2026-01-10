@@ -653,7 +653,11 @@ const overrideProxyGroups = (config) => {
             "name": "HOYO_ZZZ",
             "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
         },
-        { ...proxyGroupBase.jpAutoFirst, "name": "HOYO_PROXY" },
+        {
+            ...proxyGroupBase.jpAutoFirst,
+            "name": "HOYO_PROXY",
+            "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
+        },
         // BLOCK
         { ...proxyGroupBase.rejectFirst, "name": "MIUI_BLOATWARE" },
         { ...proxyGroupBase.rejectFirst, "name": "AD_BLOCK" },
@@ -1041,6 +1045,10 @@ const dailerProxy = (config, proxies, dailer) => {
     })
 
     config["proxy-groups"].forEach((e) => {
+        if (e.name.includes("HOYO_")) {
+            autoProxyGroups.length && e.proxies.unshift(...autoProxyGroups.map((item) => item.name));
+            loadBalanceGroups.length && e.proxies.unshift(...loadBalanceGroups.map((item) => item.name));
+        }
         if (!e.hidden &&
             !e.proxies.includes(relayProxyGroups[0].name) &&
             e.type == "select" &&
