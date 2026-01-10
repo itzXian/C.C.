@@ -70,7 +70,7 @@ const overrideDns = (config) => {
     ];
     const overrideAdblockDns = [
     ]
-    let adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
+    const adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
     const fakeIpFilter = [
         "+.m2m",
         "injections.adguard.org",
@@ -920,7 +920,7 @@ const overrideRules = (config) => {
     "GEOIP,twitter,TWITTER",
     "GEOSITE,twitter,TWITTER",
     // PROXY
-    "GEOIP,telegram,TELEGRA",
+    "GEOIP,telegram,TELEGRAM",
     "GEOSITE,telegram,TELEGRAM",
     "GEOSITE,discord,DISCORD",
     "GEOSITE,microsoft,MICROSOFT",
