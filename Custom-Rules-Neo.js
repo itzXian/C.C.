@@ -1046,8 +1046,8 @@ const dailerProxy = (config, proxies, dailer) => {
 
     config["proxy-groups"].forEach((e) => {
         if (e.name.includes("HOYO_")) {
-            autoProxyGroups.length && e.proxies.unshift(...autoProxyGroups.map((item) => item.name));
             loadBalanceGroups.length && e.proxies.unshift(...loadBalanceGroups.map((item) => item.name));
+            autoProxyGroups.length && e.proxies.unshift(...autoProxyGroups.map((item) => item.name));
         }
         if (!e.hidden &&
             !e.proxies.includes(relayProxyGroups[0].name) &&
