@@ -518,6 +518,9 @@ const overrideProxyGroups = (config) => {
         { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL-COUNTRIES", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
     */
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -545,6 +548,9 @@ const overrideProxyGroups = (config) => {
     // 默认值：consistent-hashing
     //const loadBalanceStrategy = "consistent-hashing";
     const loadBalanceGroupRegexs = [
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -787,8 +793,6 @@ const overrideRules = (config) => {
     ]
     const Hoyo_HSR = [
         "DOMAIN-SUFFIX,starrails.com,HOYO_HSR",
-        //"DOMAIN,gs.hoyoverse.com,HOYO_PROXY",
-        //"DOMAIN,globaldp-prod-os01.starrails.com,HOYO_HSR",
     ]
     const Hoyo_ZZZ = [
         "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
@@ -912,24 +916,25 @@ const overrideRules = (config) => {
     "GEOSITE,pixiv,PIXIV",
     "GEOSITE,category-ai-!cn,AI",
     "GEOSITE,youTube,YOUTUBE",
-    "GEOIP,google,GOOGLE",
+    "GEOIP,google,GOOGLE,no-resolve",
     "GEOSITE,google,GOOGLE",
-    "GEOIP,twitter,TWITTER",
+    "GEOIP,twitter,TWITTER,no-resolve",
     "GEOSITE,twitter,TWITTER",
     // PROXY
-    "GEOIP,telegram,TELEGRAM",
+    "GEOIP,telegram,TELEGRAM,no-resolve",
     "GEOSITE,telegram,TELEGRAM",
     "GEOSITE,discord,DISCORD",
     "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     // CUSTOM_JP(BEFORE FINAL)
-    "GEOIP,JP,JP_DOMAIN",
+    "GEOIP,JP,JP_DOMAIN,no-resolve",
     // BYPASS
     "GEOSITE,private,BYPASS",
-    "GEOIP,private,BYPASS",
-    "GEOSITE,CN,BYPASS",
+    "GEOIP,private,BYPASS,no-resolve",
+    "GEOSITE,CN,BYPASS,no-resolve",
     "GEOIP,CN,BYPASS",
+
     // FINAL
     "MATCH,FINAL",
     ];
@@ -954,11 +959,9 @@ const dailerProxy = (config, proxies, dailer) => {
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        /*
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        */
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const autoProxyGroups = autoProxyGroupRegexs
@@ -978,11 +981,9 @@ const dailerProxy = (config, proxies, dailer) => {
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        /*
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        */
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const loadBalanceBase = {
@@ -1045,7 +1046,7 @@ const dailerProxy = (config, proxies, dailer) => {
     })
 
     config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("HOYO_")) {
+        if (e.name.includes("HOYO_PROXY")) {
             loadBalanceGroups.length && e.proxies.unshift(...loadBalanceGroups.map((item) => item.name));
             autoProxyGroups.length && e.proxies.unshift(...autoProxyGroups.map((item) => item.name));
         }
