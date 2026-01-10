@@ -101,7 +101,6 @@ const overrideDns = (config) => {
         "*.127.*.*.*.nip.io",
         "*-127-*-*-*.nip.io",
         "geosite:private",
-        "geosite:cn",
     ];
     const nameserverPolicy = {
         "dns.alidns.com": "quic://223.5.5.5:853",
@@ -916,25 +915,24 @@ const overrideRules = (config) => {
     "GEOSITE,pixiv,PIXIV",
     "GEOSITE,category-ai-!cn,AI",
     "GEOSITE,youTube,YOUTUBE",
-    "GEOIP,google,GOOGLE,no-resolve",
+    "GEOIP,google,GOOGLE",
     "GEOSITE,google,GOOGLE",
-    "GEOIP,twitter,TWITTER,no-resolve",
+    "GEOIP,twitter,TWITTER",
     "GEOSITE,twitter,TWITTER",
     // PROXY
-    "GEOIP,telegram,TELEGRAM,no-resolve",
+    "GEOIP,telegram,TELEGRA",
     "GEOSITE,telegram,TELEGRAM",
     "GEOSITE,discord,DISCORD",
     "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     // CUSTOM_JP(BEFORE FINAL)
-    "GEOIP,JP,JP_DOMAIN,no-resolve",
+    "GEOIP,JP,JP_DOMAIN",
     // BYPASS
     "GEOSITE,private,BYPASS",
-    "GEOIP,private,BYPASS,no-resolve",
-    "GEOSITE,CN,BYPASS,no-resolve",
+    "GEOIP,private,BYPASS",
+    "GEOSITE,CN,BYPASS",
     "GEOIP,CN,BYPASS",
-
     // FINAL
     "MATCH,FINAL",
     ];
