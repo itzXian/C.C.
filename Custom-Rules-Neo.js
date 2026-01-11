@@ -100,6 +100,7 @@ const overrideDns = (config) => {
         "127-*-*-*.nip.io",
         "*.127.*.*.*.nip.io",
         "*-127-*-*-*.nip.io",
+        "+.nextdns.io",
         "geosite:private",
     ];
     const nameserverPolicy = {
