@@ -294,31 +294,17 @@ const overrideDns = (config) => {
         "+.127.0.0.1.sslip.io": "system",
         "+.127.atlas.skk.moe": "system",
     };
-    const fallbackFilter = {
-        geoip: true,
-        "geoip-code": "CN",
-        geosite: [
-            "gfw",
-        ],
-        ipcidr: [
-            "240.0.0.0/4",
-        ],
-        domain: [
-            "+.facebook.com",
-        ],
-    }
 
     const dnsOptions = {
         enable: true,
         "prefer-h3": true,
-        "use-hosts": true,
-        "use-system-hosts": true,
-        "respect-rules": false,
         ipv6: false,
         "default-nameserver": [
+            "tls://223.5.5.5:853",
             "quic://223.5.5.5:853",
+            "119.29.29.29",
+            "114.114.114.114",
         ],
-        "proxy-server-nameserver": directDns,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
@@ -332,7 +318,6 @@ const overrideDns = (config) => {
             ...nameserverPolicy,
             "geosite:private": "system",
             "geosite:cn": directDns,
-            "geosite:geolocation-cn": directDns,
             "geosite:steam@cn": directDns,
             "+.steamserver.net": directDns,
             /*
@@ -350,8 +335,6 @@ const overrideDns = (config) => {
             */
         },
         nameserver: adblockDns,
-        fallback: adblockDns,
-        "fallback-filter": fallbackFilter,
     };
     config.dns = { ...dnsOptions };
 }
