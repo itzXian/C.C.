@@ -300,10 +300,8 @@ const overrideDns = (config) => {
         "prefer-h3": true,
         ipv6: false,
         "default-nameserver": [
-            "tls://223.5.5.5:853",
             "quic://223.5.5.5:853",
-            "119.29.29.29",
-            "114.114.114.114",
+            "tls://223.5.5.5:853",
         ],
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
