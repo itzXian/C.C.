@@ -683,13 +683,17 @@ const overrideRules = (config) => {
     const Hoyo_Bypass = [
         "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
         /*
-        "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
         */
-        "DOMAIN-REGEX,[\w-]*log-upload-os\.hoyoverse\.com,HOYO_BYPASS",
+        "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com,HOYO_BYPASS",
+        /*
         "DOMAIN,asia-ugc-api.hoyoverse.com,HOYO_BYPASS",
+        "DOMAIN,asia-ugc-upload.hoyoverse.com,HOYO_BYPASS",
+        */
+        "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
         // GI: 22101-22102
