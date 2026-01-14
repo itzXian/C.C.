@@ -477,20 +477,20 @@ const overrideProxyGroups = (config) => {
         hidden: true,
         "exclude-filter": "0.[0-9]",
     }
-    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `RR_LOAD_BA | ${item.name}`,
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            strategy: "round-robin",
-        }))
-        .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
             name: `CH_LOAD_BA | ${item.name}`,
             proxies: getProxiesByRegex(config.proxies, item.regex),
             strategy: "consistent-hashing",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `RR_LOAD_BA | ${item.name}`,
+            proxies: getProxiesByRegex(config.proxies, item.regex),
+            strategy: "round-robin",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
@@ -502,11 +502,9 @@ const overrideProxyGroups = (config) => {
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroups = [
-        ...loadBalanceGroupsRoundRobin,
-        /*
         ...loadBalanceGroupsConsistentHashing,
+        ...loadBalanceGroupsRoundRobin,
         ...loadBalanceGroupsStickySession,
-        */
     ]
 
     const groups = [
@@ -908,15 +906,6 @@ const dailerProxy = (config, proxies, dailer) => {
         hidden: true,
         "exclude-filter": "0.[0-9]",
     }
-    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `🛬 | RR_LOAD_BA | ${item.name}`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(exitNode, item.regex),
-            strategy: "round-robin",
-        }))
-        .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
@@ -924,6 +913,15 @@ const dailerProxy = (config, proxies, dailer) => {
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "consistent-hashing",
+        }))
+        .filter((item) => item.proxies.length > 0);
+    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
+        .map((item) => ({
+            ...loadBalanceBase,
+            name: `🛬 | RR_LOAD_BA | ${item.name}`,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(exitNode, item.regex),
+            strategy: "round-robin",
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
@@ -936,11 +934,9 @@ const dailerProxy = (config, proxies, dailer) => {
         }))
         .filter((item) => item.proxies.length > 0);
     const loadBalanceGroups = [
-        ...loadBalanceGroupsRoundRobin,
-        /*
         ...loadBalanceGroupsConsistentHashing,
+        ...loadBalanceGroupsRoundRobin,
         ...loadBalanceGroupsStickySession,
-        */
     ]
 
     const relayProxyGroups = [
