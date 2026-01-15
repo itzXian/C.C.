@@ -318,6 +318,7 @@ const overrideDns = (config) => {
             "geosite:cn": directDns,
             "geosite:steam@cn": directDns,
             "+.steamserver.net": directDns,
+            "+.twimg.com": proxyDns,
             /*
             "geosite:steam": proxyDns,
             "geosite:pixiv": proxyDns,
