@@ -532,11 +532,12 @@ const overrideProxyGroups = (config) => {
     groups.push(...autoProxyGroups);
     groups.push(...loadBalanceGroups);
     //groups.push(...manualProxyGroups);
-
-    if (config["proxy-providers"]) groups.forEach((e) => {
-        e.use = Object.keys(config["proxy-providers"]);
-        if (e.name != "MANUAL") e.proxies = [];
-    })
+    if (Object.keys(config["proxy-providers"]).length >= 1) {
+        groups.forEach((e) => {
+            e.use = Object.keys(config["proxy-providers"]);
+            if (e.name != "MANUAL") e.proxies = [];
+        })
+    }
 
     const proxyGroupBase = {
         "jpAutoFirst": {
@@ -881,7 +882,7 @@ const dialerProxy = (config, dialer) => {
             payload: exitNode
         }
     };
-    if (config["proxy-providers"]) {
+    if (Object.keys(config["proxy-providers"]).length >= 1) {
         const proxyProviders = config["proxy-providers"];
         Object.keys(proxyProviders).forEach((key) => {
             relayProviders[`${key}-relay`] = {
