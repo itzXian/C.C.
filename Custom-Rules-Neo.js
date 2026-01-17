@@ -303,6 +303,7 @@ const overrideDns = (config) => {
             "quic://223.5.5.5:853",
             "tls://223.5.5.5:853",
         ],
+        "proxy-server-nameserver": directDns,
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
@@ -313,13 +314,13 @@ const overrideDns = (config) => {
             "geosite:connectivity-check",
         ],
         "nameserver-policy": {
+            "+.twimg.com": proxyDns,
+            /*
             ...nameserverPolicy,
             "geosite:private": "system",
             "geosite:cn": directDns,
             "geosite:steam@cn": directDns,
             "+.steamserver.net": directDns,
-            "+.twimg.com": proxyDns,
-            /*
             "geosite:steam": proxyDns,
             "geosite:pixiv": proxyDns,
             "geosite:category-ai-!cn": proxyDns,
@@ -333,6 +334,8 @@ const overrideDns = (config) => {
             "geosite:apple-intelligence": proxyDns,
             */
         },
+        "direct-nameserver": directDns,
+        "direct-nameserver-follow-policy": true,
         nameserver: adblockDns,
     };
     config.dns = { ...dnsOptions };
@@ -380,6 +383,7 @@ const includeTerms = {
     SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
     JP: "(日本|JP|Japan|🇯🇵)",
     KR: "(韩国|韓|KR|Korea|🇰🇷)",
+    AU: "(澳大利亚|澳|AU|Australia|🇦🇺)",
     US: "(美国|US|United States|America|🇺🇸)",
     UK: "(英国|UK|United Kingdom|🇬🇧)",
     FR: "(法国|FR|France|🇫🇷)",
@@ -437,6 +441,7 @@ const overrideProxyGroups = (config) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "AU", regex: new RegExp(`^(?=.*${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
@@ -831,23 +836,23 @@ const overrideRules = (config) => {
     "GEOSITE,pixiv,PIXIV",
     "GEOSITE,category-ai-!cn,AI",
     "GEOSITE,youTube,YOUTUBE",
-    "GEOIP,google,GOOGLE",
+    "GEOIP,google,GOOGLE,no-resolve",
     "GEOSITE,google,GOOGLE",
-    "GEOIP,twitter,TWITTER",
+    "GEOIP,twitter,TWITTER,no-resolve",
     "GEOSITE,twitter,TWITTER",
     // PROXY
-    "GEOIP,telegram,TELEGRAM",
+    "GEOIP,telegram,TELEGRAM,no-resolve",
     "GEOSITE,telegram,TELEGRAM",
     "GEOSITE,discord,DISCORD",
     "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     // CUSTOM_JP(BEFORE FINAL)
-    "GEOIP,JP,JP_DOMAIN",
+    "GEOIP,JP,JP_DOMAIN,no-resolve",
     // BYPASS
     "GEOSITE,private,BYPASS",
-    "GEOIP,private,BYPASS",
     "GEOSITE,CN,BYPASS",
+    "GEOIP,private,BYPASS",
     "GEOIP,CN,BYPASS",
     // FINAL
     "MATCH,FINAL",
@@ -876,6 +881,7 @@ const dailerProxy = (config, proxies, dailer) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "AU", regex: new RegExp(`^(?=.*${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const autoProxyGroups = autoProxyGroupRegexs
