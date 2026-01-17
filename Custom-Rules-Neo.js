@@ -10,7 +10,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     //overrideRuleProviders(config);
     overrideRules(config);
-    dailerProxy(config, config.proxies, "MANUAL");
+    dialerProxy(config, config.proxies, "MANUAL");
     setProxyGroupIcon(config);
     return config;
 }
@@ -860,7 +860,7 @@ const overrideRules = (config) => {
     config["rules"] = customRules;
 }
 
-const dailerProxy = (config, proxies, dailer) => {
+const dialerProxy = (config, proxies, dialer) => {
     let exitNode = JSON.parse(JSON.stringify(proxies))
     exitNode.forEach((e) => {
         e.name = `🛬 | ${e.name}`
@@ -869,7 +869,7 @@ const dailerProxy = (config, proxies, dailer) => {
         "provider123": {
             type: "inline",
             override: {
-                "dialer-proxy": dailer
+                "dialer-proxy": dialer
             },
             payload: exitNode
         }
@@ -971,7 +971,7 @@ const dailerProxy = (config, proxies, dailer) => {
         if (!e.hidden &&
             !e.proxies.includes(relayProxyGroups[0].name) &&
             e.type == "select" &&
-            e.name!=dailer) {
+            e.name!=dialer) {
             e.proxies.unshift(relayProxyGroups[0].name);
         }
     })
