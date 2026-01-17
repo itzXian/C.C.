@@ -371,7 +371,7 @@ const overrideTunnel = (config) => {
 const getProxiesByRegex = (proxies, regex) => {
     const matchedProxies = proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
     return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
-   //return matchedProxies.length > 0 && matchedProxies;
+    //return matchedProxies.length > 0 && matchedProxies;
 }
 
 // 公共的正则片段
@@ -532,10 +532,11 @@ const overrideProxyGroups = (config) => {
     groups.push(...autoProxyGroups);
     groups.push(...loadBalanceGroups);
     //groups.push(...manualProxyGroups);
+
     if (config["proxy-providers"]) groups.forEach((e) => {
         e.use = Object.keys(config["proxy-providers"]);
+        if (e.name != "MANUAL") e.proxies = [];
     })
-
 
     const proxyGroupBase = {
         "jpAutoFirst": {
@@ -875,7 +876,7 @@ const dialerProxy = (config, dialer) => {
             type: "inline",
             override: {
                 "dialer-proxy": dialer,
-                "additional-prefix": "🛬 | ",
+                "additional-prefix": " 🛬",
             },
             payload: exitNode
         }
@@ -886,13 +887,16 @@ const dialerProxy = (config, dialer) => {
             relayProviders[`${key}-relay`] = {
                 ...proxyProviders[key],
                 override: {
+                    ...proxyProviders[key]["override"],
                     "dialer-proxy": dialer,
-                    "additional-prefix": "🛬 | ",
+                    "additional-suffix": " 🛬",
                 },
             };
         });
+        Object.assign(config["proxy-providers"], relayProviders)
+    } else {
+        config["proxy-providers"] = relayProviders
     }
-    Object.assign(config["proxy-providers"], relayProviders)
 
     const autoProxyGroupRegexs = [
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
@@ -906,7 +910,7 @@ const dialerProxy = (config, dialer) => {
     ];
     const autoProxyGroups = autoProxyGroupRegexs
         .map((item) => ({
-            name: `🛬 | AUTO | ${item.name}`,
+            name: `AUTO | ${item.name} 🛬`,
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
@@ -936,7 +940,7 @@ const dialerProxy = (config, dialer) => {
     const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `🛬 | CH_LOAD_BA | ${item.name}`,
+            name: `CH_LOAD_BA | ${item.name} 🛬`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "consistent-hashing",
@@ -945,7 +949,7 @@ const dialerProxy = (config, dialer) => {
     const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `🛬 | RR_LOAD_BA | ${item.name}`,
+            name: `RR_LOAD_BA | ${item.name} 🛬`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "round-robin",
@@ -954,7 +958,7 @@ const dialerProxy = (config, dialer) => {
     const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
         .map((item) => ({
             ...loadBalanceBase,
-            name: `🛬 | SS_LOAD_BA | ${item.name}`,
+            name: `SS_LOAD_BA | ${item.name} 🛬`,
             filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
             proxies: getProxiesByRegex(exitNode, item.regex),
             strategy: "sticky-sessions",
