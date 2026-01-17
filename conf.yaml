@@ -1,0 +1,29 @@
+provider-base-config: &provider
+  type: http
+  interval: 1440
+  health-check:
+    enable: true
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+  proxy: DIRECT
+
+proxy-providers:
+  provider1:
+    <<: *provider
+    url: "https://example.com"
+    override:
+      additional-prefix: "① "
+  provider2:
+    <<: *provider
+    url: "https://example.com"
+    override:
+      additional-prefix: "② "
+
+proxies:
+  - name: DNS
+    type: dns
+
+proxy-groups:
+  - name: ALL
+    type: select
+    include-all: true
