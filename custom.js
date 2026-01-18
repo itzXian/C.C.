@@ -525,18 +525,61 @@ const overrideProxyGroups = (config) => {
         },
     ];
 
-    autoProxyGroups.length && groups[0].proxies.push(...autoProxyGroups.map((item) => item.name));
-    loadBalanceGroups.length && groups[0].proxies.push(...loadBalanceGroups.map((item) => item.name));
-    //autoProxyGroups.length && groups[0].proxies.push(...manualProxyGroups.map((item) => item.name));
+    if (autoProxyGroups.length) {
+        groups[0].proxies.push(...autoProxyGroups
+        .map((item) => item.name));
+        groups.push(...autoProxyGroups);
+    };
+    if (loadBalanceGroups.length) {
+        groups[0].proxies.push(...loadBalanceGroups
+        .map((item) => item.name));
+        groups.push(...loadBalanceGroups);
+    };
+    /*
+    if (manualProxyGroups.length) {
+        groups[0].proxies.push(...manualProxyGroups
+        .map((item) => item.name));
+        groups.push(...manualProxyGroups);
+    };
+    */
     groups[0].proxies.push(...allProxies);
-    groups.push(...autoProxyGroups);
-    groups.push(...loadBalanceGroups);
-    //groups.push(...manualProxyGroups);
     if (Object.keys(config["proxy-providers"]).length >= 1) {
         groups.forEach((e) => {
             e.use = Object.keys(config["proxy-providers"]);
             if (e.name != "MANUAL") e.proxies = [];
         })
+        const manualProxyGroup = [];
+        Object.keys(config["proxy-providers"]).forEach((provider) => {
+            const groupOfProvider = [
+                {
+                    name: `MANUAL-${provider}`,
+                    type: "select",
+                    proxies: [],
+                    use: [ provider ],
+                }
+            ];
+            if (autoProxyGroups.length) {
+                const autoProxyGroup = JSON.parse(JSON.stringify(autoProxyGroups));
+                autoProxyGroup.forEach((group) => {
+                    group.name = `${group.name}-${provider}`;
+                    group.use = [ provider ];
+                });
+                groupOfProvider[0].proxies.push(...autoProxyGroup.map((item) => (item.name)));
+                groupOfProvider.push(...autoProxyGroup);
+            };
+            if (loadBalanceGroups.length) {
+                const loadBalanceGroup = JSON.parse(JSON.stringify(loadBalanceGroups));
+                loadBalanceGroup.forEach((group) => {
+                    group.name = `${group.name}-${provider}`;
+                    group.use = [ provider ];
+                });
+                groupOfProvider[0].proxies.push(...loadBalanceGroup.map((item) => (item.name)));
+                groupOfProvider.push(...loadBalanceGroup);
+            };
+            manualProxyGroup.push(`MANUAL-${provider}`);
+            groups.push(...groupOfProvider);
+        })
+        groups[0].proxies.unshift(...manualProxyGroup);
     }
 
     const proxyGroupBase = {
@@ -612,7 +655,7 @@ const overrideProxyGroups = (config) => {
         // CUSTOM_JP
         { ...proxyGroupBase.jpAutoFirst, "name": "JP_DOMAIN" },
         // FINAL
-        { ...proxyGroupBase.manualFirst, "name": "FINAL" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "FINAL" },
     ];
     groups.push(...customProxyGroups);
 
@@ -979,10 +1022,16 @@ const dialerProxy = (config, dialer) => {
             "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
         }
     ]
-    autoProxyGroups.length && relayProxyGroups[0].proxies.push(...autoProxyGroups.map((item) => item.name));
-    loadBalanceGroups.length && relayProxyGroups[0].proxies.push(...loadBalanceGroups.map((item) => item.name));
-    relayProxyGroups.push(...autoProxyGroups);
-    relayProxyGroups.push(...loadBalanceGroups);
+    if (autoProxyGroups.length) {
+        relayProxyGroups[0].proxies.push(...autoProxyGroups
+        .map((item) => item.name));
+        relayProxyGroups.push(...autoProxyGroups);
+    };
+    if (loadBalanceGroups.length) {
+        relayProxyGroups[0].proxies.push(...loadBalanceGroups
+        .map((item) => item.name));
+        relayProxyGroups.push(...loadBalanceGroups);
+    };
     relayProxyGroups.forEach((e) => {
         e.use = Object.keys(relayProviders);
         if (e.name != "RELAY") e.proxies = [];
@@ -995,8 +1044,9 @@ const dialerProxy = (config, dialer) => {
         }
         if (!e.hidden &&
             !e.proxies.includes(relayProxyGroups[0].name) &&
-            e.type == "select" &&
-            e.name!=dialer) {
+             e.type == "select" &&
+            !e.name.includes(dialer)
+        ) {
             e.proxies.unshift(relayProxyGroups[0].name);
         }
     })
