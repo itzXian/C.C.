@@ -1017,6 +1017,7 @@ const dialerProxy = (config, dialer) => {
         relayProxyGroups.push(...loadBalanceGroups);
     };
 
+    const relayProxyGroup = [];
     if (Object.keys(config["proxy-providers"]).length >= 1) {
         const proxyProviders = config["proxy-providers"];
         const manualProxyGroup = [];
@@ -1056,7 +1057,7 @@ const dialerProxy = (config, dialer) => {
                 groupOfProvider.push(...loadBalanceGroup);
             };
             manualProxyGroup.push(`RELAY-${provider}`);
-            relayProxyGroups.push(...groupOfProvider);
+            relayProxyGroup.push(...groupOfProvider);
         });
         relayProxyGroups[0].proxies.unshift(...manualProxyGroup);
         config["proxy-groups"].forEach((e) => {
@@ -1076,10 +1077,15 @@ const dialerProxy = (config, dialer) => {
     } else {
         config["proxy-providers"] = relayProviders;
     }
+
     relayProxyGroups.forEach((e) => {
         e.use = Object.keys(relayProviders);
         if (e.name != "RELAY") e.proxies = [];
     })
+    relayProxyGroup.forEach((e) => {
+        if (!e.name.includes("RELAY")) e.proxies = [];
+    })
+    relayProxyGroups.push(...relayProxyGroup);
 
     config["proxy-groups"].forEach((e) => {
         if (e.name.includes("HOYO_PROXY")) {
