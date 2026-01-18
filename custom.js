@@ -441,8 +441,7 @@ const overrideProxyGroups = (config) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "AU", regex: new RegExp(`^(?=.*${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTW", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
@@ -933,7 +932,6 @@ const dialerProxy = (config, dialer) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "AU", regex: new RegExp(`^(?=.*${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const autoProxyGroups = autoProxyGroupRegexs
