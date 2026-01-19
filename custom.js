@@ -297,8 +297,9 @@ const overrideDns = (config) => {
 
     const dnsOptions = {
         enable: true,
-        "prefer-h3": true,
+        "prefer-h3": false,
         ipv6: false,
+        "respect-rules": true,
         "default-nameserver": [
             "quic://223.5.5.5:853",
             "tls://223.5.5.5:853",
@@ -309,7 +310,7 @@ const overrideDns = (config) => {
         "fake-ip-filter-mode": "blacklist",
         "fake-ip-filter": [
             ...fakeIpFilter,
-            "+.nextdns.io",
+            //"+.nextdns.io",
             "geosite:private",
             "geosite:connectivity-check",
         ],
@@ -424,24 +425,11 @@ const overrideProxyGroups = (config) => {
 
      // 自动代理组正则表达式配置
     const autoProxyGroupRegexs = [
-    /*
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "TW", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "KR", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "US", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "UK", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "FR", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "ALL-COUNTRIES", regex: new RegExp(`^(?!.*(?:${allCountryTerms}|${excludeTerms})).*$`, "i") },
-    */
-        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
@@ -463,8 +451,6 @@ const overrideProxyGroups = (config) => {
     // round-robin：轮询 按顺序循环使用代理列表中的节点
     // consistent-hashing：散列 根据请求的哈希值将请求分配到固定的节点
     // sticky-sessions：缓存 对「你的设备IP + 目标地址」组合计算哈希值，根据哈希值将请求分配到固定的节点 缓存 10 分钟过期
-    // 默认值：consistent-hashing
-    //const loadBalanceStrategy = "consistent-hashing";
     const loadBalanceGroupRegexs = [
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
@@ -649,10 +635,13 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupBase.jpAutoFirst, "name": "DISCORD" },
         { ...proxyGroupBase.jpAutoFirst, "name": "MICROSOFT" },
         { ...proxyGroupBase.jpAutoFirst, "name": "APPLE" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "NON_JP" },
+        // CUSTOM_JP(BEFORE FINAL)
+        { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
+        // PROXY(BEFORE FINAL)
+        { ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
         // BYPASS
         { ...proxyGroupBase.directFirst, "name": "BYPASS" },
-        // CUSTOM_JP
-        { ...proxyGroupBase.jpAutoFirst, "name": "JP_DOMAIN" },
         // FINAL
         { ...proxyGroupBase.jpAutoFirst, "name": "FINAL" },
     ];
@@ -880,7 +869,6 @@ const overrideRules = (config) => {
     ...MIUI_Bloatware,
     "GEOSITE,category-ads-all,AD_BLOCK",
     // CUSTOM
-    "DOMAIN-SUFFIX,hinative.com,FINAL",
     "GEOSITE,steam@cn,STEAM_CN",
     "DOMAIN-SUFFIX,steamserver.net,STEAM_CN",
     "GEOSITE,steam,STEAM",
@@ -899,8 +887,11 @@ const overrideRules = (config) => {
     "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
+    "DOMAIN-SUFFIX,hinative.com,NON_JP",
     // CUSTOM_JP(BEFORE FINAL)
-    "GEOIP,JP,JP_DOMAIN,no-resolve",
+    "GEOIP,JP,JP,no-resolve",
+    // PROXY(BEFORE FINAL)
+    "GEOSITE,geolocation-!cn,PROXY",
     // BYPASS
     "GEOSITE,private,BYPASS",
     "GEOSITE,CN,BYPASS",
@@ -1129,8 +1120,10 @@ const setProxyGroupIcon = (config) => {
         DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
         MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
         APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
+        NON_JP: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+        JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+        PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
         BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
-        JP_DOMAIN: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
         FINAL: generateIconUrl("final"),
     }
     config["proxy-groups"].forEach((e) => {
