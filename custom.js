@@ -548,6 +548,7 @@ const overrideProxyGroups = (config) => {
     };
     */
     groups[0].proxies.push(...allProxies);
+    const manualGroup = [];
     if (Object.keys(config["proxy-providers"]).length >= 1) {
         groups.forEach((e) => {
             e.use = Object.keys(config["proxy-providers"]);
@@ -569,9 +570,10 @@ const overrideProxyGroups = (config) => {
             proxyGroupOfProvider[0].proxies.push(...newAllProxyGroups.map((item) => (item.name)));
             proxyGroupOfProvider.push(...newAllProxyGroups);
             tempGroup.push(proxyGroupOfProvider[0].name);
-            groups.push(...proxyGroupOfProvider);
+            manualGroup.push(...proxyGroupOfProvider);
         })
         groups[0].proxies.unshift(...tempGroup);
+        groups.push(...manualGroup);
     }
 
     const proxyGroupBase = {
@@ -647,7 +649,7 @@ const overrideProxyGroups = (config) => {
             "name": "NON_JP ∆",
             "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
         },
-        { ...proxyGroupBase.jpAutoFirst, "name": "CLOUDFLARE" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "DOWNLOAD 〇" },
         // CUSTOM_JP(BEFORE BYPASS)
         { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
         // PROXY(BEFORE BYPASS)
@@ -658,6 +660,20 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupBase.jpAutoFirst, "name": "FINAL" },
     ];
     groups.push(...customProxyGroups);
+
+    if (manualGroup.length) groups.forEach((e) => {
+        if (e.name.includes("◯")) {
+            e.proxies.unshift(...manualGroup
+            .map((item) => item.name));
+        }
+        if ( e.type == "select" &&
+            !e.hidden &&
+            !e.proxies.includes(manualGroup[0].name) &&
+            !e.name.includes(groups[0].name)
+        ) {
+            e.proxies.unshift(manualGroup[0].name);
+        }
+    })
 
     config["proxy-groups"] = groups;
 }
@@ -869,6 +885,11 @@ const overrideRules = (config) => {
         "DOMAIN,pgdt.gtimg.cn,MIUI_BLOATWARE",
         "DOMAIN,rdt.tfogc.com,MIUI_BLOATWARE",
     ]
+    const Download = [
+        "DOMAIN-REGEX,api.[\w]+raplay.com,DOWNLOAD 〇",
+        "DOMAIN-REGEX,[\w]+.raplay.*workers.dev,DOWNLOAD 〇" ,
+        "DOMAIN-REGEX,.*\.[\w]+[eo](hu|ze).workers.dev,DOWNLOAD 〇",
+    ]
     const customRules = [
     // HOYO
     ...Hoyo_CN_Proxy,
@@ -900,7 +921,7 @@ const overrideRules = (config) => {
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
-    "GEOSITE,cloudflare,CLOUDFLARE",
+    ...Download,
     // CUSTOM_JP(BEFORE FINAL)
     "GEOIP,JP,JP,no-resolve",
     // PROXY(BEFORE BYPASS)
@@ -1124,7 +1145,7 @@ const setProxyGroupIcon = (config) => {
         "MICROSOFT": "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
         "APPLE": "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
         "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-        "CLOUDFLARE": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.cloudflare.com/&size=256",
+        "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
         "JP": "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
         "PROXY": "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
         "BYPASS": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
