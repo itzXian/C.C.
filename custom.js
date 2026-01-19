@@ -603,27 +603,27 @@ const overrideProxyGroups = (config) => {
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_CN_PROXY",
-            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS" ],
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
         },
         { ...proxyGroupBase.directFirst, "name": "HOYO_BYPASS" },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_GI",
-            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_HSR",
-            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_ZZZ",
-            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_PROXY ∆",
+            "name": "HOYO_PROXY",
             "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
         },
         // BLOCK
@@ -643,8 +643,12 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupBase.jpAutoFirst, "name": "DISCORD" },
         { ...proxyGroupBase.jpAutoFirst, "name": "MICROSOFT" },
         { ...proxyGroupBase.jpAutoFirst, "name": "APPLE" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "NON_JP ∆" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "CLOUDFLARE ∆" },
+        {
+            ...proxyGroupBase.jpAutoFirst,
+            "name": "NON_JP ∆",
+            "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
+        },
+        { ...proxyGroupBase.jpAutoFirst, "name": "CLOUDFLARE" },
         // CUSTOM_JP(BEFORE BYPASS)
         { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
         // PROXY(BEFORE BYPASS)
@@ -758,7 +762,7 @@ const overrideRules = (config) => {
         "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
     ]
     const Hoyo_GI = [
-        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY ∆",
+        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
         "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI",
     ]
     const Hoyo_HSR = [
@@ -768,8 +772,8 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
     ]
     const Hoyo_Proxy = [
-        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY ∆",
-        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY ∆",
+        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
+        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
     ]
     const MIUI_Bloatware = [
         "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
@@ -897,7 +901,7 @@ const overrideRules = (config) => {
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
     "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
-    "GEOSITE,cloudflare,CLOUDFLARE ∆",
+    "GEOSITE,cloudflare,CLOUDFLARE",
     // CUSTOM_JP(BEFORE FINAL)
     "GEOIP,JP,JP,no-resolve",
     // PROXY(BEFORE BYPASS)
@@ -1066,7 +1070,7 @@ const dialerProxy = (config, dialer) => {
         });
         relayProxyGroups[0].proxies.unshift(...manualProxyGroup);
         config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("HOYO_PROXY ∆")) {
+        if (e.name.includes("HOYO_PROXY")) {
             e.proxies.unshift(...relayProxyGroups
             .map((item) => item.name));
         }
@@ -1114,34 +1118,34 @@ const generateIconUrl = (name) => {
 
 const setProxyGroupIcon = (config) => {
     const iconUrls = {
-        RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
-        MANUAL: generateIconUrl("manual"),
-        CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
-        HOYO_CN_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-        HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-        HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-        HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
-        HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
-        "HOYO_PROXY ∆": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-        MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
-        AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
-        STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-        STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-        PIXIV: "https://play-lh.googleusercontent.com/UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu",
-        AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
-        YOUTUBE: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
-        GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
-        TWITTER: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
-        TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
-        DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
-        MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
-        APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
+        "RELAY": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
+        "MANUAL": generateIconUrl("manual"),
+        "CUSTOM": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+        "HOYO_CN_PROXY": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        "HOYO_BYPASS": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        "HOYO_GI": "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
+        "HOYO_HSR": "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
+        "HOYO_ZZZ": "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
+        "HOYO_PROXY": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        "MIUI_BLOATWARE": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
+        "AD_BLOCK": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
+        "STEAM_CN": "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+        "STEAM": "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+        "PIXIV": "https://play-lh.googleusercontent.com/UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu",
+        "AI": "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
+        "YOUTUBE": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
+        "GOOGLE": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
+        "TWITTER": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+        "TELEGRAM": "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+        "DISCORD": "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
+        "MICROSOFT": "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
+        "APPLE": "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
         "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-        "CLOUDFLARE ∆": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.cloudflare.com/&size=256",
-        JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
-        PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
-        BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
-        FINAL: generateIconUrl("final"),
+        "CLOUDFLARE": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.cloudflare.com/&size=256",
+        "JP": "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+        "PROXY": "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
+        "BYPASS": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
+        "FINAL": generateIconUrl("final"),
     }
     config["proxy-groups"].forEach((e) => {
         if (!e.hidden) e.icon = iconUrls[e.name]
