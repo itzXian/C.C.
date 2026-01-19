@@ -374,6 +374,18 @@ const getProxiesByRegex = (proxies, regex) => {
     return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
     //return matchedProxies.length > 0 && matchedProxies;
 }
+const recreateProxyGroupWithProvider = (group, provider) => {
+    if (!group.length) return
+    const newGroup = group.map((e) => (
+        {
+            ...e,
+            name: `${e.name} | ${provider}`,
+            proxies: [],
+            use: [ provider ],
+        }
+    ));
+    return newGroup;
+};
 
 // 公共的正则片段
 const excludeTerms = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
@@ -541,9 +553,9 @@ const overrideProxyGroups = (config) => {
             e.use = Object.keys(config["proxy-providers"]);
             if (e.name != "MANUAL") e.proxies = [];
         })
-        const manualProxyGroup = [];
+        const tempGroup = [];
         Object.keys(config["proxy-providers"]).forEach((provider) => {
-            const groupOfProvider = [
+            const proxyGroupOfProvider = [
                 {
                     name: `MANUAL | ${provider}`,
                     type: "select",
@@ -551,28 +563,15 @@ const overrideProxyGroups = (config) => {
                     use: [ provider ],
                 }
             ];
-            if (autoProxyGroups.length) {
-                const autoProxyGroup = JSON.parse(JSON.stringify(autoProxyGroups));
-                autoProxyGroup.forEach((group) => {
-                    group.name = `${group.name} | ${provider}`;
-                    group.use = [ provider ];
-                });
-                groupOfProvider[0].proxies.push(...autoProxyGroup.map((item) => (item.name)));
-                groupOfProvider.push(...autoProxyGroup);
-            };
-            if (loadBalanceGroups.length) {
-                const loadBalanceGroup = JSON.parse(JSON.stringify(loadBalanceGroups));
-                loadBalanceGroup.forEach((group) => {
-                    group.name = `${group.name} | ${provider}`;
-                    group.use = [ provider ];
-                });
-                groupOfProvider[0].proxies.push(...loadBalanceGroup.map((item) => (item.name)));
-                groupOfProvider.push(...loadBalanceGroup);
-            };
-            manualProxyGroup.push(groupOfProvider[0].name);
-            groups.push(...groupOfProvider);
+            const newAutoProxyGroups = recreateProxyGroupWithProvider(autoProxyGroups, provider);
+            const newLoadBalanceGroups = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
+            const newAllProxyGroups = newAutoProxyGroups.concat(newLoadBalanceGroups);
+            proxyGroupOfProvider[0].proxies.push(...newAllProxyGroups.map((item) => (item.name)));
+            proxyGroupOfProvider.push(...newAllProxyGroups);
+            tempGroup.push(proxyGroupOfProvider[0].name);
+            groups.push(...proxyGroupOfProvider);
         })
-        groups[0].proxies.unshift(...manualProxyGroup);
+        groups[0].proxies.unshift(...tempGroup);
     }
 
     const proxyGroupBase = {
@@ -1029,7 +1028,7 @@ const dialerProxy = (config, dialer) => {
     const relayProxyGroup = [];
     if (Object.keys(config["proxy-providers"]).length >= 1) {
         const proxyProviders = config["proxy-providers"];
-        const manualProxyGroup = [];
+        const tempGroup = [];
         Object.keys(proxyProviders).forEach((provider) => {
             relayProviders[`${provider}-relay`] = {
                 ...proxyProviders[provider],
@@ -1039,7 +1038,7 @@ const dialerProxy = (config, dialer) => {
                     "additional-suffix": " 🛬",
                 },
             };
-            const groupOfProvider = [
+            const proxyGroupOfProvider = [
                 {
                     name: `RELAY | ${provider}`,
                     type: "select",
@@ -1047,39 +1046,23 @@ const dialerProxy = (config, dialer) => {
                     use: [ `${provider}-relay` ],
                 }
             ];
-            if (autoProxyGroups.length) {
-                const autoProxyGroup = JSON.parse(JSON.stringify(autoProxyGroups));
-                autoProxyGroup.forEach((group) => {
-                    group.name = `${group.name} | ${provider}`;
-                    group.use = [ `${provider}-relay` ];
-                });
-                groupOfProvider[0].proxies.push(...autoProxyGroup.map((item) => (item.name)));
-                groupOfProvider.push(...autoProxyGroup);
-            };
-            if (loadBalanceGroups.length) {
-                const loadBalanceGroup = JSON.parse(JSON.stringify(loadBalanceGroups));
-                loadBalanceGroup.forEach((group) => {
-                    group.name = `${group.name} | ${provider}`;
-                    group.use = [ `${provider}-relay` ];
-                });
-                groupOfProvider[0].proxies.push(...loadBalanceGroup.map((item) => (item.name)));
-                groupOfProvider.push(...loadBalanceGroup);
-            };
-            manualProxyGroup.push(groupOfProvider[0].name);
-            relayProxyGroup.push(...groupOfProvider);
+            const autoProxyGroup = recreateProxyGroupWithProvider(autoProxyGroups, `${provider}-relay`);
+            const loadBalanceGroup = recreateProxyGroupWithProvider(loadBalanceGroups, `${provider}-relay`);
+            const newAllProxyGroups = autoProxyGroup.concat(loadBalanceGroup);
+            proxyGroupOfProvider[0].proxies.push(...newAllProxyGroups.map((item) => (item.name)));
+            proxyGroupOfProvider.push(...newAllProxyGroups);
+            tempGroup.push(proxyGroupOfProvider[0].name);
+            relayProxyGroup.push(...proxyGroupOfProvider);
         });
-        relayProxyGroups[0].proxies.unshift(...manualProxyGroup);
+
+        relayProxyGroups[0].proxies.unshift(...tempGroup);
         config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("HOYO_PROXY")) {
-            e.proxies.unshift(...relayProxyGroups
-            .map((item) => item.name));
-        }
         if ( e.type == "select" &&
             !e.hidden &&
-            !e.proxies.includes(manualProxyGroup[0]) &&
+            !e.proxies.includes(tempGroup[0]) &&
             !e.name.includes(dialer)
         ) {
-            e.proxies.unshift(...manualProxyGroup);
+            e.proxies.unshift(...tempGroup);
         }
     })
         Object.assign(config["proxy-providers"], relayProviders);
