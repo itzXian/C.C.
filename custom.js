@@ -77,10 +77,6 @@ const overrideDns = (config) => {
         "dns.adguard-dns.com",
     ];
     const overrideAdblockDns = [
-        "https://dns.nextdns.io/31fa5d",
-        "https://dns.nextdns.io/987d71",
-        "https://dns.nextdns.io/47ba4d",
-        "https://dns.nextdns.io/46c32a",
     ]
     const adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
     const fakeIpFilter = [
@@ -470,6 +466,7 @@ const overrideProxyGroups = (config) => {
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
 
@@ -548,7 +545,7 @@ const overrideProxyGroups = (config) => {
         Object.keys(config["proxy-providers"]).forEach((provider) => {
             const groupOfProvider = [
                 {
-                    name: `MANUAL-${provider}`,
+                    name: `MANUAL | ${provider}`,
                     type: "select",
                     proxies: [],
                     use: [ provider ],
@@ -557,7 +554,7 @@ const overrideProxyGroups = (config) => {
             if (autoProxyGroups.length) {
                 const autoProxyGroup = JSON.parse(JSON.stringify(autoProxyGroups));
                 autoProxyGroup.forEach((group) => {
-                    group.name = `${group.name}-${provider}`;
+                    group.name = `${group.name} | ${provider}`;
                     group.use = [ provider ];
                 });
                 groupOfProvider[0].proxies.push(...autoProxyGroup.map((item) => (item.name)));
@@ -566,13 +563,13 @@ const overrideProxyGroups = (config) => {
             if (loadBalanceGroups.length) {
                 const loadBalanceGroup = JSON.parse(JSON.stringify(loadBalanceGroups));
                 loadBalanceGroup.forEach((group) => {
-                    group.name = `${group.name}-${provider}`;
+                    group.name = `${group.name} | ${provider}`;
                     group.use = [ provider ];
                 });
                 groupOfProvider[0].proxies.push(...loadBalanceGroup.map((item) => (item.name)));
                 groupOfProvider.push(...loadBalanceGroup);
             };
-            manualProxyGroup.push(`MANUAL-${provider}`);
+            manualProxyGroup.push(groupOfProvider[0].name);
             groups.push(...groupOfProvider);
         })
         groups[0].proxies.unshift(...manualProxyGroup);
@@ -606,27 +603,27 @@ const overrideProxyGroups = (config) => {
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_CN_PROXY",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
+            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS" ],
         },
         { ...proxyGroupBase.directFirst, "name": "HOYO_BYPASS" },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_GI",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_HSR",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
             "name": "HOYO_ZZZ",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
+            "proxies": [ "HOYO_PROXY ∆", "HOYO_BYPASS", ...groups[0].proxies ],
         },
         {
             ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_PROXY",
+            "name": "HOYO_PROXY ∆",
             "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
         },
         // BLOCK
@@ -646,11 +643,12 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupBase.jpAutoFirst, "name": "DISCORD" },
         { ...proxyGroupBase.jpAutoFirst, "name": "MICROSOFT" },
         { ...proxyGroupBase.jpAutoFirst, "name": "APPLE" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "NON_JP" },
-        // CUSTOM_JP(BEFORE FINAL)
+        { ...proxyGroupBase.jpAutoFirst, "name": "NON_JP ∆" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "CLOUDFLARE ∆" },
+        // CUSTOM_JP(BEFORE BYPASS)
         { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
         // PROXY(BEFORE BYPASS)
-        //{ ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
+        { ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
         // BYPASS
         { ...proxyGroupBase.directFirst, "name": "BYPASS" },
         // FINAL
@@ -760,7 +758,7 @@ const overrideRules = (config) => {
         "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
     ]
     const Hoyo_GI = [
-        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
+        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY ∆",
         "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI",
     ]
     const Hoyo_HSR = [
@@ -770,8 +768,8 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
     ]
     const Hoyo_Proxy = [
-        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
-        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
+        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY ∆",
+        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY ∆",
     ]
     const MIUI_Bloatware = [
         "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
@@ -898,11 +896,12 @@ const overrideRules = (config) => {
     "GEOSITE,microsoft,MICROSOFT",
     "GEOSITE,apple,APPLE",
     "GEOSITE,apple-intelligence,APPLE",
-    "DOMAIN-SUFFIX,hinative.com,NON_JP",
+    "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
+    "GEOSITE,cloudflare,CLOUDFLARE ∆",
     // CUSTOM_JP(BEFORE FINAL)
     "GEOIP,JP,JP,no-resolve",
     // PROXY(BEFORE BYPASS)
-    "GEOSITE,geolocation-!cn,FINAL",
+    "GEOSITE,geolocation-!cn,PROXY",
     // BYPASS
     "GEOSITE,private,BYPASS",
     "GEOSITE,CN,BYPASS",
@@ -936,6 +935,7 @@ const dialerProxy = (config, dialer) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const autoProxyGroups = autoProxyGroupRegexs
@@ -960,6 +960,7 @@ const dialerProxy = (config, dialer) => {
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
     ];
     const loadBalanceBase = {
@@ -1036,7 +1037,7 @@ const dialerProxy = (config, dialer) => {
             };
             const groupOfProvider = [
                 {
-                    name: `RELAY-${provider}`,
+                    name: `RELAY | ${provider}`,
                     type: "select",
                     proxies: [],
                     use: [ `${provider}-relay` ],
@@ -1045,7 +1046,7 @@ const dialerProxy = (config, dialer) => {
             if (autoProxyGroups.length) {
                 const autoProxyGroup = JSON.parse(JSON.stringify(autoProxyGroups));
                 autoProxyGroup.forEach((group) => {
-                    group.name = `${group.name}-${provider}`;
+                    group.name = `${group.name} | ${provider}`;
                     group.use = [ `${provider}-relay` ];
                 });
                 groupOfProvider[0].proxies.push(...autoProxyGroup.map((item) => (item.name)));
@@ -1054,18 +1055,18 @@ const dialerProxy = (config, dialer) => {
             if (loadBalanceGroups.length) {
                 const loadBalanceGroup = JSON.parse(JSON.stringify(loadBalanceGroups));
                 loadBalanceGroup.forEach((group) => {
-                    group.name = `${group.name}-${provider}`;
+                    group.name = `${group.name} | ${provider}`;
                     group.use = [ `${provider}-relay` ];
                 });
                 groupOfProvider[0].proxies.push(...loadBalanceGroup.map((item) => (item.name)));
                 groupOfProvider.push(...loadBalanceGroup);
             };
-            manualProxyGroup.push(`RELAY-${provider}`);
+            manualProxyGroup.push(groupOfProvider[0].name);
             relayProxyGroup.push(...groupOfProvider);
         });
         relayProxyGroups[0].proxies.unshift(...manualProxyGroup);
         config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("HOYO_PROXY")) {
+        if (e.name.includes("HOYO_PROXY ∆")) {
             e.proxies.unshift(...relayProxyGroups
             .map((item) => item.name));
         }
@@ -1092,7 +1093,7 @@ const dialerProxy = (config, dialer) => {
     relayProxyGroups.push(...relayProxyGroup);
 
     config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("HOYO_PROXY")) {
+        if (e.name.includes("∆")) {
             e.proxies.unshift(...relayProxyGroups
             .map((item) => item.name));
         }
@@ -1121,7 +1122,7 @@ const setProxyGroupIcon = (config) => {
         HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
         HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
         HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
-        HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+        "HOYO_PROXY ∆": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
         MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
         AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
         STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
@@ -1135,8 +1136,10 @@ const setProxyGroupIcon = (config) => {
         DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
         MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
         APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
-        NON_JP: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+        "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+        "CLOUDFLARE ∆": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.cloudflare.com/&size=256",
         JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+        PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
         BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
         FINAL: generateIconUrl("final"),
     }
