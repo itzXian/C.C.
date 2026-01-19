@@ -77,6 +77,10 @@ const overrideDns = (config) => {
         "dns.adguard-dns.com",
     ];
     const overrideAdblockDns = [
+        "https://dns.nextdns.io/31fa5d",
+        "https://dns.nextdns.io/987d71",
+        "https://dns.nextdns.io/47ba4d",
+        "https://dns.nextdns.io/46c32a",
     ]
     const adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
     const fakeIpFilter = [
@@ -425,6 +429,11 @@ const overrideProxyGroups = (config) => {
 
      // 自动代理组正则表达式配置
     const autoProxyGroupRegexs = [
+        /*
+        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -452,9 +461,11 @@ const overrideProxyGroups = (config) => {
     // consistent-hashing：散列 根据请求的哈希值将请求分配到固定的节点
     // sticky-sessions：缓存 对「你的设备IP + 目标地址」组合计算哈希值，根据哈希值将请求分配到固定的节点 缓存 10 分钟过期
     const loadBalanceGroupRegexs = [
+        /*
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -638,8 +649,8 @@ const overrideProxyGroups = (config) => {
         { ...proxyGroupBase.jpAutoFirst, "name": "NON_JP" },
         // CUSTOM_JP(BEFORE FINAL)
         { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
-        // PROXY(BEFORE FINAL)
-        { ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
+        // PROXY(BEFORE BYPASS)
+        //{ ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
         // BYPASS
         { ...proxyGroupBase.directFirst, "name": "BYPASS" },
         // FINAL
@@ -890,8 +901,8 @@ const overrideRules = (config) => {
     "DOMAIN-SUFFIX,hinative.com,NON_JP",
     // CUSTOM_JP(BEFORE FINAL)
     "GEOIP,JP,JP,no-resolve",
-    // PROXY(BEFORE FINAL)
-    "GEOSITE,geolocation-!cn,PROXY",
+    // PROXY(BEFORE BYPASS)
+    "GEOSITE,geolocation-!cn,FINAL",
     // BYPASS
     "GEOSITE,private,BYPASS",
     "GEOSITE,CN,BYPASS",
@@ -917,9 +928,11 @@ const dialerProxy = (config, dialer) => {
     };
 
     const autoProxyGroupRegexs = [
+        /*
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -939,9 +952,11 @@ const dialerProxy = (config, dialer) => {
         .filter((item) => item.proxies.length > 0);
 
     const loadBalanceGroupRegexs = [
+        /*
         { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
+        */
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
@@ -1122,7 +1137,6 @@ const setProxyGroupIcon = (config) => {
         APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
         NON_JP: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
         JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
-        PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
         BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
         FINAL: generateIconUrl("final"),
     }
