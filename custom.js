@@ -1,8 +1,7 @@
 // 以下代码参照
 // https://www.clashverge.dev/guide/script.html
 const main = (config) => {
-    if (!config.proxies) return config;
-    //removeProxyByRegex(config, /^((?!专线).)*$/);
+    if (!config?.proxies) return config;
     overrideBasicOptions(config);
     overrideDns(config);
     overrideHosts(config);
@@ -17,8 +16,110 @@ const main = (config) => {
 
 // 以下代码源自
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
+const excludeTerms = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
+const includeTerms = {
+    HK: "(香港|HK|Hong|🇭🇰)",
+    TW: "(台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳)",
+    SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
+    JP: "(日本|JP|Japan|🇯🇵)",
+    KR: "(韩国|韓|KR|Korea|🇰🇷)",
+    AU: "(澳大利亚|澳|AU|Australia|🇦🇺)",
+    US: "(美国|US|United States|America|🇺🇸)",
+    UK: "(英国|UK|United Kingdom|🇬🇧)",
+    FR: "(法国|FR|France|🇫🇷)",
+    DE: "(德国|DE|Germany|🇩🇪)",
+    DIA: "(专线)",
+};
+const allCountryTerms = Object.values(includeTerms).join("|");
 
-// 覆写Basic Options
+const safeProvidersKeys = (config) => Object.keys(config?.["proxy-providers"] || {});
+
+const getProxiesByRegex = (proxies, regex) => {
+    const matched = (proxies || []).filter((p) => regex.test(p.name)).map((p) => p.name);
+    return matched.length ? matched : ["COMPATIBLE"];
+};
+
+const recreateProxyGroupWithProvider = (group = [], provider) => {
+    if (!Array.isArray(group) || group.length === 0) return [];
+    return group.map((e) => ({
+        ...e,
+        name: `${e.name} | ${provider}`,
+        proxies: [],
+        use: [provider],
+    }));
+};
+
+const buildAutoAndLoadRegexs = () => {
+    const auto = [
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+    ];
+    const load = [
+        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+    ];
+    return { auto, load };
+};
+
+const buildAutoProxyGroups = (proxies, suffix = "") => {
+    const { auto } = buildAutoAndLoadRegexs();
+    const exitNameSuffix = suffix ? ` ${suffix}` : "";
+    return auto
+        .map((item) => ({
+            name: `AUTO | ${item.name}${exitNameSuffix}`,
+            type: "url-test",
+            url: "https://cp.cloudflare.com",
+            interval: 300,
+            tolerance: 50,
+            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+            proxies: getProxiesByRegex(proxies, item.regex),
+            hidden: true,
+        }))
+        .filter((g) => g.proxies.length > 0);
+};
+
+const buildLoadBalanceGroups = (proxies, suffix = "") => {
+    const { load } = buildAutoAndLoadRegexs();
+    const base = {
+        type: "load-balance",
+        url: "https://cp.cloudflare.com",
+        interval: 300,
+        hidden: true,
+        "exclude-filter": "0.[0-9]",
+    };
+    const exitNameSuffix = suffix ? ` ${suffix}` : "";
+    const consistent = load.map((item) => ({
+        ...base,
+        name: `CH_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+        proxies: getProxiesByRegex(proxies, item.regex),
+        strategy: "consistent-hashing",
+    }));
+    const roundRobin = load.map((item) => ({
+        ...base,
+        name: `RR_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+        proxies: getProxiesByRegex(proxies, item.regex),
+        strategy: "round-robin",
+    }));
+    const sticky = load.map((item) => ({
+        ...base,
+        name: `SS_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
+        proxies: getProxiesByRegex(proxies, item.regex),
+        strategy: "sticky-sessions",
+    }));
+    return [...consistent, ...roundRobin, ...sticky].filter((g) => g.proxies.length > 0);
+};
+
 const overrideBasicOptions = (config) => {
     const otherOptions = {
         "mixed-port": 7890,
@@ -59,10 +160,9 @@ const overrideBasicOptions = (config) => {
             "skip-domain": ["Mijia Cloud", "+.push.apple.com"]
         },
     };
-    Object.keys(otherOptions).forEach((key) => {
-        config[key] = otherOptions[key];
-    });
+    Object.assign(config, otherOptions);
 }
+
 // 覆写DNS
 const overrideDns = (config) => {
     const directDns = [
@@ -77,8 +177,9 @@ const overrideDns = (config) => {
         "dns.adguard-dns.com",
     ];
     const overrideAdblockDns = [
-    ]
-    const adblockDns = overrideAdblockDns.length > 0 ? overrideAdblockDns : defaultAdblockDns
+    ];
+    const adblockDns = overrideAdblockDns.length ? overrideAdblockDns : defaultAdblockDns;
+
     const fakeIpFilter = [
         "+.m2m",
         "injections.adguard.org",
@@ -107,193 +208,8 @@ const overrideDns = (config) => {
         "127.*.*.*.nip.io",
         "127-*-*-*.nip.io",
         "*.127.*.*.*.nip.io",
-        "*-127-*-*-*.nip.io",
+        "*-127-*-*.nip.io",
     ];
-    const nameserverPolicy = {
-        "dns.alidns.com": "quic://223.5.5.5:853",
-        "dot.pub": "119.29.29.29",
-        "doh.pub": "119.29.29.29",
-        "dns.pub": "119.29.29.29",
-        "doh.360.cn": "101.198.198.198",
-        "+.bytedance.com": "180.184.2.2",
-        "*.bytecdn.cn": "180.184.2.2",
-        "*.volccdn.com": "180.184.2.2",
-        "*.toutiaoimg.com": "180.184.2.2",
-        "*.toutiaoimg.cn": "180.184.2.2",
-        "*.toutiaostatic.com": "180.184.2.2",
-        "*.toutiaovod.com": "180.184.2.2",
-        "*.toutiaocloud.com": "180.184.2.2",
-        "+.toutiaopage.com": "180.184.2.2",
-        "+.feiliao.com": "180.184.2.2",
-        "+.iesdouyin.com": "180.184.2.2",
-        "*.pstatp.com": "180.184.2.2",
-        "+.snssdk.com": "180.184.2.2",
-        "*.bytegoofy.com": "180.184.2.2",
-        "+.toutiao.com": "180.184.2.2",
-        "+.feishu.cn": "180.184.2.2",
-        "+.feishu.net": "180.184.2.2",
-        "*.feishucdn.com": "180.184.2.2",
-        "*.feishupkg.com": "180.184.2.2",
-        "+.baike.com": "180.184.2.2",
-        "+.zjurl.cn": "180.184.2.2",
-        "+.okr.com": "180.184.2.2",
-        "+.douyin.com": "180.184.2.2",
-        "*.douyinpic.com": "180.184.2.2",
-        "*.douyinstatic.com": "180.184.2.2",
-        "*.douyincdn.com": "180.184.2.2",
-        "*.douyinliving.com": "180.184.2.2",
-        "*.douyinvod.com": "180.184.2.2",
-        "+.huoshan.com": "180.184.2.2",
-        "+.doubao.com": "180.184.2.2",
-        "+.coze.cn": "180.184.2.2",
-        "+.wukong.com": "180.184.2.2",
-        "*.huoshanstatic.com": "180.184.2.2",
-        "+.huoshanzhibo.com": "180.184.2.2",
-        "+.ixigua.com": "180.184.2.2",
-        "*.ixiguavideo.com": "180.184.2.2",
-        "*.ixgvideo.com": "180.184.2.2",
-        "*.byted-static.com": "180.184.2.2",
-        "+.volces.com": "180.184.2.2",
-        "*.zjcdn.com": "180.184.2.2",
-        "*.zijieapi.com": "180.184.2.2",
-        "+.feelgood.cn": "180.184.2.2",
-        "+.volcengine.com": "180.184.2.2",
-        "*.bytetcc.com": "180.184.2.2",
-        "*.bytednsdoc.com": "180.184.2.2",
-        "*.byteimg.com": "180.184.2.2",
-        "*.byteacctimg.com": "180.184.2.2",
-        "*.byteeffecttos.com": "180.184.2.2",
-        "*.ibytedapm.com": "180.184.2.2",
-        "+.oceanengine.com": "180.184.2.2",
-        "*.edge-byted.com": "180.184.2.2",
-        "*.volcvideo.com": "180.184.2.2",
-        "*.bytecdntp.com": "180.184.2.2",
-        "+.dongchedi.com": "180.184.2.2",
-        "+.dcarstatic.com": "180.184.2.2",
-        "+.dcarlive.com": "180.184.2.2",
-        "+.dcarimg.com": "180.184.2.2",
-        "+.dcarvod.com": "180.184.2.2",
-        "+.dcarapi.com": "180.184.2.2",
-        "+.pipix.com": "180.184.2.2",
-        "+.ppximg.com": "180.184.2.2",
-        "+.ppxstatic.com": "180.184.2.2",
-        "+.ppxvod.com": "180.184.2.2",
-        "+.xiaoxiaapi.com": "180.184.2.2",
-        "+.rsproxy.cn": "180.184.2.2",
-        "+.91.com": "180.76.76.76",
-        "+.hao123.com": "180.76.76.76",
-        "+.baidu.cn": "180.76.76.76",
-        "+.baidu.com": "180.76.76.76",
-        "+.iqiyi.com": "180.76.76.76",
-        "*.iqiyipic.com": "180.76.76.76",
-        "*.baidubce.com": "180.76.76.76",
-        "*.bcelive.com": "180.76.76.76",
-        "*.baiducontent.com": "180.76.76.76",
-        "*.baidustatic.com": "180.76.76.76",
-        "*.bdstatic.com": "180.76.76.76",
-        "*.bdimg.com": "180.76.76.76",
-        "*.bcebos.com": "180.76.76.76",
-        "*.baidupcs.com": "180.76.76.76",
-        "*.baidubcr.com": "180.76.76.76",
-        "*.yunjiasu-cdn.net": "180.76.76.76",
-        "+.tieba.com": "180.76.76.76",
-        "+.dwz.cn": "180.76.76.76",
-        "+.zuoyebang.com": "180.76.76.76",
-        "+.zybang.com": "180.76.76.76",
-        "+.xiaodutv.com": "180.76.76.76",
-        "*.shifen.com": "180.76.76.76",
-        "*.jomodns.com": "180.76.76.76",
-        "*.bdydns.com": "180.76.76.76",
-        "*.jomoxc.com": "180.76.76.76",
-        "*.duapp.com": "180.76.76.76",
-        "*.antpcdn.com": "180.76.76.76",
-        "upos-sz-mirrorbd.bilivideo.com": "180.76.76.76",
-        "upos-sz-mirrorbos.bilivideo.com": "180.76.76.76",
-        "*.qhimg.com": "https://doh.360.cn/dns-query",
-        "*.qhimgs.com": "https://doh.360.cn/dns-query",
-        "*.qhimgs?.com": "https://doh.360.cn/dns-query",
-        "*.qhres.com": "https://doh.360.cn/dns-query",
-        "*.qhres2.com": "https://doh.360.cn/dns-query",
-        "*.qhmsg.com": "https://doh.360.cn/dns-query",
-        "*.qhstatic.com": "https://doh.360.cn/dns-query",
-        "*.qhupdate.com": "https://doh.360.cn/dns-query",
-        "*.qihucdn.com": "https://doh.360.cn/dns-query",
-        "+.360.com": "https://doh.360.cn/dns-query",
-        "+.360.cn": "https://doh.360.cn/dns-query",
-        "+.360.net": "https://doh.360.cn/dns-query",
-        "+.360safe.com": "https://doh.360.cn/dns-query",
-        "*.360tpcdn.com": "https://doh.360.cn/dns-query",
-        "+.360os.com": "https://doh.360.cn/dns-query",
-        "*.360webcache.com": "https://doh.360.cn/dns-query",
-        "+.360kuai.com": "https://doh.360.cn/dns-query",
-        "+.so.com": "https://doh.360.cn/dns-query",
-        "+.haosou.com": "https://doh.360.cn/dns-query",
-        "+.yunpan.cn": "https://doh.360.cn/dns-query",
-        "+.yunpan.com": "https://doh.360.cn/dns-query",
-        "+.yunpan.com.cn": "https://doh.360.cn/dns-query",
-        "*.qh-cdn.com": "https://doh.360.cn/dns-query",
-        "+.baomitu.com": "https://doh.360.cn/dns-query",
-        "+.qiku.com": "https://doh.360.cn/dns-query",
-        "+.360simg.com": "https://doh.360.cn/dns-query",
-        "+.securelogin.com.cn": "system",
-        "captive.apple.com": "system",
-        "hotspot.cslwifi.com": "system",
-        "*.m2m": "system",
-        "injections.adguard.org": "system",
-        "local.adguard.org": "system",
-        "*.bogon": "system",
-        "instant.arubanetworks.com": "system",
-        "setmeup.arubanetworks.com": "system",
-        "router.asus.com": "system",
-        "repeater.asus.com": "system",
-        "+.asusrouter.com": "system",
-        "+.routerlogin.net": "system",
-        "+.routerlogin.com": "system",
-        "+.tplinkwifi.net": "system",
-        "+.tplogin.cn": "system",
-        "+.tplinkap.net": "system",
-        "+.tplinkmodem.net": "system",
-        "+.tplinkplclogin.net": "system",
-        "+.tplinkrepeater.net": "system",
-        "*.ui.direct": "system",
-        "unifi": "system",
-        "*.huaweimobilewifi.com": "system",
-        "*.router": "system",
-        "aterm.me": "system",
-        "console.gl-inet.com": "system",
-        "homerouter.cpe": "system",
-        "mobile.hotspot": "system",
-        "ntt.setup": "system",
-        "pi.hole": "system",
-        "*.plex.direct": "system",
-        "*.home": "system",
-        "+.10.in-addr.arpa": "system",
-        "+.16.172.in-addr.arpa": "system",
-        "+.17.172.in-addr.arpa": "system",
-        "+.18.172.in-addr.arpa": "system",
-        "+.19.172.in-addr.arpa": "system",
-        "+.20.172.in-addr.arpa": "system",
-        "+.21.172.in-addr.arpa": "system",
-        "+.22.172.in-addr.arpa": "system",
-        "+.23.172.in-addr.arpa": "system",
-        "+.24.172.in-addr.arpa": "system",
-        "+.25.172.in-addr.arpa": "system",
-        "+.26.172.in-addr.arpa": "system",
-        "+.27.172.in-addr.arpa": "system",
-        "+.28.172.in-addr.arpa": "system",
-        "+.29.172.in-addr.arpa": "system",
-        "+.30.172.in-addr.arpa": "system",
-        "+.31.172.in-addr.arpa": "system",
-        "+.168.192.in-addr.arpa": "system",
-        "+.254.169.in-addr.arpa": "system",
-        "*.lan": "system",
-        "*.local": "system",
-        "*.internal": "system",
-        "*.localdomain": "system",
-        "+.home.arpa": "system",
-        "+.127.0.0.1.sslip.io": "system",
-        "+.127.atlas.skk.moe": "system",
-    };
 
     const dnsOptions = {
         enable: true,
@@ -310,31 +226,12 @@ const overrideDns = (config) => {
         "fake-ip-filter-mode": "blacklist",
         "fake-ip-filter": [
             ...fakeIpFilter,
-            //"+.nextdns.io",
             "geosite:private",
             "geosite:connectivity-check",
         ],
         "nameserver-policy": {
             "+.twimg.com": proxyDns,
             "+.pximg.net": proxyDns,
-            /*
-            ...nameserverPolicy,
-            "geosite:private": "system",
-            "geosite:cn": directDns,
-            "geosite:steam@cn": directDns,
-            "+.steamserver.net": directDns,
-            "geosite:steam": proxyDns,
-            "geosite:pixiv": proxyDns,
-            "geosite:category-ai-!cn": proxyDns,
-            "geosite:youTube": proxyDns,
-            "geosite:google": proxyDns,
-            "geosite:twitter": proxyDns,
-            "geosite:telegram": proxyDns,
-            "geosite:discord": proxyDns,
-            "geosite:microsoft": proxyDns,
-            "geosite:apple": proxyDns,
-            "geosite:apple-intelligence": proxyDns,
-            */
         },
         "direct-nameserver": directDns,
         "direct-nameserver-follow-policy": true,
@@ -370,158 +267,10 @@ const overrideTunnel = (config) => {
     config.tun = { ...tunnelOptions };
 }
 
-const getProxiesByRegex = (proxies, regex) => {
-    const matchedProxies = proxies.filter((e) => regex.test(e.name)).map((e) => e.name);
-    return matchedProxies.length > 0 ? matchedProxies: ["COMPATIBLE"];
-    //return matchedProxies.length > 0 && matchedProxies;
-}
-const recreateProxyGroupWithProvider = (group, provider) => {
-    if (!group.length) return
-    const newGroup = group.map((e) => (
-        {
-            ...e,
-            name: `${e.name} | ${provider}`,
-            proxies: [],
-            use: [ provider ],
-        }
-    ));
-    return newGroup;
-};
-
-// 公共的正则片段
-const excludeTerms = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
-// 包含条件：各个国家或地区的关键词
-const includeTerms = {
-    HK: "(香港|HK|Hong|🇭🇰)",
-    TW: "(台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳)",
-    SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
-    JP: "(日本|JP|Japan|🇯🇵)",
-    KR: "(韩国|韓|KR|Korea|🇰🇷)",
-    AU: "(澳大利亚|澳|AU|Australia|🇦🇺)",
-    US: "(美国|US|United States|America|🇺🇸)",
-    UK: "(英国|UK|United Kingdom|🇬🇧)",
-    FR: "(法国|FR|France|🇫🇷)",
-    DE: "(德国|DE|Germany|🇩🇪)",
-    DIA: "(专线)",
-};
-// 合并所有国家关键词，供"其它"条件使用
-const allCountryTerms = Object.values(includeTerms).join("|");
-
-// 覆盖代理组
 const overrideProxyGroups = (config) => {
-    // 所有代理
-    const allProxies = config["proxies"].map((e) => e.name);
-
-    // 手动选择代理组
-    /*
-    const manualProxyGroupRegexs = [
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "KR", regex: new RegExp(`^(?=.*${includeTerms.KR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "US", regex: new RegExp(`^(?=.*${includeTerms.US})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "UK", regex: new RegExp(`^(?=.*${includeTerms.UK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "FR", regex: new RegExp(`^(?=.*${includeTerms.FR})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "DE", regex: new RegExp(`^(?=.*${includeTerms.DE})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "TW", regex: new RegExp(`^(?=.*${includeTerms.TW})(?!.*${excludeTerms}).*$`, "i") }
-    ];
-
-    const manualProxyGroups = manualProxyGroupRegexs
-        .map((item) => ({
-            name: item.name,
-            type: "select",
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            hidden: true,
-        }))
-        .filter((item) => item.proxies.length > 0);
-    */
-
-     // 自动代理组正则表达式配置
-    const autoProxyGroupRegexs = [
-        /*
-        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        */
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-    ];
-
-    const autoProxyGroups = autoProxyGroupRegexs
-        .map((item) => ({
-            name: `AUTO | ${item.name}`,
-            type: "url-test",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tolerance: 50,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            hidden: true,
-        }))
-        .filter((item) => item.proxies.length > 0);
-
-    // 负载均衡策略
-    // 可选值：round-robin / consistent-hashing / sticky-sessions
-    // round-robin：轮询 按顺序循环使用代理列表中的节点
-    // consistent-hashing：散列 根据请求的哈希值将请求分配到固定的节点
-    // sticky-sessions：缓存 对「你的设备IP + 目标地址」组合计算哈希值，根据哈希值将请求分配到固定的节点 缓存 10 分钟过期
-    const loadBalanceGroupRegexs = [
-        /*
-        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        */
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-    ];
-
-    const loadBalanceBase = {
-        type: "load-balance",
-        url: "https://cp.cloudflare.com",
-        interval: 300,
-        hidden: true,
-        "exclude-filter": "0.[0-9]",
-    }
-    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `CH_LOAD_BA | ${item.name}`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            strategy: "consistent-hashing",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `RR_LOAD_BA | ${item.name}`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            strategy: "round-robin",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `SS_LOAD_BA | ${item.name}`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(config.proxies, item.regex),
-            strategy: "sticky-sessions",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroups = [
-        ...loadBalanceGroupsConsistentHashing,
-        ...loadBalanceGroupsRoundRobin,
-        ...loadBalanceGroupsStickySession,
-    ]
+    const allProxies = config.proxies.map((p) => p.name);
+    const autoProxyGroups = buildAutoProxyGroups(config.proxies);
+    const loadBalanceGroups = buildLoadBalanceGroups(config.proxies);
 
     const groups = [
         {
@@ -532,216 +281,141 @@ const overrideProxyGroups = (config) => {
     ];
 
     if (autoProxyGroups.length) {
-        groups[0].proxies.push(...autoProxyGroups
-        .map((item) => item.name));
+        groups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
         groups.push(...autoProxyGroups);
-    };
+    }
     if (loadBalanceGroups.length) {
-        groups[0].proxies.push(...loadBalanceGroups
-        .map((item) => item.name));
+        groups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
         groups.push(...loadBalanceGroups);
-    };
-    /*
-    if (manualProxyGroups.length) {
-        groups[0].proxies.push(...manualProxyGroups
-        .map((item) => item.name));
-        groups.push(...manualProxyGroups);
-    };
-    */
+    }
+
     groups[0].proxies.push(...allProxies);
+
     const manualGroup = [];
-    if (Object.keys(config["proxy-providers"]).length >= 1) {
-        groups.forEach((e) => {
-            e.use = Object.keys(config["proxy-providers"]);
-            if (e.name != "MANUAL") e.proxies = [];
-        })
-        const tempGroup = [];
-        Object.keys(config["proxy-providers"]).forEach((provider) => {
+    const providerKeys = safeProvidersKeys(config);
+    if (providerKeys.length >= 1) {
+        // set `use` for groups and clear proxies for non-MANUAL
+        groups.forEach((g) => {
+            g.use = providerKeys.slice();
+            if (g.name !== "MANUAL") g.proxies = [];
+        });
+
+        const tempNames = [];
+        providerKeys.forEach((provider) => {
             const proxyGroupOfProvider = [
                 {
                     name: `MANUAL | ${provider}`,
                     type: "select",
                     proxies: [],
-                    use: [ provider ],
+                    use: [provider],
                 }
             ];
-            const newAutoProxyGroups = recreateProxyGroupWithProvider(autoProxyGroups, provider);
-            const newLoadBalanceGroups = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
-            const newAllProxyGroups = newAutoProxyGroups.concat(newLoadBalanceGroups);
-            proxyGroupOfProvider[0].proxies.push(...newAllProxyGroups.map((item) => (item.name)));
-            proxyGroupOfProvider.push(...newAllProxyGroups);
-            tempGroup.push(proxyGroupOfProvider[0].name);
+            const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, provider);
+            const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
+            const newAll = [...newAuto, ...newLoad];
+            proxyGroupOfProvider[0].proxies.push(...newAll.map((item) => item.name));
+            proxyGroupOfProvider.push(...newAll);
+            tempNames.push(proxyGroupOfProvider[0].name);
             manualGroup.push(...proxyGroupOfProvider);
-        })
-        groups[0].proxies.unshift(...tempGroup);
+        });
+        groups[0].proxies.unshift(...tempNames);
         groups.push(...manualGroup);
     }
 
     const proxyGroupBase = {
-        "jpAutoFirst": {
-            "type": "select",
-            "proxies": [ "MANUAL", "CUSTOM", "DIRECT", "REJECT", ...groups[0].proxies ]
+        jpAutoFirst: {
+            type: "select",
+            proxies: ["CUSTOM", "MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"]
         },
-        "manualFirst": {
-            "type": "select",
-            "proxies": [ "MANUAL", "CUSTOM", "DIRECT", "REJECT" ]
+        directFirst: {
+            type: "select",
+            proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"]
         },
-        "directFirst": {
-            "type": "select",
-            "proxies": [ "DIRECT", "MANUAL", "CUSTOM", "REJECT" ]
+        rejectFirst: {
+            type: "select",
+            proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"]
         },
-        "rejectFirst": {
-            "type": "select",
-            "proxies": [ "REJECT", "MANUAL", "CUSTOM", "DIRECT" ]
-        },
-    }
+    };
+
     const customProxyGroups = [
-        {
-            "name": "CUSTOM",
-            "type": "select",
-            "proxies": [ "MANUAL", "DIRECT", "REJECT", ...groups[0].proxies ]
-        },
-        // HOYO
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_CN_PROXY",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS" ],
-        },
-        { ...proxyGroupBase.directFirst, "name": "HOYO_BYPASS" },
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_GI",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
-        },
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_HSR",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
-        },
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_ZZZ",
-            "proxies": [ "HOYO_PROXY", "HOYO_BYPASS", ...groups[0].proxies ],
-        },
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "HOYO_PROXY",
-            "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
-        },
-        // BLOCK
-        { ...proxyGroupBase.rejectFirst, "name": "MIUI_BLOATWARE" },
-        { ...proxyGroupBase.rejectFirst, "name": "AD_BLOCK" },
-        // CUSTOM
-        { ...proxyGroupBase.directFirst, "name": "STEAM_CN" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "STEAM" },
-        // CUSTOM_JP
-        { ...proxyGroupBase.jpAutoFirst, "name": "PIXIV" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "AI" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "YOUTUBE" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "GOOGLE" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "TWITTER" },
-        // PROXY
-        { ...proxyGroupBase.jpAutoFirst, "name": "TELEGRAM" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "DISCORD" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "MICROSOFT" },
-        { ...proxyGroupBase.jpAutoFirst, "name": "APPLE" },
-        {
-            ...proxyGroupBase.jpAutoFirst,
-            "name": "NON_JP ∆",
-            "proxies": [ ...proxyGroupBase.jpAutoFirst.proxies ],
-        },
-        { ...proxyGroupBase.jpAutoFirst, "name": "DOWNLOAD 〇" },
-        // CUSTOM_JP(BEFORE BYPASS)
-        { ...proxyGroupBase.jpAutoFirst, "name": "JP" },
-        // PROXY(BEFORE BYPASS)
-        { ...proxyGroupBase.jpAutoFirst, "name": "PROXY" },
-        // BYPASS
-        { ...proxyGroupBase.directFirst, "name": "BYPASS" },
-        // FINAL
-        { ...proxyGroupBase.jpAutoFirst, "name": "FINAL" },
+        { name: "CUSTOM", type: "select", proxies: ["MANUAL", "DIRECT", "REJECT", ...groups[0].proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_CN_PROXY", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.directFirst, name: "HOYO_BYPASS" },
+        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_GI", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_HSR", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_ZZZ", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_PROXY", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.rejectFirst, name: "MIUI_BLOATWARE" },
+        { ...proxyGroupBase.rejectFirst, name: "AD_BLOCK" },
+        { ...proxyGroupBase.directFirst, name: "STEAM_CN" },
+        { ...proxyGroupBase.jpAutoFirst, name: "STEAM" },
+        { ...proxyGroupBase.jpAutoFirst, name: "PIXIV" },
+        { ...proxyGroupBase.jpAutoFirst, name: "AI" },
+        { ...proxyGroupBase.jpAutoFirst, name: "YOUTUBE" },
+        { ...proxyGroupBase.jpAutoFirst, name: "GOOGLE" },
+        { ...proxyGroupBase.jpAutoFirst, name: "TWITTER" },
+        { ...proxyGroupBase.jpAutoFirst, name: "TELEGRAM" },
+        { ...proxyGroupBase.jpAutoFirst, name: "DISCORD" },
+        { ...proxyGroupBase.jpAutoFirst, name: "MICROSOFT" },
+        { ...proxyGroupBase.jpAutoFirst, name: "APPLE" },
+        { ...proxyGroupBase.jpAutoFirst, name: "NON_JP ∆", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "DOWNLOAD 〇", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
+        { ...proxyGroupBase.jpAutoFirst, name: "JP" },
+        { ...proxyGroupBase.jpAutoFirst, name: "PROXY" },
+        { ...proxyGroupBase.directFirst, name: "BYPASS" },
+        { ...proxyGroupBase.jpAutoFirst, name: "FINAL" },
     ];
     groups.push(...customProxyGroups);
 
-    if (manualGroup.length) groups.forEach((e) => {
-        if (e.name.includes("◯")) {
-            e.proxies.unshift(...manualGroup
-            .map((item) => item.name));
-        }
-        if ( e.type == "select" &&
-            !e.hidden &&
-            !e.proxies.includes(manualGroup[0].name) &&
-            !e.name.includes(groups[0].name)
-        ) {
-            e.proxies.unshift(manualGroup[0].name);
-        }
-    })
+    if (manualGroup.length) {
+        groups.forEach((g) => {
+            if (g.name.includes("◯")) {
+                g.proxies.unshift(...manualGroup.map((m) => m.name));
+            }
+            if (g.type === "select" && !g.hidden && manualGroup[0] && !g.proxies.includes(manualGroup[0].name) && !g.name.includes(groups[0].name)) {
+                g.proxies.unshift(manualGroup[0].name);
+            }
+        });
+    }
 
     config["proxy-groups"] = groups;
 }
 
 const overrideRuleProviders = (config) => {
     const ruleProviderConfig = {
-        "type": "http",
-        "interval": "3600",
-    };
-    ruleProviderConfig.text = {
-        ...ruleProviderConfig,
-        "format": "text",
-    };
-    ruleProviderConfig.yaml = {
-        ...ruleProviderConfig,
-        "format": "yaml",
+        type: "http",
+        interval: "3600",
     };
     const ruleProviderBase = {
-        Classical: {
-            ...ruleProviderConfig.text,
-            "behavior": "classical",
-        },
-        Domain: {
-            ...ruleProviderConfig.text,
-            "behavior": "domain",
-        },
-        Ipcodr: {
-            ...ruleProviderConfig.text,
-            "behavior": "ipcidr",
-        },
-        ClassicalYaml: {
-            ...ruleProviderConfig.yaml,
-            "behavior": "classical",
-        },
-        DomainYaml: {
-            ...ruleProviderConfig.yaml,
-            "behavior": "domain",
-        },
-        IpcodrYaml: {
-            ...ruleProviderConfig.yaml,
-            "behavior": "ipcidr",
-        },
-    }
+        Classical: { ...ruleProviderConfig, format: "text", behavior: "classical" },
+        Domain: { ...ruleProviderConfig, format: "text", behavior: "domain" },
+        Ipcodr: { ...ruleProviderConfig, format: "text", behavior: "ipcidr" },
+        ClassicalYaml: { ...ruleProviderConfig, format: "yaml", behavior: "classical" },
+        DomainYaml: { ...ruleProviderConfig, format: "yaml", behavior: "domain" },
+        IpcodrYaml: { ...ruleProviderConfig, format: "yaml", behavior: "ipcidr" },
+    };
     const ruleProviders = {
-        // HOYO
         Hoyo_CN_Proxy: {
             ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
-            "path": "./Hoyo_CN_Proxy.list"
+            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
+            path: "./Hoyo_CN_Proxy.list"
         },
         Hoyo_Bypass: {
             ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
-            "path": "./Hoyo_Bypass.list"
+            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
+            path: "./Hoyo_Bypass.list"
         },
         Hoyo_Proxy: {
             ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
-            "path": "./Hoyo_Proxy.list"
+            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
+            path: "./Hoyo_Proxy.list"
         },
-        // BLOCK
         MIUI_Bloatware: {
             ...ruleProviderBase.Classical,
-            "url": "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
-            "path": "./MIUI_Bloatware.list"
+            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
+            path: "./MIUI_Bloatware.list"
         },
-    }
+    };
     config["rule-providers"] = ruleProviders;
 }
 
@@ -752,45 +426,31 @@ const overrideRules = (config) => {
         "DOMAIN,oseurodispatch.yuanshen.com,HOYO_CN_PROXY",
         "DOMAIN,osusadispatch.yuanshen.com,HOYO_CN_PROXY",
         "DOMAIN,osuspider.yuanshen.com,HOYO_CN_PROXY",
-        // "DOMAIN-REGEX,\w*(os|patch)\w*\.yuanshen\.com",
-    ]
+    ];
     const Hoyo_Bypass = [
         "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
-        /*
-        "DOMAIN,log-upload-os.hoyoverse.com,HOYO_BYPASS",
-        "DOMAIN,sdk-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-        "DOMAIN,ad-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-        "DOMAIN,ys-log-upload-os.hoyoverse.com,HOYO_BYPASS",
-        */
         "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com,HOYO_BYPASS",
-        /*
-        "DOMAIN,asia-ugc-api.hoyoverse.com,HOYO_BYPASS",
-        "DOMAIN,asia-ugc-upload.hoyoverse.com,HOYO_BYPASS",
-        */
         "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
-        // GI: 22101-22102
         "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
-        // HSR: 23301/23801
         "AND,((DST-PORT,23301/23801),(NETWORK,udp)),HOYO_BYPASS",
-        // ZZZ: 20501
         "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
-    ]
+    ];
     const Hoyo_GI = [
         "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
         "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI",
-    ]
+    ];
     const Hoyo_HSR = [
         "DOMAIN-SUFFIX,starrails.com,HOYO_HSR",
-    ]
+    ];
     const Hoyo_ZZZ = [
         "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
-    ]
+    ];
     const Hoyo_Proxy = [
         "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
         "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
-    ]
+    ];
     const MIUI_Bloatware = [
         "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
         "DOMAIN,tracking.miui.com,MIUI_BLOATWARE",
@@ -885,61 +545,54 @@ const overrideRules = (config) => {
         "DOMAIN,data.sec.miui.com,MIUI_BLOATWARE",
         "DOMAIN,pgdt.gtimg.cn,MIUI_BLOATWARE",
         "DOMAIN,rdt.tfogc.com,MIUI_BLOATWARE",
-    ]
+    ];
+
     const Download = [
-        "DOMAIN-REGEX,api.[\w]+raplay.com,DOWNLOAD 〇",
-        "DOMAIN-REGEX,[\w]+.raplay.*workers.dev,DOWNLOAD 〇" ,
-        "DOMAIN-REGEX,.*\.[\w]+[eo](hu|ze).workers.dev,DOWNLOAD 〇",
-    ]
+        "DOMAIN-REGEX,api.[\\w]+raplay.com,DOWNLOAD 〇",
+        "DOMAIN-REGEX,[\\w]+.raplay.*workers.dev,DOWNLOAD 〇",
+        "DOMAIN-REGEX,.*\\.[\\w]+[eo](hu|ze).workers.dev,DOWNLOAD 〇",
+    ];
+
     const customRules = [
-    // HOYO
-    ...Hoyo_CN_Proxy,
-    ...Hoyo_Bypass,
-    ...Hoyo_GI,
-    ...Hoyo_HSR,
-    ...Hoyo_ZZZ,
-    ...Hoyo_Proxy,
-    // BLOCK
-    ...MIUI_Bloatware,
-    "GEOSITE,category-ads-all,AD_BLOCK",
-    // CUSTOM
-    "GEOSITE,steam@cn,STEAM_CN",
-    "DOMAIN-SUFFIX,steamserver.net,STEAM_CN",
-    "GEOSITE,steam,STEAM",
-    // CUSTOM_JP
-    "GEOSITE,pixiv,PIXIV",
-    "GEOSITE,category-ai-!cn,AI",
-    "GEOSITE,youTube,YOUTUBE",
-    "GEOIP,google,GOOGLE,no-resolve",
-    "GEOSITE,google,GOOGLE",
-    "GEOIP,twitter,TWITTER,no-resolve",
-    "GEOSITE,twitter,TWITTER",
-    // PROXY
-    "GEOIP,telegram,TELEGRAM,no-resolve",
-    "GEOSITE,telegram,TELEGRAM",
-    "GEOSITE,discord,DISCORD",
-    "GEOSITE,microsoft,MICROSOFT",
-    "GEOSITE,apple,APPLE",
-    "GEOSITE,apple-intelligence,APPLE",
-    "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
-    ...Download,
-    // CUSTOM_JP(BEFORE FINAL)
-    "GEOIP,JP,JP,no-resolve",
-    // PROXY(BEFORE BYPASS)
-    "GEOSITE,geolocation-!cn,PROXY",
-    // BYPASS
-    "GEOSITE,private,BYPASS",
-    "GEOSITE,CN,BYPASS",
-    "GEOIP,private,BYPASS",
-    "GEOIP,CN,BYPASS",
-    // FINAL
-    "MATCH,FINAL",
+        ...Hoyo_CN_Proxy,
+        ...Hoyo_Bypass,
+        ...Hoyo_GI,
+        ...Hoyo_HSR,
+        ...Hoyo_ZZZ,
+        ...Hoyo_Proxy,
+        ...MIUI_Bloatware,
+        "GEOSITE,category-ads-all,AD_BLOCK",
+        "GEOSITE,steam@cn,STEAM_CN",
+        "DOMAIN-SUFFIX,steamserver.net,STEAM_CN",
+        "GEOSITE,steam,STEAM",
+        "GEOSITE,pixiv,PIXIV",
+        "GEOSITE,category-ai-!cn,AI",
+        "GEOSITE,youTube,YOUTUBE",
+        "GEOIP,google,GOOGLE,no-resolve",
+        "GEOSITE,google,GOOGLE",
+        "GEOIP,twitter,TWITTER,no-resolve",
+        "GEOSITE,twitter,TWITTER",
+        "GEOIP,telegram,TELEGRAM,no-resolve",
+        "GEOSITE,telegram,TELEGRAM",
+        "GEOSITE,discord,DISCORD",
+        "GEOSITE,microsoft,MICROSOFT",
+        "GEOSITE,apple,APPLE",
+        "GEOSITE,apple-intelligence,APPLE",
+        "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
+        ...Download,
+        "GEOIP,JP,JP,no-resolve",
+        "GEOSITE,geolocation-!cn,PROXY",
+        "GEOSITE,private,BYPASS",
+        "GEOSITE,CN,BYPASS",
+        "GEOIP,private,BYPASS",
+        "GEOIP,CN,BYPASS",
+        "MATCH,FINAL",
     ];
     config["rules"] = customRules;
 }
 
 const dialerProxy = (config, dialer) => {
-    let exitNode = JSON.parse(JSON.stringify(config.proxies))
+    const exitNode = JSON.parse(JSON.stringify(config.proxies || []));
     const relayProviders = {
         "provider-config-relay": {
             type: "inline",
@@ -951,175 +604,100 @@ const dialerProxy = (config, dialer) => {
         }
     };
 
-    const autoProxyGroupRegexs = [
-        /*
-        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        */
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-    ];
-    const autoProxyGroups = autoProxyGroupRegexs
-        .map((item) => ({
-            name: `AUTO | ${item.name} 🛬`,
-            type: "url-test",
-            url: "https://cp.cloudflare.com",
-            interval: 300,
-            tolerance: 50,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(exitNode, item.regex),
-            hidden: true,
-        }))
-        .filter((item) => item.proxies.length > 0);
-
-    const loadBalanceGroupRegexs = [
-        /*
-        { name: "JP_DIA", regex: new RegExp(`^(?=.*${includeTerms.JP}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK_DIA", regex: new RegExp(`^(?=.*${includeTerms.HK}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG_DIA", regex: new RegExp(`^(?=.*${includeTerms.SG}.*${includeTerms.DIA})(?!.*${excludeTerms}).*$`, "i") },
-        */
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-    ];
-    const loadBalanceBase = {
-        type: "load-balance",
-        url: "https://cp.cloudflare.com",
-        interval: 300,
-        hidden: true,
-        "exclude-filter": "0.[0-9]",
-    }
-    const loadBalanceGroupsConsistentHashing = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `CH_LOAD_BA | ${item.name} 🛬`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(exitNode, item.regex),
-            strategy: "consistent-hashing",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroupsRoundRobin = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `RR_LOAD_BA | ${item.name} 🛬`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(exitNode, item.regex),
-            strategy: "round-robin",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroupsStickySession = loadBalanceGroupRegexs
-        .map((item) => ({
-            ...loadBalanceBase,
-            name: `SS_LOAD_BA | ${item.name} 🛬`,
-            filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
-            proxies: getProxiesByRegex(exitNode, item.regex),
-            strategy: "sticky-sessions",
-        }))
-        .filter((item) => item.proxies.length > 0);
-    const loadBalanceGroups = [
-        ...loadBalanceGroupsConsistentHashing,
-        ...loadBalanceGroupsRoundRobin,
-        ...loadBalanceGroupsStickySession,
-    ]
+    const autoProxyGroups = buildAutoProxyGroups(exitNode, "🛬");
+    const loadBalanceGroups = buildLoadBalanceGroups(exitNode, "🛬");
 
     const relayProxyGroups = [
         {
-            "name": "RELAY",
-            "type": "select",
-            "proxies": [],
-            "exclude-filter": "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
+            name: "RELAY",
+            type: "select",
+            proxies: [],
+            "exclude-filter": excludeTerms,
         },
-    ]
-    if (autoProxyGroups.length) {
-        relayProxyGroups[0].proxies.push(...autoProxyGroups
-        .map((item) => item.name));
-        relayProxyGroups.push(...autoProxyGroups);
-    };
-    if (loadBalanceGroups.length) {
-        relayProxyGroups[0].proxies.push(...loadBalanceGroups
-        .map((item) => item.name));
-        relayProxyGroups.push(...loadBalanceGroups);
-    };
+    ];
 
+    if (autoProxyGroups.length) {
+        relayProxyGroups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
+        relayProxyGroups.push(...autoProxyGroups);
+    }
+    if (loadBalanceGroups.length) {
+        relayProxyGroups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
+        relayProxyGroups.push(...loadBalanceGroups);
+    }
+
+    const providerKeys = safeProvidersKeys(config);
     const relayProxyGroup = [];
-    if (Object.keys(config["proxy-providers"]).length >= 1) {
-        const proxyProviders = config["proxy-providers"];
-        const tempGroup = [];
-        Object.keys(proxyProviders).forEach((provider) => {
+    if (providerKeys.length >= 1) {
+        const proxyProviders = config["proxy-providers"] || {};
+        const tempNames = [];
+
+        providerKeys.forEach((provider) => {
+            // create a relay variant of the provider with overrides
             relayProviders[`${provider}-relay`] = {
                 ...proxyProviders[provider],
                 override: {
-                    ...proxyProviders[provider]["override"],
+                    ...proxyProviders[provider]?.override,
                     "dialer-proxy": dialer,
                     "additional-suffix": " 🛬",
                 },
             };
+
             const proxyGroupOfProvider = [
                 {
                     name: `RELAY | ${provider}`,
                     type: "select",
                     proxies: [],
-                    use: [ `${provider}-relay` ],
+                    use: [`${provider}-relay`],
                 }
             ];
+
             const autoProxyGroup = recreateProxyGroupWithProvider(autoProxyGroups, `${provider}-relay`);
             const loadBalanceGroup = recreateProxyGroupWithProvider(loadBalanceGroups, `${provider}-relay`);
-            const newAllProxyGroups = autoProxyGroup.concat(loadBalanceGroup);
-            proxyGroupOfProvider[0].proxies.push(...newAllProxyGroups.map((item) => (item.name)));
-            proxyGroupOfProvider.push(...newAllProxyGroups);
-            tempGroup.push(proxyGroupOfProvider[0].name);
+            const newAll = [...autoProxyGroup, ...loadBalanceGroup];
+
+            proxyGroupOfProvider[0].proxies.push(...newAll.map((item) => item.name));
+            proxyGroupOfProvider.push(...newAll);
+            tempNames.push(proxyGroupOfProvider[0].name);
             relayProxyGroup.push(...proxyGroupOfProvider);
         });
 
-        relayProxyGroups[0].proxies.unshift(...tempGroup);
-        config["proxy-groups"].forEach((e) => {
-        if ( e.type == "select" &&
-            !e.hidden &&
-            !e.proxies.includes(tempGroup[0]) &&
-            !e.name.includes(dialer)
-        ) {
-            e.proxies.unshift(...tempGroup);
-        }
-    })
-        Object.assign(config["proxy-providers"], relayProviders);
+        relayProxyGroups[0].proxies.unshift(...tempNames);
+
+        config["proxy-groups"].forEach((g) => {
+            if (g.type === "select" && !g.hidden && !g.proxies.includes(tempNames[0]) && !g.name.includes(dialer)) {
+                g.proxies.unshift(...tempNames);
+            }
+        });
+
+        Object.assign(config["proxy-providers"] = config["proxy-providers"] || {}, relayProviders);
     } else {
         config["proxy-providers"] = relayProviders;
     }
 
-    relayProxyGroups.forEach((e) => {
-        e.use = Object.keys(relayProviders);
-        if (e.name != "RELAY") e.proxies = [];
-    })
-    relayProxyGroup.forEach((e) => {
-        if (!e.name.includes("RELAY")) e.proxies = [];
-    })
+    relayProxyGroups.forEach((g) => {
+        g.use = Object.keys(relayProviders);
+        if (g.name !== "RELAY") g.proxies = [];
+    });
+
+    relayProxyGroup.forEach((g) => {
+        if (!g.name.includes("RELAY")) g.proxies = [];
+    });
+
     relayProxyGroups.push(...relayProxyGroup);
 
-    config["proxy-groups"].forEach((e) => {
-        if (e.name.includes("∆")) {
-            e.proxies.unshift(...relayProxyGroups
-            .map((item) => item.name));
+    config["proxy-groups"].forEach((g) => {
+        if (g.name.includes("∆")) {
+            g.proxies.unshift(...relayProxyGroups.map((r) => r.name));
         }
-        if ( e.type == "select" &&
-            !e.hidden &&
-            !e.proxies.includes(relayProxyGroups[0].name) &&
-            !e.name.includes(dialer)
-        ) {
-            e.proxies.unshift(relayProxyGroups[0].name);
+        if (g.type === "select" && !g.hidden && !g.proxies.includes(relayProxyGroups[0].name) && !g.name.includes(dialer)) {
+            g.proxies.unshift(relayProxyGroups[0].name);
         }
-    })
+    });
+
     config["proxy-groups"].unshift(...relayProxyGroups);
 }
 
-const generateIconUrl = (name) => {
-    return `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`
-}
+const generateIconUrl = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
 
 const setProxyGroupIcon = (config) => {
     const iconUrls = {
@@ -1151,22 +729,18 @@ const setProxyGroupIcon = (config) => {
         "PROXY": "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
         "BYPASS": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
         "FINAL": generateIconUrl("final"),
-    }
-    config["proxy-groups"].forEach((e) => {
-        if (!e.hidden) e.icon = iconUrls[e.name]
-    })
-}
-
-// 以下代码源自
-// https://github.com/clash-verge-rev/clash-verge-rev/discussions/2053#discussion-7518652
-function removeProxyByRegex(config, regex) {
-    config.proxies = config.proxies.filter((e) => !e.name.match(regex));
-    config['proxy-groups'] = config['proxy-groups'].map((e) => {
-        e.proxies = e.proxies.filter((name) => !name.match(regex));
+    };
+    (config["proxy-groups"] || []).forEach((g) => {
+        if (!g.hidden && iconUrls[g.name]) g.icon = iconUrls[g.name];
     });
 }
 
-const test = () => {
-    module.exports = { main }
-};
-//test()
+function removeProxyByRegex(config, regex) {
+    config.proxies = (config.proxies || []).filter((e) => !e.name.match(regex));
+    config['proxy-groups'] = (config['proxy-groups'] || []).map((e) => {
+        e.proxies = (e.proxies || []).filter((name) => !name.match(regex));
+        return e; // previously missing return caused undefined entries
+    });
+}
+
+//module.exports = { main };
