@@ -316,6 +316,7 @@ const overrideDns = (config) => {
         ],
         "nameserver-policy": {
             "+.twimg.com": proxyDns,
+            "+.pximg.net": proxyDns,
             /*
             ...nameserverPolicy,
             "geosite:private": "system",
