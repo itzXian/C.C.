@@ -367,12 +367,18 @@ const overrideRules = (config) => {
         "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
+        // GI: 22101-22102
         "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
+        // HSR: 23301/23801
         "AND,((DST-PORT,23301/23801),(NETWORK,udp)),HOYO_BYPASS",
+        // ZZZ: 20501
         "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
     ];
 
-    const Hoyo_GI = ["AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY", "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI"];
+    const Hoyo_GI = [
+        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
+        "DOMAIN,dispatch-hk4e-global-os-asia.hoyoverse.com,HOYO_GI",
+    ];
     const Hoyo_HSR = ["DOMAIN-SUFFIX,starrails.com,HOYO_HSR"];
     const Hoyo_ZZZ = ["DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ"];
     const Hoyo_Proxy = ["DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY", "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY"];
