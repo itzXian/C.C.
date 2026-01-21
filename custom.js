@@ -268,9 +268,9 @@ const overrideTunnel = (config) => {
 }
 
 const overrideProxyGroups = (config) => {
-    const allProxies = config.proxies.map((p) => p.name);
-    const autoProxyGroups = buildAutoProxyGroups(config.proxies);
-    const loadBalanceGroups = buildLoadBalanceGroups(config.proxies);
+    const allProxies = JSON.parse(JSON.stringify(config.proxies || []));
+    const autoProxyGroups = buildAutoProxyGroups(allProxies);
+    const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
 
     const groups = [
         {
@@ -289,9 +289,10 @@ const overrideProxyGroups = (config) => {
         groups.push(...loadBalanceGroups);
     }
 
-    groups[0].proxies.push(...allProxies);
+    groups[0].proxies.push(...allProxies.map((p) => p.name));
 
-    const manualGroup = [];
+    const tempGroups = [];
+    const tempNames = [];
     const providerKeys = safeProvidersKeys(config);
     if (providerKeys.length >= 1) {
         // set `use` for groups and clear proxies for non-MANUAL
@@ -300,9 +301,8 @@ const overrideProxyGroups = (config) => {
             if (g.name !== "MANUAL") g.proxies = [];
         });
 
-        const tempNames = [];
         providerKeys.forEach((provider) => {
-            const newRelay = [
+            const newGroups = [
                 {
                     name: `MANUAL | ${provider}`,
                     type: "select",
@@ -313,13 +313,13 @@ const overrideProxyGroups = (config) => {
             const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, provider);
             const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
             const newAll = [...newAuto, ...newLoad];
-            newRelay[0].proxies.push(...newAll.map((item) => item.name));
-            newRelay.push(...newAll);
-            tempNames.push(newRelay[0].name);
-            manualGroup.push(...newRelay);
+            newGroups[0].proxies.push(...newAll.map((item) => item.name));
+            newGroups.push(...newAll);
+            tempNames.push(newGroups[0].name);
+            tempGroups.push(...newGroups);
         });
         groups[0].proxies.unshift(...tempNames);
-        groups.push(...manualGroup);
+        groups.push(...tempGroups);
     }
 
     const proxyGroupBase = {
@@ -367,13 +367,13 @@ const overrideProxyGroups = (config) => {
     ];
     groups.push(...customProxyGroups);
 
-    if (manualGroup.length) {
+    if (tempGroups.length) {
         groups.forEach((g) => {
-            if (g.name.includes("◯")) {
-                g.proxies.unshift(...manualGroup.map((m) => m.name));
+            if (g.name.includes("〇")) {
+                g.proxies.unshift(...tempGroups.map((m) => m.name));
             }
-            if (g.type === "select" && !g.hidden && manualGroup[0] && !g.proxies.includes(manualGroup[0].name) && !g.name.includes(groups[0].name)) {
-                g.proxies.unshift(manualGroup[0].name);
+            if (g.type === "select" && !g.hidden && tempGroups[0] && !g.proxies.includes(tempGroups[0].name) && !g.name.includes(groups[0].name)) {
+                g.proxies.unshift(...tempNames);
             }
         });
     }
@@ -592,7 +592,7 @@ const overrideRules = (config) => {
 }
 
 const dialerProxy = (config, dialer) => {
-    const newProxy = JSON.parse(JSON.stringify(config.proxies || []));
+    const allProxies = JSON.parse(JSON.stringify(config.proxies || []));
     const relayProviders = {
         "provider-config-relay": {
             type: "inline",
@@ -600,14 +600,14 @@ const dialerProxy = (config, dialer) => {
                 "dialer-proxy": dialer,
                 "additional-prefix": "🛬",
             },
-            payload: newProxy
+            payload: allProxies
         }
     };
 
-    const autoProxyGroups = buildAutoProxyGroups(newProxy, "🛬");
-    const loadBalanceGroups = buildLoadBalanceGroups(newProxy, "🛬");
+    const autoProxyGroups = buildAutoProxyGroups(allProxies, "🛬");
+    const loadBalanceGroups = buildLoadBalanceGroups(allProxies, "🛬");
 
-    const relayProxyGroups = [
+    const groups = [
         {
             name: "RELAY",
             type: "select",
@@ -617,16 +617,16 @@ const dialerProxy = (config, dialer) => {
     ];
 
     if (autoProxyGroups.length) {
-        relayProxyGroups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
-        relayProxyGroups.push(...autoProxyGroups);
+        groups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
+        groups.push(...autoProxyGroups);
     }
     if (loadBalanceGroups.length) {
-        relayProxyGroups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
-        relayProxyGroups.push(...loadBalanceGroups);
+        groups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
+        groups.push(...loadBalanceGroups);
     }
 
     const providerKeys = safeProvidersKeys(config);
-    const relayProxyGroup = [];
+    const tempGroups = [];
     if (providerKeys.length >= 1) {
         const proxyProviders = config["proxy-providers"] || {};
         const tempNames = [];
@@ -642,7 +642,7 @@ const dialerProxy = (config, dialer) => {
                 },
             };
 
-            const newRelay = [
+            const newGroups = [
                 {
                     name: `RELAY | ${provider}`,
                     type: "select",
@@ -655,13 +655,13 @@ const dialerProxy = (config, dialer) => {
             const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, newProvider);
             const newAll = [...newAuto, ...newLoad];
 
-            newRelay[0].proxies.push(...newAll.map((item) => item.name));
-            newRelay.push(...newAll);
-            tempNames.push(newRelay[0].name);
-            relayProxyGroup.push(...newRelay);
+            newGroups[0].proxies.push(...newAll.map((item) => item.name));
+            newGroups.push(...newAll);
+            tempNames.push(newGroups[0].name);
+            tempGroups.push(...newGroups);
         });
 
-        relayProxyGroups[0].proxies.unshift(...tempNames);
+        groups[0].proxies.unshift(...tempNames);
 
         config["proxy-groups"].forEach((g) => {
             if (g.type === "select" && !g.hidden && !g.proxies.includes(tempNames[0]) && !g.name.includes(dialer)) {
@@ -674,27 +674,27 @@ const dialerProxy = (config, dialer) => {
         config["proxy-providers"] = relayProviders;
     }
 
-    relayProxyGroups.forEach((g) => {
+    groups.forEach((g) => {
         g.use = Object.keys(relayProviders);
         if (g.name !== "RELAY") g.proxies = [];
     });
 
-    relayProxyGroup.forEach((g) => {
+    tempGroups.forEach((g) => {
         if (!g.name.includes("RELAY")) g.proxies = [];
     });
 
-    relayProxyGroups.push(...relayProxyGroup);
+    groups.push(...tempGroups);
 
     config["proxy-groups"].forEach((g) => {
         if (g.name.includes("∆")) {
-            g.proxies.unshift(...relayProxyGroups.map((r) => r.name));
+            g.proxies.unshift(...groups.map((r) => r.name));
         }
-        if (g.type === "select" && !g.hidden && !g.proxies.includes(relayProxyGroups[0].name) && !g.name.includes(dialer)) {
-            g.proxies.unshift(relayProxyGroups[0].name);
+        if (g.type === "select" && !g.hidden && !g.proxies.includes(groups[0].name) && !g.name.includes(dialer)) {
+            g.proxies.unshift(groups[0].name);
         }
     });
 
-    config["proxy-groups"].unshift(...relayProxyGroups);
+    config["proxy-groups"].unshift(...groups);
 }
 
 const generateIconUrl = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
