@@ -292,7 +292,6 @@ const overrideProxyGroups = (config) => {
     groups[0].proxies.push(...allProxies.map((p) => p.name));
 
     const tempGroups = [];
-    const tempNames = [];
     const providerKeys = safeProvidersKeys(config);
     if (providerKeys.length >= 1) {
         // set `use` for groups and clear proxies for non-MANUAL
@@ -301,6 +300,7 @@ const overrideProxyGroups = (config) => {
             if (g.name !== "MANUAL") g.proxies = [];
         });
 
+        const tempNames = [];
         providerKeys.forEach((provider) => {
             const newGroups = [
                 {
@@ -370,10 +370,10 @@ const overrideProxyGroups = (config) => {
     if (tempGroups.length) {
         groups.forEach((g) => {
             if (g.name.includes("〇")) {
-                g.proxies.unshift(...tempGroups.map((m) => m.name));
-            }
-            if (g.type === "select" && !g.hidden && tempGroups[0] && !g.proxies.includes(tempGroups[0].name) && !g.name.includes(groups[0].name)) {
-                g.proxies.unshift(...tempNames);
+                g.proxies.push(...tempGroups
+                    .map((m) => m.name)
+                    .filter((name) => !name.includes(groups[0].name))
+                );
             }
         });
     }
@@ -629,8 +629,8 @@ const dialerProxy = (config, dialer) => {
     const tempGroups = [];
     if (providerKeys.length >= 1) {
         const proxyProviders = config["proxy-providers"] || {};
-        const tempNames = [];
 
+        const tempNames = [];
         providerKeys.forEach((provider) => {
             const newProvider = `${provider}-relay`;
             relayProviders[newProvider] = {
@@ -665,7 +665,7 @@ const dialerProxy = (config, dialer) => {
 
         config["proxy-groups"].forEach((g) => {
             if (g.type === "select" && !g.hidden && !g.proxies.includes(tempNames[0]) && !g.name.includes(dialer)) {
-                g.proxies.unshift(...tempNames);
+                g.proxies.splice(1, 0, ...tempNames);
             }
         });
 
@@ -687,10 +687,13 @@ const dialerProxy = (config, dialer) => {
 
     config["proxy-groups"].forEach((g) => {
         if (g.name.includes("∆")) {
-            g.proxies.unshift(...groups.map((r) => r.name));
+            g.proxies.push(...groups
+                .map((r) => r.name)
+                .filter((name) => !name.includes(groups[0].name))
+            );
         }
         if (g.type === "select" && !g.hidden && !g.proxies.includes(groups[0].name) && !g.name.includes(dialer)) {
-            g.proxies.unshift(groups[0].name);
+            g.proxies.splice(1, 0, groups[0].name);
         }
     });
 
