@@ -302,7 +302,7 @@ const overrideProxyGroups = (config) => {
 
         const tempNames = [];
         providerKeys.forEach((provider) => {
-            const proxyGroupOfProvider = [
+            const newRelay = [
                 {
                     name: `MANUAL | ${provider}`,
                     type: "select",
@@ -313,10 +313,10 @@ const overrideProxyGroups = (config) => {
             const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, provider);
             const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
             const newAll = [...newAuto, ...newLoad];
-            proxyGroupOfProvider[0].proxies.push(...newAll.map((item) => item.name));
-            proxyGroupOfProvider.push(...newAll);
-            tempNames.push(proxyGroupOfProvider[0].name);
-            manualGroup.push(...proxyGroupOfProvider);
+            newRelay[0].proxies.push(...newAll.map((item) => item.name));
+            newRelay.push(...newAll);
+            tempNames.push(newRelay[0].name);
+            manualGroup.push(...newRelay);
         });
         groups[0].proxies.unshift(...tempNames);
         groups.push(...manualGroup);
@@ -592,20 +592,20 @@ const overrideRules = (config) => {
 }
 
 const dialerProxy = (config, dialer) => {
-    const exitNode = JSON.parse(JSON.stringify(config.proxies || []));
+    const newProxy = JSON.parse(JSON.stringify(config.proxies || []));
     const relayProviders = {
         "provider-config-relay": {
             type: "inline",
             override: {
                 "dialer-proxy": dialer,
-                "additional-prefix": " 🛬",
+                "additional-prefix": "🛬",
             },
-            payload: exitNode
+            payload: newProxy
         }
     };
 
-    const autoProxyGroups = buildAutoProxyGroups(exitNode, "🛬");
-    const loadBalanceGroups = buildLoadBalanceGroups(exitNode, "🛬");
+    const autoProxyGroups = buildAutoProxyGroups(newProxy, "🛬");
+    const loadBalanceGroups = buildLoadBalanceGroups(newProxy, "🛬");
 
     const relayProxyGroups = [
         {
@@ -632,33 +632,33 @@ const dialerProxy = (config, dialer) => {
         const tempNames = [];
 
         providerKeys.forEach((provider) => {
-            // create a relay variant of the provider with overrides
-            relayProviders[`${provider}-relay`] = {
+            const newProvider = `${provider}-relay`;
+            relayProviders[newProvider] = {
                 ...proxyProviders[provider],
                 override: {
                     ...proxyProviders[provider]?.override,
                     "dialer-proxy": dialer,
-                    "additional-suffix": " 🛬",
+                    "additional-suffix": "🛬",
                 },
             };
 
-            const proxyGroupOfProvider = [
+            const newRelay = [
                 {
                     name: `RELAY | ${provider}`,
                     type: "select",
                     proxies: [],
-                    use: [`${provider}-relay`],
+                    use: [newProvider],
                 }
             ];
 
-            const autoProxyGroup = recreateProxyGroupWithProvider(autoProxyGroups, `${provider}-relay`);
-            const loadBalanceGroup = recreateProxyGroupWithProvider(loadBalanceGroups, `${provider}-relay`);
-            const newAll = [...autoProxyGroup, ...loadBalanceGroup];
+            const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, newProvider);
+            const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, newProvider);
+            const newAll = [...newAuto, ...newLoad];
 
-            proxyGroupOfProvider[0].proxies.push(...newAll.map((item) => item.name));
-            proxyGroupOfProvider.push(...newAll);
-            tempNames.push(proxyGroupOfProvider[0].name);
-            relayProxyGroup.push(...proxyGroupOfProvider);
+            newRelay[0].proxies.push(...newAll.map((item) => item.name));
+            newRelay.push(...newAll);
+            tempNames.push(newRelay[0].name);
+            relayProxyGroup.push(...newRelay);
         });
 
         relayProxyGroups[0].proxies.unshift(...tempNames);
