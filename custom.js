@@ -44,19 +44,27 @@ const makeAutoRegexes = (() => {
     // build once to avoid recompilation
     const auto = [
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JP HY2❌", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTWAU HY2✅", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
         { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+   { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+        { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
+        { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
     ];
     const load = [
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JP HY2❌", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSG", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
+        { name: "JPHKSGTWAU HY2✅", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
+        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
         { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
+        { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
+        { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
     ];
     return () => ({ auto, load });
 })();
@@ -84,6 +92,7 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
             interval: CONST.INTERVAL,
             tolerance: CONST.TOLERANCE,
             filter: regexToFilterString(item.regex),
+            "exclude-type": item["exclude-type"] ? item["exclude-type"] : "",
             proxies: getProxiesByRegex(proxies, item.regex),
             hidden: true,
         }))
