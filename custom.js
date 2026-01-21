@@ -71,10 +71,10 @@ const buildAutoAndLoadRegexs = () => {
 
 const buildAutoProxyGroups = (proxies, suffix = "") => {
     const { auto } = buildAutoAndLoadRegexs();
-    const exitNameSuffix = suffix ? ` ${suffix}` : "";
+    const newNameSuffix = suffix ? suffix : "";
     return auto
         .map((item) => ({
-            name: `AUTO | ${item.name}${exitNameSuffix}`,
+            name: `AUTO | ${item.name}${newNameSuffix}`,
             type: "url-test",
             url: "https://cp.cloudflare.com",
             interval: 300,
@@ -95,24 +95,24 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
         hidden: true,
         "exclude-filter": "0.[0-9]",
     };
-    const exitNameSuffix = suffix ? ` ${suffix}` : "";
+    const newNameSuffix = suffix ? suffix : "";
     const consistent = load.map((item) => ({
         ...base,
-        name: `CH_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        name: `CH_LOAD_BA | ${item.name}${newNameSuffix}`,
         filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
         proxies: getProxiesByRegex(proxies, item.regex),
         strategy: "consistent-hashing",
     }));
     const roundRobin = load.map((item) => ({
         ...base,
-        name: `RR_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        name: `RR_LOAD_BA | ${item.name}${newNameSuffix}`,
         filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
         proxies: getProxiesByRegex(proxies, item.regex),
         strategy: "round-robin",
     }));
     const sticky = load.map((item) => ({
         ...base,
-        name: `SS_LOAD_BA | ${item.name}${exitNameSuffix}`,
+        name: `SS_LOAD_BA | ${item.name}${newNameSuffix}`,
         filter: `${item.regex}`.replaceAll(/(\/i|\/)/g, ""),
         proxies: getProxiesByRegex(proxies, item.regex),
         strategy: "sticky-sessions",
