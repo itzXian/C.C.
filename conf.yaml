@@ -8,16 +8,16 @@ provider-base-config: &provider
   proxy: DIRECT
 
 proxy-providers:
-  provider1:
+  Provider1:
     <<: *provider
     url: "https://example.com"
     override:
-      additional-prefix: "① "
-  provider2:
+      additional-prefix: "☝🏻 "
+  Provider2:
     <<: *provider
     url: "https://example.com"
     override:
-      additional-prefix: "② "
+      additional-prefix: "✌️ "
 
 proxies:
   - name: DNS

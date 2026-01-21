@@ -69,7 +69,7 @@ const getProxiesByRegex = (proxies, regex) => {
 
 const recreateProxyGroupWithProvider = (group = [], provider) => {
     if (!Array.isArray(group) || group.length === 0) return [];
-    return group.map((e) => ({ ...e, name: `${e.name} | ${provider}`, proxies: [], use: [provider] }));
+    return group.map((e) => ({ ...e, name: `${provider} ${e.name}`, proxies: [], use: [provider] }));
 };
 
 /* ========== 构建自动/负载均衡组 ========== */
@@ -192,8 +192,16 @@ const overrideDns = (config) => {
         "enhanced-mode": "fake-ip",
         "fake-ip-range": "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
-        "fake-ip-filter": [...fakeIpFilter, "geosite:private", "geosite:connectivity-check"],
-        "nameserver-policy": { "+.twimg.com": proxyDns, "+.pximg.net": proxyDns },
+        "fake-ip-filter": [
+            ...fakeIpFilter,
+            "geosite:private",
+            "geosite:connectivity-check"
+        ],
+        "nameserver-policy": {
+            "+.twimg.com": proxyDns,
+            "+.pximg.net": proxyDns,
+            "cdn.discordapp.com": proxyDns,
+        },
         "direct-nameserver": directDns,
         "direct-nameserver-follow-policy": true,
         nameserver: adblockDns,
@@ -258,7 +266,7 @@ const overrideProxyGroups = (config) => {
 
         const tempNames = [];
         providerKeys.forEach((provider) => {
-            const newGroups = [{ name: `MANUAL | ${provider}`, type: "select", proxies: [], use: [provider] }];
+            const newGroups = [{ name: `MANUAL ${provider}`, type: "select", proxies: [], use: [provider] }];
             const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, provider);
             const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, provider);
             const newAll = [...newAuto, ...newLoad];
@@ -556,13 +564,13 @@ const dialerProxy = (config, dialer) => {
         const tempNames = [];
 
         providerKeys.forEach((provider) => {
-            const newProvider = `${provider}-relay`;
+            const newProvider = `${provider}-Relay`;
             relayProviders[newProvider] = {
                 ...proxyProviders[provider],
                 override: { ...proxyProviders[provider]?.override, "dialer-proxy": dialer, "additional-suffix": "🛬" },
             };
 
-            const newGroups = [{ name: `RELAY | ${provider}`, type: "select", proxies: [], use: [newProvider] }];
+            const newGroups = [{ name: `RELAY ${provider}`, type: "select", proxies: [], use: [newProvider] }];
             const newAuto = recreateProxyGroupWithProvider(autoProxyGroups, newProvider);
             const newLoad = recreateProxyGroupWithProvider(loadBalanceGroups, newProvider);
             const newAll = [...newAuto, ...newLoad];
