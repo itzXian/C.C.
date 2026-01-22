@@ -29,32 +29,15 @@ const includeTerms = {
 const safeProvidersKeys = (config) => Object.keys(config?.["proxy-providers"] || {});
 
 const deepClone = (obj) => {
-    // structuredClone when available is faster and preserves more types
-    try {
-        return typeof structuredClone === "function" ? structuredClone(obj) : JSON.parse(JSON.stringify(obj));
-    } catch {
-        return JSON.parse(JSON.stringify(obj));
-    }
+    return typeof structuredClone === "function" ? structuredClone(obj) : JSON.parse(JSON.stringify(obj));
 };
 
 const regexToFilterString = (r) => String(r).replace(CONST.REGEX_REMOVE, "");
 
 /* ========== 预构建的正则（缓存） ========== */
 const makeAutoRegexes = (() => {
-    // build once to avoid recompilation
-    const auto = [
-        { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JP HY2❌", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
-        { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${includeTerms.SG})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "JPHKSGTWAU HY2✅", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
-        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${includeTerms.JP}|${includeTerms.HK}|${includeTerms.SG}|${includeTerms.TW}|${includeTerms.AU})(?!.*${excludeTerms}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${excludeTerms}|${includeTerms.JP}).)*$`, "i") },
-   { name: "ALL", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i") },
-        { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
-        { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
-    ];
-    const load = [
+    // build once to avoid recompilation - single definition used for both
+    const regexes = [
         { name: "JP", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i") },
         { name: "JP HY2❌", regex: new RegExp(`^(?=.*${includeTerms.JP})(?!.*${excludeTerms}).*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
         { name: "HK", regex: new RegExp(`^(?=.*${includeTerms.HK})(?!.*${excludeTerms}).*$`, "i") },
@@ -66,7 +49,7 @@ const makeAutoRegexes = (() => {
         { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
         { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${excludeTerms}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
     ];
-    return () => ({ auto, load });
+    return () => ({ auto: regexes, load: regexes });
 })();
 
 /* ========== 代理/组相关辅助 ========== */
@@ -103,19 +86,20 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
     const { load } = makeAutoRegexes();
     const s = suffix || "";
     const base = { type: "load-balance", url: CONST.DNS_TEST_URL, interval: CONST.INTERVAL, hidden: true, "exclude-filter": "0.[0-9]" };
+    const strategies = ["consistent-hashing", "round-robin", "sticky-sessions"];
+    const prefixes = ["CH_LOAD_BA", "RR_LOAD_BA", "SS_LOAD_BA"];
 
-    const mk = (prefix, strategy) =>
+    return strategies.flatMap((strategy, idx) =>
         load
             .map((item) => ({
                 ...base,
-                name: `${prefix} | ${item.name}${s}`,
+                name: `${prefixes[idx]} | ${item.name}${s}`,
                 filter: regexToFilterString(item.regex),
                 proxies: getProxiesByRegex(proxies, item.regex),
                 strategy,
             }))
-            .filter((g) => g.proxies.length > 0);
-
-    return [...mk("CH_LOAD_BA", "consistent-hashing"), ...mk("RR_LOAD_BA", "round-robin"), ...mk("SS_LOAD_BA", "sticky-sessions")];
+            .filter((g) => g.proxies.length > 0)
+    );
 };
 
 /* ========== 覆写函数 ========== */
@@ -240,11 +224,14 @@ const overrideTunnel = (config) => {
 };
 
 /* ========== 生成与注入 proxy-groups ========== */
-const buildProxyGroupBase = (groupNames) => ({
-    jpAutoFirst: { type: "select", proxies: ["CUSTOM", "MANUAL", ...groupNames, "DIRECT", "REJECT"] },
-    directFirst: { type: "select", proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
-    rejectFirst: { type: "select", proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
-});
+const buildProxyGroupBase = (groupNames) => {
+    const jpAutoFirst = { type: "select", proxies: ["CUSTOM", "MANUAL", ...groupNames, "DIRECT", "REJECT"] };
+    return {
+        jpAutoFirst,
+        directFirst: { ...jpAutoFirst, proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
+        rejectFirst: { ...jpAutoFirst, proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
+    };
+};
 
 const overrideProxyGroups = (config) => {
     const allProxies = deepClone(config.proxies || []);
@@ -291,33 +278,35 @@ const overrideProxyGroups = (config) => {
 
     const proxyGroupBase = buildProxyGroupBase(groups[0].proxies);
 
+    const createProxyGroup = (name, base, extraProxies) => ({ ...base, name, proxies: extraProxies ? [...extraProxies, ...base.proxies] : base.proxies });
+
     const customProxyGroups = [
         { name: "CUSTOM", type: "select", proxies: ["MANUAL", "DIRECT", "REJECT", ...groups[0].proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_CN_PROXY", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.directFirst, name: "HOYO_BYPASS" },
-        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_GI", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_HSR", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_ZZZ", proxies: ["HOYO_PROXY", "HOYO_BYPASS", ...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "HOYO_PROXY", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.rejectFirst, name: "MIUI_BLOATWARE" },
-        { ...proxyGroupBase.rejectFirst, name: "AD_BLOCK" },
-        { ...proxyGroupBase.directFirst, name: "STEAM_CN" },
-        { ...proxyGroupBase.jpAutoFirst, name: "STEAM" },
-        { ...proxyGroupBase.jpAutoFirst, name: "PIXIV" },
-        { ...proxyGroupBase.jpAutoFirst, name: "AI" },
-        { ...proxyGroupBase.jpAutoFirst, name: "YOUTUBE" },
-        { ...proxyGroupBase.jpAutoFirst, name: "GOOGLE" },
-        { ...proxyGroupBase.jpAutoFirst, name: "TWITTER" },
-        { ...proxyGroupBase.jpAutoFirst, name: "TELEGRAM" },
-        { ...proxyGroupBase.jpAutoFirst, name: "DISCORD" },
-        { ...proxyGroupBase.jpAutoFirst, name: "MICROSOFT" },
-        { ...proxyGroupBase.jpAutoFirst, name: "APPLE" },
-        { ...proxyGroupBase.jpAutoFirst, name: "NON_JP ∆", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "DOWNLOAD 〇", proxies: [...proxyGroupBase.jpAutoFirst.proxies] },
-        { ...proxyGroupBase.jpAutoFirst, name: "JP" },
-        { ...proxyGroupBase.jpAutoFirst, name: "PROXY" },
-        { ...proxyGroupBase.directFirst, name: "BYPASS" },
-        { ...proxyGroupBase.jpAutoFirst, name: "FINAL" },
+        createProxyGroup("HOYO_CN_PROXY", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
+        createProxyGroup("HOYO_GI", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_HSR", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_ZZZ", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_PROXY", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("MIUI_BLOATWARE", proxyGroupBase.rejectFirst),
+        createProxyGroup("AD_BLOCK", proxyGroupBase.rejectFirst),
+        createProxyGroup("STEAM_CN", proxyGroupBase.directFirst),
+        createProxyGroup("STEAM", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("PIXIV", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("AI", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("YOUTUBE", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("GOOGLE", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("TWITTER", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("TELEGRAM", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("DISCORD", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("MICROSOFT", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("APPLE", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("NON_JP ∆", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("JP", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("PROXY", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("BYPASS", proxyGroupBase.directFirst),
+        createProxyGroup("FINAL", proxyGroupBase.jpAutoFirst),
     ];
 
     groups.push(...customProxyGroups);
