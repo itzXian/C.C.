@@ -77,7 +77,6 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
             proxies: GET_PROXIES_BY_REGEX(proxies, item.regex),
             hidden: true,
         }))
-        .filter((g) => g.proxies.length > 0);
 };
 
 const buildLoadBalanceGroups = (proxies, suffix = "") => {
@@ -96,7 +95,6 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
                 proxies: GET_PROXIES_BY_REGEX(proxies, item.regex),
                 strategy,
             }))
-            .filter((g) => g.proxies.length > 0)
     );
 };
 
@@ -462,24 +460,19 @@ const overrideProxyGroups = (config) => {
     const allProxies = DEEP_CLONE(config.proxies || []);
     const autoProxyGroups = buildAutoProxyGroups(allProxies);
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
+    const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
 
     const groups = [{ name: "MANUAL", type: "select", proxies: [] }];
-
-    if (autoProxyGroups.length) {
-        groups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
-        groups.push(...autoProxyGroups);
-    }
-    if (loadBalanceGroups.length) {
-        groups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
-        groups.push(...loadBalanceGroups);
-    }
-
-    groups[0].proxies.push(...allProxies.map((p) => p.name));
 
     const providerKeys = SAFE_PROVIDERS_KEYS(config);
     const tempGroups = [];
 
     if (providerKeys.length) {
+        groups[0].proxies.push(...allGroups.map((g) => g.name));
+        groups.push(...allGroups);
+
+        groups[0].proxies.push(...allProxies.map((p) => p.name));
+
         groups.forEach((g) => {
             g.use = providerKeys.slice();
             if (g.name !== "MANUAL") g.proxies = [];
@@ -500,6 +493,12 @@ const overrideProxyGroups = (config) => {
 
         groups[0].proxies.unshift(...tempNames);
         groups.push(...tempGroups);
+    } else {
+        const nonEmptyGroups = allGroups.filter((g) => !g.proxies.includes("COMPATIBLE"));
+        groups[0].proxies.push(...nonEmptyGroups.map((g) => g.name));
+        groups.push(...nonEmptyGroups);
+
+        groups[0].proxies.push(...allProxies.map((p) => p.name));
     }
 
     const proxyGroupBase = buildProxyGroupBase(groups[0].proxies);
@@ -557,22 +556,17 @@ const dialerProxy = (config, dialer) => {
 
     const autoProxyGroups = buildAutoProxyGroups(allProxies, "🛬");
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies, "🛬");
+    const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
 
     const groups = [{ name: "RELAY", type: "select", proxies: [], "exclude-filter":  EXCLUDE_TERMS }];
-
-    if (autoProxyGroups.length) {
-        groups[0].proxies.push(...autoProxyGroups.map((g) => g.name));
-        groups.push(...autoProxyGroups);
-    }
-    if (loadBalanceGroups.length) {
-        groups[0].proxies.push(...loadBalanceGroups.map((g) => g.name));
-        groups.push(...loadBalanceGroups);
-    }
 
     const providerKeys = SAFE_PROVIDERS_KEYS(config);
     const tempGroups = [];
 
     if (providerKeys.length) {
+        groups[0].proxies.push(...allGroups.map((g) => g.name));
+        groups.push(...allGroups);
+
         const proxyProviders = config["proxy-providers"] || {};
         const tempNames = [];
 
@@ -606,6 +600,10 @@ const dialerProxy = (config, dialer) => {
 
         Object.assign((config["proxy-providers"] = config["proxy-providers"] || {}), relayProviders);
     } else {
+        const nonEmptyGroups = allGroups.filter((g) => !g.proxies.includes("COMPATIBLE"));
+        groups[0].proxies.push(...nonEmptyGroups.map((g) => g.name));
+        groups.push(...nonEmptyGroups);
+
         config["proxy-providers"] = relayProviders;
     }
 
