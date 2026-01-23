@@ -374,6 +374,8 @@ const RULE_SETS = {
 
 const overrideRules = (config) => {
     const customRules = [
+        ...RULE_SETS.Download,
+        "DOMAIN-SUFFIX,workers.dev,WORKERS.DEV 〇",
         ...RULE_SETS.Hoyo_GI_CN,
         ...RULE_SETS.Hoyo_Bypass,
         ...RULE_SETS.Hoyo_GI,
@@ -400,8 +402,6 @@ const overrideRules = (config) => {
         "GEOSITE,apple,APPLE",
         "GEOSITE,apple-intelligence,APPLE",
         "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
-        ...RULE_SETS.Download,
-        "DOMAIN-SUFFIX,workers.dev,WORKERS.DEV 〇",
         "GEOIP,JP,JP,no-resolve",
         "GEOSITE,geolocation-!cn,PROXY",
         "GEOSITE,private,BYPASS",
@@ -421,6 +421,8 @@ const ICON_MAP = {
     RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
     MANUAL:  GENERATE_ICON_URL("manual"),
     CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+    "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+    "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
     HOYO_GI_CN: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
     HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
     HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
@@ -441,8 +443,6 @@ const ICON_MAP = {
     MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
     APPLE:  "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
     "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
     JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
     PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
     BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
@@ -505,7 +505,9 @@ const overrideProxyGroups = (config) => {
     const proxyGroupBase = buildProxyGroupBase(groups[0].proxies);
 
     const customProxyGroups = [
-        { name: "CUSTOM", type:  "select", proxies: ["MANUAL", "DIRECT", "REJECT", ...groups[0].proxies] },
+        { name: "CUSTOM", type:  "select", proxies: ["MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
+        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.jpAutoFirst, ["DOWNLOAD 〇"]),
         createProxyGroup("HOYO_GI_CN", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
         createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
         createProxyGroup("HOYO_GI", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
@@ -526,8 +528,6 @@ const overrideProxyGroups = (config) => {
         createProxyGroup("MICROSOFT", proxyGroupBase.jpAutoFirst),
         createProxyGroup("APPLE", proxyGroupBase.jpAutoFirst),
         createProxyGroup("NON_JP ∆", proxyGroupBase.jpAutoFirst),
-        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst),
-        createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.jpAutoFirst),
         createProxyGroup("JP", proxyGroupBase.jpAutoFirst),
         createProxyGroup("PROXY", proxyGroupBase.jpAutoFirst),
         createProxyGroup("BYPASS", proxyGroupBase.directFirst),
@@ -599,7 +599,8 @@ const dialerProxy = (config, dialer) => {
 
         (config["proxy-groups"] || []).forEach((g) => {
             if (g.type === "select" && !g.hidden && !g.proxies.includes(tempNames[0]) && !g.name.includes(dialer)) {
-                g.proxies.splice(1, 0, ...tempNames);
+                const n = g.proxies.indexOf("CUSTOM") >= 0 ? g.proxies.indexOf("CUSTOM") + 1 : 0;
+                g.proxies.splice(n, 0, ...tempNames);
             }
         });
 
@@ -624,7 +625,8 @@ const dialerProxy = (config, dialer) => {
             g.proxies.push(...groups.map((r) => r.name).filter((name) => !name.includes(groups[0].name)));
         }
         if (g.type === "select" && !g.hidden && !g.proxies.includes(groups[0].name) && !g.name.includes(dialer)) {
-            g.proxies.splice(1, 0, groups[0].name);
+            const n = g.proxies.indexOf("CUSTOM") >= 0 ? g.proxies.indexOf("CUSTOM") + 1 : 0;
+            g.proxies.splice(n, 0, groups[0].name);
         }
     });
 
