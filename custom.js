@@ -222,10 +222,10 @@ const overrideRuleProviders = (config) => {
     };
 
     config["rule-providers"] = {
-        Hoyo_CN_Proxy: {
+        Hoyo_GI_CN: {
             ...ruleProviderBase.Classical,
-            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_CN_Proxy.list",
-            path: "./Hoyo_CN_Proxy.list",
+            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_GI_CN.list",
+            path: "./Hoyo_GI_CN.list",
         },
         Hoyo_Bypass: {
             ...ruleProviderBase.Classical,
@@ -247,12 +247,12 @@ const overrideRuleProviders = (config) => {
 
 /* ========== Rules Configuration ========== */
 const RULE_SETS = {
-    Hoyo_CN_Proxy: [
-        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_CN_PROXY",
-        "DOMAIN,autopatchhk.yuanshen.com,HOYO_CN_PROXY",
-        "DOMAIN,oseurodispatch.yuanshen.com,HOYO_CN_PROXY",
-        "DOMAIN,osusadispatch.yuanshen.com,HOYO_CN_PROXY",
-        "DOMAIN,osuspider.yuanshen.com,HOYO_CN_PROXY",
+    Hoyo_GI_CN: [
+        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_GI_CN",
+        "DOMAIN,autopatchhk.yuanshen.com,HOYO_GI_CN",
+        "DOMAIN,oseurodispatch.yuanshen.com,HOYO_GI_CN",
+        "DOMAIN,osusadispatch.yuanshen.com,HOYO_GI_CN",
+        "DOMAIN,osuspider.yuanshen.com,HOYO_GI_CN",
     ],
     Hoyo_Bypass: [
         "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
@@ -368,13 +368,13 @@ const RULE_SETS = {
     Download:  [
         "DOMAIN-REGEX,api.[\\w]+raplay.com,DOWNLOAD 〇",
         "DOMAIN-REGEX,[\\w]+.raplay.*workers.dev,DOWNLOAD 〇",
-        "DOMAIN-REGEX,.*\\.[\\w]+[eo](hu|ze).workers.dev,DOWNLOAD 〇",
+        "DOMAIN-REGEX,.*\\.[\\w]+[eo](hu|ze|ko).workers.dev,DOWNLOAD 〇",
     ],
 };
 
 const overrideRules = (config) => {
     const customRules = [
-        ...RULE_SETS.Hoyo_CN_Proxy,
+        ...RULE_SETS.Hoyo_GI_CN,
         ...RULE_SETS.Hoyo_Bypass,
         ...RULE_SETS.Hoyo_GI,
         ...RULE_SETS.Hoyo_HSR,
@@ -419,7 +419,7 @@ const ICON_MAP = {
     RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
     MANUAL:  GENERATE_ICON_URL("manual"),
     CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
-    HOYO_CN_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+    HOYO_GI_CN: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
     HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
     HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
     HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
@@ -503,7 +503,7 @@ const overrideProxyGroups = (config) => {
 
     const customProxyGroups = [
         { name: "CUSTOM", type:  "select", proxies: ["MANUAL", "DIRECT", "REJECT", ...groups[0].proxies] },
-        createProxyGroup("HOYO_CN_PROXY", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_GI_CN", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
         createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
         createProxyGroup("HOYO_GI", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
         createProxyGroup("HOYO_HSR", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
