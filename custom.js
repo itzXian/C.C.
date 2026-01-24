@@ -477,8 +477,7 @@ const setProxyGroupIcon = (config) => {
 
 /* ========== Proxy Groups Override ========== */
 const overrideProxyGroups = (config) => {
-    // shallow-copy names only to avoid expensive deep clone when possible
-    const allProxies = (config.proxies || []).map((p) => ({ name: p.name }));
+    const allProxies = DEEP_CLONE(config.proxies || []);
     const autoProxyGroups = buildAutoProxyGroups(allProxies);
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
     const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
@@ -566,8 +565,7 @@ const overrideProxyGroups = (config) => {
 
 /* ========== Dialer / Relay Support ========== */
 const dialerProxy = (config, dialer) => {
-    // shallow-copy names only to avoid expensive deep clone when possible
-    const allProxies = (config.proxies || []).map((p) => ({ name: p.name }));
+    const allProxies = DEEP_CLONE(config.proxies || []);
     const relayProviders = {
         "provider-config-relay": {
             type: "inline",
