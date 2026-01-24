@@ -58,13 +58,31 @@ const AUTO_REGEX_GROUPS = (() => {
         { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
         { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
     ];
-    return { auto: regexes, load: regexes };
+    // Precompute the regex -> filter string once to avoid repeated String(regex).replace calls
+    regexes.forEach((it) => { it.filter = REGEX_TO_FILTER_STRING(it.regex); });
+
+    // Cache computation of matched proxy names per regex for a given proxies list.
+    const computeMatchesForProxies = (proxies) => {
+        const names = (proxies || []).map((p) => p.name || "");
+        for (let i = 0; i < regexes.length; i++) {
+            const it = regexes[i];
+            const matched = [];
+            for (let j = 0; j < names.length; j++) {
+                const n = names[j];
+                if (it.regex.test(n)) matched.push(n);
+            }
+            it._matched = matched.length ? matched : ["COMPATIBLE"];
+        }
+    };
+
+    return { auto: regexes, load: regexes, computeMatchesForProxies };
 })();
 
 /* ========== Group Builder Functions ========== */
 const buildAutoProxyGroups = (proxies, suffix = "") => {
-    const { auto } = AUTO_REGEX_GROUPS;
+    const { auto, computeMatchesForProxies } = AUTO_REGEX_GROUPS;
     const s = suffix || "";
+    computeMatchesForProxies(proxies);
     return auto
         .map((item) => ({
             name: `AUTO | ${item.name}${s}`,
@@ -72,27 +90,29 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
             url:  CONST.DNS_TEST_URL,
             interval: CONST.INTERVAL,
             tolerance: CONST.TOLERANCE,
-            filter: REGEX_TO_FILTER_STRING(item.regex),
+            filter: item.filter,
             "exclude-type": item["exclude-type"] ?  item["exclude-type"] : "",
-            proxies: GET_PROXIES_BY_REGEX(proxies, item.regex),
+            proxies: item._matched,
             hidden: true,
         }))
 };
 
 const buildLoadBalanceGroups = (proxies, suffix = "") => {
-    const { load } = AUTO_REGEX_GROUPS;
+    const { load, computeMatchesForProxies } = AUTO_REGEX_GROUPS;
     const s = suffix || "";
     const base = { type: "load-balance", url: CONST.DNS_TEST_URL, interval: CONST.INTERVAL, hidden: true, "exclude-filter": "0.[0-9]" };
     const strategies = ["consistent-hashing", "round-robin", "sticky-sessions"];
     const prefixes = ["CH_LOAD_BA", "RR_LOAD_BA", "SS_LOAD_BA"];
+
+    computeMatchesForProxies(proxies);
 
     return strategies.flatMap((strategy, idx) =>
         load
             .map((item) => ({
                 ...base,
                 name: `${prefixes[idx]} | ${item.name}${s}`,
-                filter: REGEX_TO_FILTER_STRING(item.regex),
-                proxies: GET_PROXIES_BY_REGEX(proxies, item.regex),
+                filter: item.filter,
+                proxies: item._matched,
                 strategy,
             }))
     );
@@ -457,7 +477,8 @@ const setProxyGroupIcon = (config) => {
 
 /* ========== Proxy Groups Override ========== */
 const overrideProxyGroups = (config) => {
-    const allProxies = DEEP_CLONE(config.proxies || []);
+    // shallow-copy names only to avoid expensive deep clone when possible
+    const allProxies = (config.proxies || []).map((p) => ({ name: p.name }));
     const autoProxyGroups = buildAutoProxyGroups(allProxies);
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
     const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
@@ -545,7 +566,8 @@ const overrideProxyGroups = (config) => {
 
 /* ========== Dialer / Relay Support ========== */
 const dialerProxy = (config, dialer) => {
-    const allProxies = DEEP_CLONE(config.proxies || []);
+    // shallow-copy names only to avoid expensive deep clone when possible
+    const allProxies = (config.proxies || []).map((p) => ({ name: p.name }));
     const relayProviders = {
         "provider-config-relay": {
             type: "inline",
@@ -649,4 +671,4 @@ const main = (config) => {
     return config;
 };
 
-// module.exports = { main };
+//module.exports = { main };
