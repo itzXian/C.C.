@@ -4,9 +4,9 @@
 
 /* ========== Constants & Utilities ========== */
 const CONST = {
-    DNS_TEST_URL: "https://cp.cloudflare.com",
+    DNS_TEST_URL: "http://www.google.com/generate_204",
     INTERVAL: 300,
-    TOLERANCE: 50,
+    TOLERANCE: 100,
     REGEX_REMOVE: /(\/i|\/)/g,
 };
 
@@ -42,15 +42,10 @@ const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
 const AUTO_REGEX_GROUPS = (() => {
     const regexes = [
         { name: "JP", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.JP})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "JP HY2❌", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.JP})(?!.*${EXCLUDE_TERMS}).*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
         { name: "HK", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.HK})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
         { name: "SG", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.SG})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "JPHKSGTWAU HY2✅", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}|${INCLUDE_TERMS.TW}|${INCLUDE_TERMS.AU})(?!.*${EXCLUDE_TERMS}).*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
-        { name: "JPHKSGTWAU", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}|${INCLUDE_TERMS.TW}|${INCLUDE_TERMS.AU})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
         { name: "NON-JP", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}|${INCLUDE_TERMS.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i") },
-        { name: "ALL HY2✅", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i"), "exclude-type": "vless|Vless|vmess|Vmess" },
-        { name: "ALL HY2❌", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i"), "exclude-type": "hysteria2|Hysteria2" },
     ];
     // Precompute the regex -> filter string once to avoid repeated String(regex).replace calls
     regexes.forEach((it) => { it.filter = REGEX_TO_FILTER_STRING(it.regex); });
@@ -86,7 +81,7 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
             interval: CONST.INTERVAL,
             filter: item.filter,
             "exclude-filter": "0.[0-9]",
-            "exclude-type": item["exclude-type"] ?  item["exclude-type"] : "",
+            "exclude-type": item["exclude-type"] || "",
             proxies: item._matched,
             tolerance: CONST.TOLERANCE,
         }))
@@ -110,7 +105,7 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
                 interval: CONST.INTERVAL,
                 filter: item.filter,
                 "exclude-filter": "0.[0-9]",
-                "exclude-type": item["exclude-type"] ?  item["exclude-type"] : "",
+                "exclude-type": item["exclude-type"] || "",
                 proxies: item._matched,
                 strategy,
             }))
@@ -523,8 +518,8 @@ const overrideProxyGroups = (config) => {
     const proxyGroupBase = buildProxyGroupBase(groups[0].proxies);
 
     const customProxyGroups = [
-        { name: "CUSTOM", type:  "select", proxies: ["MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
-        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst),
+        { name: "CUSTOM", type: "select", proxies: ["MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
+        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst, []),
         createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.jpAutoFirst, ["DOWNLOAD 〇"]),
         createProxyGroup("HOYO_GI_CN", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
         createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
@@ -545,7 +540,7 @@ const overrideProxyGroups = (config) => {
         createProxyGroup("DISCORD", proxyGroupBase.jpAutoFirst),
         createProxyGroup("MICROSOFT", proxyGroupBase.jpAutoFirst),
         createProxyGroup("APPLE", proxyGroupBase.jpAutoFirst),
-        createProxyGroup("NON_JP ∆", proxyGroupBase.jpAutoFirst),
+        createProxyGroup("NON_JP ∆", proxyGroupBase.jpAutoFirst, []),
         createProxyGroup("JP", proxyGroupBase.jpAutoFirst),
         createProxyGroup("PROXY", proxyGroupBase.jpAutoFirst),
         createProxyGroup("BYPASS", proxyGroupBase.directFirst),
