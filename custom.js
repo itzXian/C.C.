@@ -23,7 +23,6 @@ const INCLUDE_TERMS = {
     UK: "(英国|UK|United Kingdom|🇬🇧)",
     FR: "(法国|FR|France|🇫🇷)",
     DE: "(德国|DE|Germany|🇩🇪)",
-    DIA: "(专线)",
 };
 
 const DEEP_CLONE = (obj) => {
@@ -33,11 +32,6 @@ const DEEP_CLONE = (obj) => {
 const REGEX_TO_FILTER_STRING = (r) => String(r).replace(CONST.REGEX_REMOVE, "");
 
 const SAFE_PROVIDERS_KEYS = (config) => Object.keys(config?.["proxy-providers"] || {});
-
-const GET_PROXIES_BY_REGEX = (proxies, regex) => {
-    const matched = (proxies || []).filter((p) => regex.test(p.name)).map((p) => p.name);
-    return matched.length ?  matched : ["COMPATIBLE"];
-};
 
 const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
     if (!Array.isArray(group) || group.length === 0) return [];
@@ -85,22 +79,22 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
     computeMatchesForProxies(proxies);
     return auto
         .map((item) => ({
+            hidden: true,
             name: `AUTO | ${item.name}${s}`,
             type: "url-test",
             url:  CONST.DNS_TEST_URL,
             interval: CONST.INTERVAL,
-            tolerance: CONST.TOLERANCE,
             filter: item.filter,
+            "exclude-filter": "0.[0-9]",
             "exclude-type": item["exclude-type"] ?  item["exclude-type"] : "",
             proxies: item._matched,
-            hidden: true,
+            tolerance: CONST.TOLERANCE,
         }))
 };
 
 const buildLoadBalanceGroups = (proxies, suffix = "") => {
     const { load, computeMatchesForProxies } = AUTO_REGEX_GROUPS;
     const s = suffix || "";
-    const base = { type: "load-balance", url: CONST.DNS_TEST_URL, interval: CONST.INTERVAL, hidden: true, "exclude-filter": "0.[0-9]" };
     const strategies = ["consistent-hashing", "round-robin", "sticky-sessions"];
     const prefixes = ["CH_LOAD_BA", "RR_LOAD_BA", "SS_LOAD_BA"];
 
@@ -109,9 +103,14 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
     return strategies.flatMap((strategy, idx) =>
         load
             .map((item) => ({
-                ...base,
+                hidden: true,
                 name: `${prefixes[idx]} | ${item.name}${s}`,
+                type: "load-balance",
+                url: CONST.DNS_TEST_URL,
+                interval: CONST.INTERVAL,
                 filter: item.filter,
+                "exclude-filter": "0.[0-9]",
+                "exclude-type": item["exclude-type"] ?  item["exclude-type"] : "",
                 proxies: item._matched,
                 strategy,
             }))
