@@ -669,4 +669,5 @@ const main = (config) => {
     return config;
 };
 
-//module.exports = { main };
+const isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
+if (isNode) module.exports = { main };
