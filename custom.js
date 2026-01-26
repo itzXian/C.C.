@@ -4,7 +4,9 @@
 
 /* ========== Constants & Utilities ========== */
 const CONST = {
-    DNS_TEST_URL: "http://www.google.com/generate_204",
+    TEST_URL: "http://www.google.com/generate_204",
+    STATUS_CODES: "200/204/302",
+    TIMEOUT: 3000,
     INTERVAL: 300,
     TOLERANCE: 100,
     REGEX_REMOVE: /(\/i|\/)/g,
@@ -77,7 +79,9 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
             hidden: true,
             name: `AUTO | ${item.name}${s}`,
             type: "url-test",
-            url:  CONST.DNS_TEST_URL,
+            url:  CONST.TEST_URL,
+            "expected-status": CONST.STATUS_CODES,
+            timeout: CONST.TIMEOUT,
             interval: CONST.INTERVAL,
             filter: item.filter,
             "exclude-filter": "0.[0-9]",
@@ -101,7 +105,9 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
                 hidden: true,
                 name: `${prefixes[idx]} | ${item.name}${s}`,
                 type: "load-balance",
-                url: CONST.DNS_TEST_URL,
+                url: CONST.TEST_URL,
+                "expected-status": CONST.STATUS_CODES,
+                timeout: CONST.TIMEOUT,
                 interval: CONST.INTERVAL,
                 filter: item.filter,
                 "exclude-filter": "0.[0-9]",
