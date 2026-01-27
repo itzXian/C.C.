@@ -150,7 +150,7 @@ const overrideBasicOptions = (config) => {
         "log-level": "warning",
         ipv6: false,
         "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
-        secret: crypto.getRandomValues(new BigUint64Array(1))[0].toString(36),
+        secret: Math.random().toString(36).slice(3)
         "find-process-mode": "strict",
         profile: { "store-selected": true, "store-fake-ip": true },
         "unified-delay": true,
