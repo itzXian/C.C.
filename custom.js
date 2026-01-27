@@ -214,19 +214,6 @@ const overrideHosts = (config) => {
     };
 };
 
-const overrideTunnel = (config) => {
-    config.tun = {
-        enable: true,
-        stack: "system",
-        device: "tun0",
-        "dns-hijack": ["any: 53", "tcp://any:53"],
-        "auto-route": true,
-        "auto-detect-interface": true,
-        "strict-route": true,
-        "route-exclude-address": [],
-    };
-};
-
 /* ========== Rule-Providers Configuration ========== */
 const overrideRuleProviders = (config) => {
     const ruleProviderConfig = { type: "http", interval: "3600" };
@@ -659,7 +646,6 @@ const main = (config) => {
     overrideBasicOptions(config);
     overrideDns(config);
     overrideHosts(config);
-    overrideTunnel(config);
     overrideProxyGroups(config);
     // overrideRuleProviders(config); // Uncomment to use remote rule-providers
     overrideRules(config);
