@@ -149,7 +149,7 @@ const overrideBasicOptions = (config) => {
         "geo-update-interval": 24,
         "log-level": "warning",
         ipv6: false,
-        "external-controller": Math.random().toString().slice(2, 6),
+        "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
         secret: crypto.getRandomValues(new BigUint64Array(1))[0].toString(36),
         "find-process-mode": "strict",
         profile: { "store-selected": true, "store-fake-ip": true },
