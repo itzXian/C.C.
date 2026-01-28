@@ -3,8 +3,10 @@ provider-base-config: &provider
   interval: 1440
   health-check:
     enable: true
-    url: https://www.gstatic.com/generate_204
+    url: https://www.google.com/generate_204
     interval: 300
+    timeout: 3000
+    expected-status: 200/204/302
   proxy: DIRECT
 
 proxy-providers:
