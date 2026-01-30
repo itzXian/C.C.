@@ -180,7 +180,7 @@ const overrideBasicOptions = (config) => {
 
 const overrideDns = (config) => {
     const directDns = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
-    const proxyDns = ["tls://8.8.4.4", "tls://1.1.1.1"];
+    const proxyDns = ["tls://1.0.0.1:853", "tls://1.1.1.1", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
     const defaultAdblockDns = ["dns.adguard-dns.com"];
     const overrideAdblockDns = [
     ];
