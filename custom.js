@@ -15,16 +15,16 @@ const CONST = {
 const EXCLUDE_TERMS = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
 
 const INCLUDE_TERMS = {
-    HK: "(香港|HK|Hong|🇭🇰)",
-    TW: "(台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳)",
-    SG: "(新加坡|狮城|SG|Singapore|🇸🇬)",
-    JP: "(日本|JP|Japan|🇯🇵)",
-    KR: "(韩国|韓|KR|Korea|🇰🇷)",
-    AU: "(澳大利亚|澳|AU|Australia|🇦🇺)",
-    US: "(美国|US|United States|America|🇺🇸)",
-    UK: "(英国|UK|United Kingdom|🇬🇧)",
-    FR: "(法国|FR|France|🇫🇷)",
-    DE: "(德国|DE|Germany|🇩🇪)",
+    HK: "香港|HK|Hong|🇭🇰",
+    TW: "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
+    SG: "新加坡|狮城|SG|Singapore|🇸🇬",
+    JP: "日本|JP|Japan|🇯🇵",
+    KR: "韩国|韓|KR|Korea|🇰🇷",
+    AU: "澳大利亚|澳|AU|Australia|🇦🇺",
+    US: "美国|US|United States|America|🇺🇸",
+    UK: "英国|UK|United Kingdom|🇬🇧",
+    FR: "法国|FR|France|🇫🇷",
+    DE: "德国|DE|Germany|🇩🇪",
 };
 
 const DEEP_CLONE = (obj) => {
@@ -41,11 +41,12 @@ const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
 };
 
 /* ========== Pre-built Regex Cache ========== */
-const AUTO_REGEX_GROUPS = (() => {
+const REGEXS = (() => {
     const regexes = [
-        { name: "JP", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.JP})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.HK})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*${INCLUDE_TERMS.SG})(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "JPHKSG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.HK}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
         { name: "NON-JP", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}|${INCLUDE_TERMS.JP}).)*$`, "i") },
         { name: "ALL", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i") },
     ];
@@ -71,7 +72,7 @@ const AUTO_REGEX_GROUPS = (() => {
 
 /* ========== Group Builder Functions ========== */
 const buildAutoProxyGroups = (proxies, suffix = "") => {
-    const { auto, computeMatchesForProxies } = AUTO_REGEX_GROUPS;
+    const { auto, computeMatchesForProxies } = REGEXS;
     const s = suffix || "";
     computeMatchesForProxies(proxies);
     return auto
@@ -92,10 +93,18 @@ const buildAutoProxyGroups = (proxies, suffix = "") => {
 };
 
 const buildLoadBalanceGroups = (proxies, suffix = "") => {
-    const { load, computeMatchesForProxies } = AUTO_REGEX_GROUPS;
+    const { load, computeMatchesForProxies } = REGEXS;
     const s = suffix || "";
-    const strategies = ["consistent-hashing", "round-robin", "sticky-sessions"];
-    const prefixes = ["CH_LOAD_BA", "RR_LOAD_BA", "SS_LOAD_BA"];
+    const strategies = [
+        //"consistent-hashing",
+        "round-robin",
+        //"sticky-sessions",
+    ];
+    const prefixes = [
+        //"CH_LOAD_BA"],
+        "RR_LOAD_BA",
+        //"SS_LOAD_BA"
+    ];
 
     computeMatchesForProxies(proxies);
 
@@ -115,6 +124,7 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
                 proxies: item._matched,
                 strategy,
             }))
+            .filter((item) => item.name.match(/ (HK|SG)/g))
     );
 };
 
