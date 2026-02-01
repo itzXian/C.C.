@@ -159,8 +159,6 @@ const overrideBasicOptions = (config) => {
         "geo-update-interval": 24,
         "log-level": "warning",
         ipv6: false,
-        "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
-        secret: Math.random().toString(36).slice(3),
         "find-process-mode": "strict",
         profile: { "store-selected": true, "store-fake-ip": true },
         "unified-delay": true,
@@ -177,6 +175,16 @@ const overrideBasicOptions = (config) => {
         },
     });
 };
+
+const overrideExternalController = (config) => {
+    Object.assign(config, {
+        "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
+        secret: Math.random().toString(36).slice(2),
+        "external-ui": "ui",
+        "external-ui-name": "zd",
+        "external-ui-url": "https://github.com/Zephyruso/zashboard/releases/download/v2.6.0/dist-no-fonts.zip",
+    })
+}
 
 const overrideDns = (config) => {
     const directDns = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
@@ -656,6 +664,7 @@ const main = (config) => {
     if (!config?.proxies) return config;
 
     overrideBasicOptions(config);
+    overrideExternalController(config);
     overrideDns(config);
     overrideHosts(config);
     overrideProxyGroups(config);
