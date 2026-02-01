@@ -489,7 +489,10 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
     const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
 
-    const groups = [{ name: "MANUAL", type: "select", proxies: [] }];
+    const groups = [
+        { name: "MANUAL", type: "select", proxies: ["FALLBACK"] },
+        { name: "FALLBACK", type: "fallback", proxies: [], hidden: true },
+    ];
 
     const providerKeys = SAFE_PROVIDERS_KEYS(config);
     const tempGroups = [];
@@ -499,15 +502,19 @@ const overrideProxyGroups = (config) => {
         groups.push(...allGroups);
 
         groups[0].proxies.push(...allProxies.map((p) => p.name));
+        groups[1].proxies.push(...allProxies.map((p) => p.name));
 
         groups.forEach((g) => {
             g.use = providerKeys.slice();
-            if (g.name !== "MANUAL") g.proxies = [];
+            if (g.name !== "MANUAL" && g.name !== "FALLBACK") g.proxies = [];
         });
 
         const tempNames = [];
         providerKeys.forEach((provider) => {
-            const newGroups = [{ name: `MANUAL ${provider}`, type: "select", proxies: [], use: [provider] }];
+            const newGroups = [
+                { name: `MANUAL ${provider}`, type: "select", proxies: [], use: [provider] },
+                { name: `FALLBACK ${provider}`, type: "fallback", proxies: [], use: [provider], hidden: true },
+            ];
             const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, provider);
             const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, provider);
             const newAll = [...newAuto, ...newLoad];
@@ -604,7 +611,9 @@ const dialerProxy = (config, dialer) => {
                 override: { ...proxyProviders[provider]?.override, "dialer-proxy": dialer, "additional-suffix": "🛬" },
             };
 
-            const newGroups = [{ name: `RELAY ${provider}`, type: "select", proxies: [], use: [newProvider] }];
+            const newGroups = [
+                { name: `RELAY ${provider}`, type: "select", proxies: [], use: [newProvider] },
+            ];
             const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, newProvider);
             const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, newProvider);
             const newAll = [...newAuto, ...newLoad];
