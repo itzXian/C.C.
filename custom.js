@@ -181,7 +181,6 @@ const overrideExternalController = (config) => {
         "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
         secret: Math.random().toString(36).slice(2),
         "external-ui": "ui",
-        "external-ui-name": "zd",
         "external-ui-url": "https://github.com/Zephyruso/zashboard/releases/download/v2.6.0/dist-no-fonts.zip",
     })
 }
