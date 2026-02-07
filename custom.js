@@ -272,17 +272,18 @@ const overrideRuleProviders = (config) => {
 /* ========== Rules Configuration ========== */
 const RULE_SETS = {
     Hoyo_GI_CN: [
-        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_GI_CN",
         "DOMAIN,autopatchhk.yuanshen.com,HOYO_GI_CN",
         "DOMAIN,oseurodispatch.yuanshen.com,HOYO_GI_CN",
         "DOMAIN,osusadispatch.yuanshen.com,HOYO_GI_CN",
         "DOMAIN,osuspider.yuanshen.com,HOYO_GI_CN",
     ],
+    Hoyo_GI: [
+        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_GI",
+    ],
     Hoyo_GI_UGC: [
         "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com,HOYO_GI_UGC",
     ],
     Hoyo_Bypass: [
-        "DOMAIN,dispatchosglobal.yuanshen.com,HOYO_BYPASS",
         "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
         "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
@@ -409,6 +410,7 @@ const overrideRules = (config) => {
         ...RULE_SETS.Download,
         "DOMAIN-SUFFIX,workers.dev,WORKERS.DEV 〇",
         ...RULE_SETS.Hoyo_GI_CN,
+        ...RULE_SETS.Hoyo_GI,
         ...RULE_SETS.Hoyo_GI_UGC,
         ...RULE_SETS.Hoyo_Bypass,
         ...RULE_SETS.Hoyo_Proxy,
@@ -541,7 +543,8 @@ const overrideProxyGroups = (config) => {
         createProxyGroup("DOWNLOAD 〇", proxyGroupBase.jpAutoFirst, []),
         createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.jpAutoFirst, ["DOWNLOAD 〇"]),
         createProxyGroup("HOYO_GI_CN", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
-        createProxyGroup("HOYO_GI_UGC", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
+        createProxyGroup("HOYO_GI", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
+        createProxyGroup("HOYO_GI_UGC", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
         createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
         createProxyGroup("HOYO_PROXY", proxyGroupBase.jpAutoFirst),
         createProxyGroup("MIUI_BLOATWARE", proxyGroupBase.rejectFirst),
