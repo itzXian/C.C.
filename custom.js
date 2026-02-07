@@ -128,15 +128,6 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
     );
 };
 
-const buildProxyGroupBase = (groupNames) => {
-    const jpAutoFirst = { type: "select", proxies: ["CUSTOM", "MANUAL", ...groupNames, "DIRECT", "REJECT"] };
-    return {
-        jpAutoFirst,
-        directFirst: { ...jpAutoFirst, proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
-        rejectFirst: { ...jpAutoFirst, proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
-    };
-};
-
 const createProxyGroup = (name, base, extraProxies) => ({
     ...base,
     name,
@@ -536,7 +527,11 @@ const overrideProxyGroups = (config) => {
         groups[0].proxies.push(...allProxies.map((p) => p.name));
     }
 
-    const proxyGroupBase = buildProxyGroupBase(groups[0].proxies);
+    const proxyGroupBase = {
+        jpAutoFirst : { type: "select", proxies: ["CUSTOM", "MANUAL", ...groupNames, "DIRECT", "REJECT"] },
+        directFirst: { type: "select", proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
+        rejectFirst: { type: "select", proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
+    };
 
     const customProxyGroups = [
         { name: "CUSTOM", type: "select", proxies: ["MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
