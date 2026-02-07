@@ -299,9 +299,9 @@ const RULE_SETS = {
         // GI
         "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
         // HSR
-        "DOMAIN-SUFFIX,starrails.com,HOYO_HSR",
+        "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",
         // ZZZ
-        "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_ZZZ",
+        "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",
     ],
     MIUI_Bloatware:  [
         "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
@@ -543,9 +543,6 @@ const overrideProxyGroups = (config) => {
         createProxyGroup("HOYO_GI_CN", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
         createProxyGroup("HOYO_GI_UGC", proxyGroupBase.jpAutoFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
         createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
-        createProxyGroup("HOYO_GI", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
-        createProxyGroup("HOYO_HSR", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
-        createProxyGroup("HOYO_ZZZ", proxyGroupBase.jpAutoFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
         createProxyGroup("HOYO_PROXY", proxyGroupBase.jpAutoFirst),
         createProxyGroup("MIUI_BLOATWARE", proxyGroupBase.rejectFirst),
         createProxyGroup("AD_BLOCK", proxyGroupBase.rejectFirst),
