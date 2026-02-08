@@ -2,138 +2,6 @@
 // https://www.clashverge.dev/guide/script.html
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
-/* ========== Constants & Utilities ========== */
-const CONST = {
-    TEST_URL: "https://www.google.com/generate_204",
-    STATUS_CODES: "200/204/302",
-    TIMEOUT: 3000,
-    INTERVAL: 300,
-    TOLERANCE: 100,
-    REGEX_REMOVE: /(\/i|\/)/g,
-};
-
-const EXCLUDE_TERMS = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
-
-const INCLUDE_TERMS = {
-    HK: "香港|HK|Hong|🇭🇰",
-    TW: "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
-    SG: "新加坡|狮城|SG|Singapore|🇸🇬",
-    JP: "日本|JP|Japan|🇯🇵",
-    KR: "韩国|韓|KR|Korea|🇰🇷",
-    AU: "澳大利亚|澳|AU|Australia|🇦🇺",
-    US: "美国|US|United States|America|🇺🇸",
-    UK: "英国|UK|United Kingdom|🇬🇧",
-    FR: "法国|FR|France|🇫🇷",
-    DE: "德国|DE|Germany|🇩🇪",
-};
-
-const DEEP_CLONE = (obj) => {
-    return typeof structuredClone === "function" ?  structuredClone(obj) : JSON.parse(JSON.stringify(obj));
-};
-
-const REGEX_TO_FILTER_STRING = (r) => String(r).replace(CONST.REGEX_REMOVE, "");
-
-const SAFE_PROVIDERS_KEYS = (config) => Object.keys(config?.["proxy-providers"] || {});
-
-const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
-    if (!Array.isArray(group) || group.length === 0) return [];
-    return group.map((e) => ({ ...e, name: `${provider} ${e.name}`, proxies: [], use: [provider] }));
-};
-
-/* ========== Pre-built Regex Cache ========== */
-const REGEXS = (() => {
-    const regexes = [
-        { name: "JPHKSG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "JP", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.HK}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}|${INCLUDE_TERMS.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i") },
-    ];
-    // Precompute the regex -> filter string once to avoid repeated String(regex).replace calls
-    regexes.forEach((it) => { it.filter = REGEX_TO_FILTER_STRING(it.regex); });
-
-    // Cache computation of matched proxy names per regex for a given proxies list.
-    const computeMatchesForProxies = (proxies) => {
-        const names = (proxies || []).map((p) => p.name || "");
-        for (let i = 0; i < regexes.length; i++) {
-            const it = regexes[i];
-            const matched = [];
-            for (let j = 0; j < names.length; j++) {
-                const n = names[j];
-                if (it.regex.test(n)) matched.push(n);
-            }
-            it._matched = matched.length ? matched : ["COMPATIBLE"];
-        }
-    };
-
-    return { auto: regexes, load: regexes, computeMatchesForProxies };
-})();
-
-/* ========== Group Builder Functions ========== */
-const buildAutoProxyGroups = (proxies, suffix = "") => {
-    const { auto, computeMatchesForProxies } = REGEXS;
-    const s = suffix || "";
-    computeMatchesForProxies(proxies);
-    return auto
-        .map((item) => ({
-            hidden: true,
-            name: `AUTO | ${item.name}${s}`,
-            type: "url-test",
-            url:  CONST.TEST_URL,
-            "expected-status": CONST.STATUS_CODES,
-            timeout: CONST.TIMEOUT,
-            interval: CONST.INTERVAL,
-            filter: item.filter,
-            "exclude-filter": "0.[0-9]",
-            "exclude-type": item["exclude-type"] || "",
-            proxies: item._matched,
-            tolerance: CONST.TOLERANCE,
-        }))
-};
-
-const buildLoadBalanceGroups = (proxies, suffix = "") => {
-    const { load, computeMatchesForProxies } = REGEXS;
-    const s = suffix || "";
-    const strategies = [
-        //"consistent-hashing",
-        "round-robin",
-        //"sticky-sessions",
-    ];
-    const prefixes = [
-        //"CH_LOAD_BA"],
-        "RR_LOAD_BA",
-        //"SS_LOAD_BA"
-    ];
-
-    computeMatchesForProxies(proxies);
-
-    return strategies.flatMap((strategy, idx) =>
-        load
-            .map((item) => ({
-                hidden: true,
-                name: `${prefixes[idx]} | ${item.name}${s}`,
-                type: "load-balance",
-                url: CONST.TEST_URL,
-                "expected-status": CONST.STATUS_CODES,
-                timeout: CONST.TIMEOUT,
-                interval: CONST.INTERVAL,
-                filter: item.filter,
-                "exclude-filter": "0.[0-9]",
-                "exclude-type": item["exclude-type"] || "",
-                proxies: item._matched,
-                strategy,
-            }))
-            .filter((item) => item.name.match(/ (HK|SG)/g))
-    );
-};
-
-const createProxyGroup = (name, base, extraProxies) => ({
-    ...base,
-    name,
-    proxies: extraProxies ?  [...extraProxies, ...base.proxies] : base.proxies,
-});
-
 /* ========== Configuration Overrides ========== */
 const overrideBasicOptions = (config) => {
     Object.assign(config, {
@@ -174,7 +42,7 @@ const overrideExternalController = (config) => {
         "external-ui": "ui",
         "external-ui-url": "https://github.com/Zephyruso/zashboard/releases/download/v2.6.0/dist-no-fonts.zip",
     })
-}
+};
 
 const overrideDns = (config) => {
     const directDns = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
@@ -437,49 +305,136 @@ const overrideRules = (config) => {
     config.rules = customRules;
 };
 
-/* ========== Icon Support ========== */
-const GENERATE_ICON_URL = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
-
-const ICON_MAP = {
-    RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
-    MANUAL:  GENERATE_ICON_URL("manual"),
-    CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
-    "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
-    HOYO_GI_CN: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_GI_UGC: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-    HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
-    HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
-    HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-    MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
-    AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
-    STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-    STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-    PIXIV: "https://play-lh.googleusercontent.com/UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu",
-    AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
-    YOUTUBE: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
-    GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
-    TWITTER:  "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
-    TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
-    DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
-    MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
-    APPLE:  "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
-    "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
-    PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
-    BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
-    FINAL:  GENERATE_ICON_URL("final"),
+/* ========== Constants & Utilities ========== */
+const CONST = {
+    TEST_URL: "https://www.google.com/generate_204",
+    STATUS_CODES: "200/204/302",
+    TIMEOUT: 3000,
+    INTERVAL: 300,
+    TOLERANCE: 100,
+    REGEX_REMOVE: /(\/i|\/)/g,
 };
 
-const setProxyGroupIcon = (config) => {
-    (config["proxy-groups"] || []).forEach((g) => {
-        if (!g.hidden && ICON_MAP[g.name]) {
-            g.icon = ICON_MAP[g.name];
+const EXCLUDE_TERMS = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
+
+const INCLUDE_TERMS = {
+    HK: "香港|HK|Hong|🇭🇰",
+    TW: "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
+    SG: "新加坡|狮城|SG|Singapore|🇸🇬",
+    JP: "日本|JP|Japan|🇯🇵",
+    KR: "韩国|韓|KR|Korea|🇰🇷",
+    AU: "澳大利亚|澳|AU|Australia|🇦🇺",
+    US: "美国|US|United States|America|🇺🇸",
+    UK: "英国|UK|United Kingdom|🇬🇧",
+    FR: "法国|FR|France|🇫🇷",
+    DE: "德国|DE|Germany|🇩🇪",
+};
+
+const DEEP_CLONE = (obj) => {
+    return typeof structuredClone === "function" ?  structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+};
+
+const REGEX_TO_FILTER_STRING = (r) => String(r).replace(CONST.REGEX_REMOVE, "");
+
+const SAFE_PROVIDERS_KEYS = (config) => Object.keys(config?.["proxy-providers"] || {});
+
+const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
+    if (!Array.isArray(group) || group.length === 0) return [];
+    return group.map((e) => ({ ...e, name: `${provider} ${e.name}`, proxies: [], use: [provider] }));
+};
+
+/* ========== Pre-built Regex Cache ========== */
+const REGEXS = (() => {
+    const regexes = [
+        { name: "JPHKSG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "JP", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "HK", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.HK}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "SG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
+        { name: "NON-JP", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}|${INCLUDE_TERMS.JP}).)*$`, "i") },
+        { name: "ALL", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i") },
+    ];
+    // Precompute the regex -> filter string once to avoid repeated String(regex).replace calls
+    regexes.forEach((it) => { it.filter = REGEX_TO_FILTER_STRING(it.regex); });
+
+    // Cache computation of matched proxy names per regex for a given proxies list.
+    const computeMatchesForProxies = (proxies) => {
+        const names = (proxies || []).map((p) => p.name || "");
+        for (let i = 0; i < regexes.length; i++) {
+            const it = regexes[i];
+            const matched = [];
+            for (let j = 0; j < names.length; j++) {
+                const n = names[j];
+                if (it.regex.test(n)) matched.push(n);
+            }
+            it._matched = matched.length ? matched : ["COMPATIBLE"];
         }
-    });
+    };
+
+    return { auto: regexes, load: regexes, computeMatchesForProxies };
+})();
+
+/* ========== Group Builder Functions ========== */
+const buildAutoProxyGroups = (proxies, suffix = "") => {
+    const { auto, computeMatchesForProxies } = REGEXS;
+    computeMatchesForProxies(proxies);
+    return auto
+        .map((item) => ({
+            hidden: true,
+            name: `AUTO | ${item.name}${suffix}`,
+            type: "url-test",
+            url:  CONST.TEST_URL,
+            "expected-status": CONST.STATUS_CODES,
+            timeout: CONST.TIMEOUT,
+            interval: CONST.INTERVAL,
+            filter: item.filter,
+            "exclude-filter": "0.[0-9]",
+            "exclude-type": item["exclude-type"] || "",
+            proxies: item._matched,
+            tolerance: CONST.TOLERANCE,
+        }))
 };
+
+const buildLoadBalanceGroups = (proxies, suffix = "") => {
+    const { load, computeMatchesForProxies } = REGEXS;
+    const strategies = [
+        //"consistent-hashing",
+        "round-robin",
+        //"sticky-sessions",
+    ];
+    const prefixes = [
+        //"CH_LOAD_BA"],
+        "RR_LOAD_BA",
+        //"SS_LOAD_BA"
+    ];
+
+    computeMatchesForProxies(proxies);
+
+    return strategies.flatMap((strategy, idx) =>
+        load
+            .map((item) => ({
+                hidden: true,
+                name: `${prefixes[idx]} | ${item.name}${suffix}`,
+                type: "load-balance",
+                url: CONST.TEST_URL,
+                "expected-status": CONST.STATUS_CODES,
+                timeout: CONST.TIMEOUT,
+                interval: CONST.INTERVAL,
+                filter: item.filter,
+                "exclude-filter": "0.[0-9]",
+                "exclude-type": item["exclude-type"] || "",
+                proxies: item._matched,
+                strategy,
+            }))
+            .filter((item) => item.name.match(/ (HK|SG)/g))
+    );
+};
+
+const createProxyGroup = (name, base, extraProxies) => ({
+    ...base,
+    name,
+    proxies: extraProxies ?  [...extraProxies, ...base.proxies] : base.proxies,
+});
+
 
 /* ========== Proxy Groups Override ========== */
 const overrideProxyGroups = (config) => {
@@ -528,7 +483,7 @@ const overrideProxyGroups = (config) => {
     }
 
     const proxyGroupBase = {
-        jpAutoFirst : { type: "select", proxies: ["CUSTOM", "MANUAL", ...groupNames, "DIRECT", "REJECT"] },
+        jpAutoFirst : { type: "select", proxies: ["CUSTOM", "MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
         directFirst: { type: "select", proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
         rejectFirst: { type: "select", proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
     };
@@ -583,9 +538,10 @@ const dialerProxy = (config, dialer) => {
         },
     };
 
-    const autoProxyGroups = buildAutoProxyGroups(allProxies, "🛬");
-    const loadBalanceGroups = buildLoadBalanceGroups(allProxies, "🛬");
-    const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
+    const autoProxyGroups = buildAutoProxyGroups(allProxies, "🛬")
+        .filter((item) => item.name.match(/ (JP|NON-JP)🛬/));
+    //const loadBalanceGroups = buildLoadBalanceGroups(allProxies, "🛬");
+    const allGroups = [...autoProxyGroups];//, ...loadBalanceGroups];
 
     const groups = [{ name: "RELAY", type: "select", proxies: [], "exclude-filter":  EXCLUDE_TERMS }];
 
@@ -608,8 +564,8 @@ const dialerProxy = (config, dialer) => {
 
             const newGroups = [{ name: `RELAY ${provider}`, type: "select", proxies: [], use: [newProvider] }];
             const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, newProvider);
-            const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, newProvider);
-            const newAll = [...newAuto, ...newLoad];
+            //const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, newProvider);
+            const newAll = [...newAuto]//, ...newLoad];
 
             newGroups[0].proxies.push(...newAll.map((i) => i.name));
             newGroups.push(...newAll);
@@ -659,6 +615,50 @@ const dialerProxy = (config, dialer) => {
 
     config["proxy-groups"] = [...(config["proxy-groups"] || [])];
     config["proxy-groups"].unshift(...groups);
+};
+
+/* ========== Icon Support ========== */
+const GENERATE_ICON_URL = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
+
+const ICON_MAP = {
+    RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
+    MANUAL:  GENERATE_ICON_URL("manual"),
+    CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+    "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+    "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
+    HOYO_GI_CN: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
+    HOYO_GI_UGC: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
+    HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+    HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
+    HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
+    HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
+    HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+    MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
+    AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
+    STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+    STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+    PIXIV: "https://play-lh.googleusercontent.com/UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu",
+    AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
+    YOUTUBE: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
+    GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
+    TWITTER:  "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+    TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+    DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
+    MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
+    APPLE:  "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
+    "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
+    JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+    PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
+    BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
+    FINAL:  GENERATE_ICON_URL("final"),
+};
+
+const setProxyGroupIcon = (config) => {
+    (config["proxy-groups"] || []).forEach((g) => {
+        if (!g.hidden && ICON_MAP[g.name]) {
+            g.icon = ICON_MAP[g.name];
+        }
+    });
 };
 
 /* ========== Main Entry Point ========== */
