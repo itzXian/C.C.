@@ -411,6 +411,7 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
 
     return strategies.flatMap((strategy, idx) =>
         load
+            .filter((item) => item.name.match(/ (HK|SG)/g))
             .map((item) => ({
                 hidden: true,
                 name: `${prefixes[idx]} | ${item.name}${suffix}`,
@@ -425,7 +426,6 @@ const buildLoadBalanceGroups = (proxies, suffix = "") => {
                 proxies: item._matched,
                 strategy,
             }))
-            .filter((item) => item.name.match(/ (HK|SG)/g))
     );
 };
 
@@ -443,7 +443,7 @@ const overrideProxyGroups = (config) => {
     const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
     const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
 
-    const groups = [{ name: "MANUAL", type: "select", proxies: [] }];
+    const groups = [{ name: "SELECTOR", type: "select", proxies: [] }];
 
     const providerKeys = SAFE_PROVIDERS_KEYS(config);
     const tempGroups = [];
@@ -456,12 +456,12 @@ const overrideProxyGroups = (config) => {
 
         groups.forEach((g) => {
             g.use = providerKeys.slice();
-            if (g.name !== "MANUAL") g.proxies = [];
+            if (g.name !== "SELECTOR") g.proxies = [];
         });
 
         const tempNames = [];
         providerKeys.forEach((provider) => {
-            const newGroups = [{ name: `MANUAL ${provider}`, type: "select", proxies: [], use: [provider] }];
+            const newGroups = [{ name: `SELECTOR ${provider}`, type: "select", proxies: [], use: [provider] }];
             const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, provider);
             const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, provider);
             const newAll = [...newAuto, ...newLoad];
@@ -483,13 +483,13 @@ const overrideProxyGroups = (config) => {
     }
 
     const proxyGroupBase = {
-        customFirst : { type: "select", proxies: ["CUSTOM", "MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
-        directFirst: { type: "select", proxies: ["DIRECT", "MANUAL", "CUSTOM", "REJECT"] },
-        rejectFirst: { type: "select", proxies: ["REJECT", "MANUAL", "CUSTOM", "DIRECT"] },
+        customFirst : { type: "select", proxies: ["CUSTOM", "SELECTOR", ...groups[0].proxies, "DIRECT", "REJECT"] },
+        directFirst: { type: "select", proxies: ["DIRECT", "SELECTOR", "CUSTOM", "REJECT"] },
+        rejectFirst: { type: "select", proxies: ["REJECT", "SELECTOR", "CUSTOM", "DIRECT"] },
     };
 
     const customProxyGroups = [
-        { name: "CUSTOM", type: "select", proxies: ["MANUAL", ...groups[0].proxies, "DIRECT", "REJECT"] },
+        { name: "CUSTOM", type: "select", proxies: ["SELECTOR", ...groups[0].proxies, "DIRECT", "REJECT"] },
         createProxyGroup("DOWNLOAD 〇", proxyGroupBase.customFirst, []),
         createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.customFirst, ["DOWNLOAD 〇"]),
         createProxyGroup("HOYO_GI_CN", proxyGroupBase.customFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
@@ -622,7 +622,7 @@ const GENERATE_ICON_URL = (name) => `https://raw.githubusercontent.com/blackmatr
 
 const ICON_MAP = {
     RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
-    MANUAL:  GENERATE_ICON_URL("manual"),
+    SELECTOR:  GENERATE_ICON_URL("manual"),
     CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
     "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
@@ -672,7 +672,7 @@ const main = (config) => {
     overrideProxyGroups(config);
     // overrideRuleProviders(config); // Uncomment to use remote rule-providers
     overrideRules(config);
-    dialerProxy(config, "MANUAL");
+    dialerProxy(config, "SELECTOR");
     setProxyGroupIcon(config);
 
     return config;
