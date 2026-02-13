@@ -10,19 +10,19 @@ const overrideBasicOptions = (config) => {
         "allow-lan": true,
         mode: "rule",
         "geox-url": {
-            geoip:   "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
-            geosite: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
-            mmdb:    "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb",
+            geoip:   "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
+            geosite: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
+            mmdb:    "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb",
             asn:     "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb",
         },
-        "geo-auto-update":    true,
+        "geo-auto-update":     true,
         "geo-update-interval": 24,
-        "log-level":          "warning",
-        ipv6:                 false,
-        "find-process-mode":  "strict",
-        profile:              { "store-selected": true, "store-fake-ip": true },
-        "unified-delay":      true,
-        "tcp-concurrent":     true,
+        "log-level":           "warning",
+        ipv6:                  false,
+        "find-process-mode":   "strict",
+        profile:               { "store-selected": true, "store-fake-ip": true },
+        "unified-delay":       true,
+        "tcp-concurrent":      true,
         sniffer: {
             enable: true,
             sniff: {
@@ -80,20 +80,18 @@ const overrideDns = (config) => {
             "+.pximg.net":        proxyDns,
             "cdn.discordapp.com": proxyDns,
         },
-        "direct-nameserver":      directDns,
+        "direct-nameserver":               directDns,
         "direct-nameserver-follow-policy": true,
-        nameserver:               adblockDns,
+        nameserver:                        adblockDns,
     };
 };
 
 /* ========== Rule-Providers Configuration ========== */
+// Docs:
+//     https://wiki.metacubex.one/config/rule-providers/
+//     https://wiki.metacubex.one/config/rule-providers/content/
+//     https://wiki.metacubex.one/handbook/syntax/#_8
 const overrideRuleProviders = (config) => {
-    /*
-    Docs:
-        https://wiki.metacubex.one/config/rule-providers/
-        https://wiki.metacubex.one/config/rule-providers/content/
-        https://wiki.metacubex.one/handbook/syntax/#_8
-    */
     config["rule-providers"] = {
         Hoyo_GI_CN: {
             type: "inline",
@@ -250,13 +248,13 @@ const FILTER = {
     FR:      "法国|FR|France|🇫🇷",
     DE:      "德国|DE|Germany|🇩🇪",
     EXCLUDE: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
-    ALL:     ".",
+    ALL:     "",
 };
 
-const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE, flag = "") => {
-    const pattern = `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`;
-    return flag ? new RegExp(pattern, flag) : pattern;
-};
+const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) =>
+    includeTerm
+        ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
+        : `^((?!.*${excludeTerm}).)*$`;
 
 const IS_NOT_EMPTY = (value) => {
     if (value == null)             return false;
@@ -282,13 +280,14 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     ...overrides,
 });
 
-const CREATE_RELAY_PROVIDER = (obj) =>
-    Object.fromEntries(
-        Object.entries(obj).map(([key, value]) => [
-            `🔗${key}`,
-            { ...value, override: { "dialer-proxy": "SELECTOR", "additional-prefix": "🔗" } },
-        ])
-    );
+const CREATE_RELAY_PROVIDER = (obj) => {
+    const result = Object.create(null);
+    for (const key of Object.keys(obj)) {
+        const relay = `🔗${key}`;
+        result[relay] = { ...obj[key], override: { "dialer-proxy": "SELECTOR", "additional-prefix": relay } };
+    }
+    return result;
+};
 
 const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes=[], proxyProviders = {}, prefix = "") => {
     const proxyProviderKeys = Object.keys(proxyProviders);
@@ -314,16 +313,16 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes=[], proxyProviders = {}, p
         proxyGroups = proxyGroups.filter((p) => IS_NOT_EMPTY(p.proxies));
 
     const selectorGroup = [{
-        type:          "select",
-        name:          `${prefix}SELECTOR`,
-        "include-all": true,
-        proxies:       proxyGroups.map((p) => p.name),
-        use:           proxyProviderKeys,
-        hidden:        false,
+        type:    "select",
+        name:    `${prefix}SELECTOR`,
+        filter:  REGEX(FILTER.ALL),
+        proxies: proxyGroups.map((p) => p.name),
+        use:     proxyProviderKeys,
+        hidden:  false,
     }];
 
     const relayProxies   = IS_NOT_EMPTY(proxyProviders)
-        ? proxyProviders
+        ? []
         : DEEP_CLONE(proxyNodes);
     const relayProviders = IS_NOT_EMPTY(proxyProviders)
         ? CREATE_RELAY_PROVIDER(proxyProviders)
@@ -363,6 +362,9 @@ const overrideProxyGroups = (config) => {
         CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, proxyProviders);
 
     if (IS_NOT_EMPTY(proxyProviders)) {
+        const tempSelector      = [];
+        const tempRelaySelector = [];
+
         for (const [key, value] of Object.entries(proxyProviders)) {
             const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
             proxyGroups        = [...proxyGroups,        ...pr.proxyGroups];
@@ -370,15 +372,21 @@ const overrideProxyGroups = (config) => {
             relayGroups        = [...relayGroups,        ...pr.relayGroups];
             relaySelectorGroup = [...relaySelectorGroup, ...pr.relaySelectorGroup];
             relayProviders     = { ...relayProviders,    ...pr.relayProviders };
+            tempSelector.push(pr.selectorGroup[0].name);
+            tempRelaySelector.push(pr.relaySelectorGroup[0].name);
         }
+
+        selectorGroup[0].proxies.unshift(...tempSelector);
+        relaySelectorGroup[0].proxies.unshift(...tempRelaySelector);
     }
 
-    const proxyGroupNames = [
+    const allGroups = [
         ...relaySelectorGroup,
         ...selectorGroup,
         ...relayGroups,
         ...proxyGroups,
-    ].map((e) => e.name);
+    ];
+    const proxyGroupNames = allGroups.map((e) => e.name);
 
     const customFirst = { proxies: ["CUSTOM", ...proxyGroupNames, "DIRECT", "REJECT"] };
     const directFirst = { proxies: ["DIRECT", "CUSTOM", "REJECT"] };
@@ -389,58 +397,56 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
         { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
-        { name: "HOYO_DIRECT",    ...directFirst},
-        { name: "HOYO_PROXY",     ...customFirst},
-        { name: "MIUI_BLOATWARE", ...rejectFirst},
-        { name: "AD_BLOCK",       ...rejectFirst},
-        { name: "STEAM_CN",       ...directFirst},
-        { name: "STEAM",          ...customFirst},
-        { name: "PIXIV",          ...customFirst},
-        { name: "AI",             ...customFirst},
-        { name: "YOUTUBE",        ...customFirst},
-        { name: "GOOGLE",         ...customFirst},
-        { name: "TWITTER",        ...customFirst},
-        { name: "TELEGRAM",       ...customFirst},
-        { name: "DISCORD",        ...customFirst},
-        { name: "MICROSOFT",      ...customFirst},
-        { name: "APPLE",          ...customFirst},
-        { name: "NON_JP",         ...customFirst},
-        { name: "JP",             ...customFirst},
-        { name: "PROXY",          ...customFirst},
-        { name: "BYPASS",         ...directFirst},
-        { name: "FINAL",          ...customFirst},
+        { name: "HOYO_DIRECT",    ...directFirst },
+        { name: "HOYO_PROXY",     ...customFirst },
+        { name: "MIUI_BLOATWARE", ...rejectFirst },
+        { name: "AD_BLOCK",       ...rejectFirst },
+        { name: "STEAM_CN",       ...directFirst },
+        { name: "STEAM",          ...customFirst },
+        { name: "PIXIV",          ...customFirst },
+        { name: "AI",             ...customFirst },
+        { name: "YOUTUBE",        ...customFirst },
+        { name: "GOOGLE",         ...customFirst },
+        { name: "TWITTER",        ...customFirst },
+        { name: "TELEGRAM",       ...customFirst },
+        { name: "DISCORD",        ...customFirst },
+        { name: "MICROSOFT",      ...customFirst },
+        { name: "APPLE",          ...customFirst },
+        { name: "NON_JP",         ...customFirst },
+        { name: "JP",             ...customFirst },
+        { name: "PROXY",          ...customFirst },
+        { name: "BYPASS",         ...directFirst },
+        { name: "FINAL",          ...customFirst },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
-    config["proxy-groups"]    = [...relaySelectorGroup, ...selectorGroup, ...relayGroups, ...proxyGroups, ...otherGroups];
+    config["proxy-groups"]    = [...allGroups, ...otherGroups];
     config["proxy-providers"] = { ...proxyProviders, ...relayProviders };
 };
 
 /* ========== Icon Support ========== */
-const GENERATE_ICON_URL = (name) =>
-    `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
-
-const WIKI  = (path) => `https://upload.wikimedia.org/wikipedia/commons/${path}`;
-const GPLAY = (id)   => `https://play-lh.googleusercontent.com/${id}`;
-const FAV   = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
+const GITHUB  = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
+const WIKI    = (path) => `https://upload.wikimedia.org/wikipedia/commons/${path}`;
+const GPLAY   = (id)   => `https://play-lh.googleusercontent.com/${id}`;
+const FAVICON = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
 
 const ICON_MAP = {
     RELAY:          WIKI("3/3a/Noto_Emoji_v2.034_1f517.svg"),
-    SELECTOR:       GENERATE_ICON_URL("manual"),
+    SELECTOR:       GITHUB("manual"),
     CUSTOM:         WIKI("c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_GI_UGC:    GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_GI:        GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
-    HOYO_DIRECT:    FAV("https://hoyoverse.com"),
-    HOYO_PROXY:     FAV("https://hoyoverse.com"),
+    HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
+    HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
-    MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
+    MIUI_BLOATWARE: FAVICON("https://www.mi.com/"),
     AD_BLOCK:       WIKI("1/1c/Codex_icon_Block_red.svg"),
     STEAM_CN:       WIKI("8/83/Steam_icon_logo.svg"),
     STEAM:          WIKI("8/83/Steam_icon_logo.svg"),
     PIXIV:          GPLAY("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
     AI:             GPLAY("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
-    YOUTUBE:        FAV("https://youtube.com"),
+    YOUTUBE:        FAVICON("https://youtube.com"),
     GOOGLE:         WIKI("c/c1/Google_%22G%22_logo.svg"),
     TWITTER:        WIKI("6/6f/Logo_of_Twitter.svg"),
     TELEGRAM:       WIKI("8/82/Telegram_logo.svg"),
@@ -451,17 +457,18 @@ const ICON_MAP = {
     JP:             WIKI("5/54/Noto_Emoji_v2.034_1f338.svg"),
     PROXY:          WIKI("2/26/Noto_Emoji_v2.034_1f310.svg"),
     BYPASS:         WIKI("8/8b/Noto_Emoji_v2.034_2b50.svg"),
-    FINAL:          GENERATE_ICON_URL("final"),
+    FINAL:          GITHUB("final"),
 };
 
 const setProxyGroupIcon = (config) => {
     for (const g of config["proxy-groups"]) {
         if (!g.hidden) {
-            g.icon = ICON_MAP?.[g.name.match(/[A-Za-z0-9_]+$/).toString()] ?? "";
+            g.icon = ICON_MAP?.[g.name.match(/[A-Za-z0-9_]+$/)?.[0]] ?? "";
         }
     }
 };
 
+/* ========== Entry Point ========== */
 const main = (config) => {
     overrideBasicOptions(config);
     overrideExternalController(config);
@@ -470,7 +477,6 @@ const main = (config) => {
     overrideRules(config);
     overrideProxyGroups(config);
     setProxyGroupIcon(config);
-
     return config;
 };
 
