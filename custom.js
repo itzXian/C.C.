@@ -1,56 +1,59 @@
+// Version: 1.0
 // Reference:
 // https://www.clashverge.dev/guide/script.html
 // https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
-/* ========== Configuration Overrides ========== */
+/* ========== Base-Options Configuration ========== */
 const overrideBasicOptions = (config) => {
     Object.assign(config, {
         "mixed-port": 7890,
         "allow-lan": true,
         mode: "rule",
         "geox-url": {
-            geoip: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
+            geoip:   "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
             geosite: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
-            mmdb: "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb",
-            asn: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb",
+            mmdb:    "https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb",
+            asn:     "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb",
         },
-        "geo-auto-update": true,
+        "geo-auto-update":    true,
         "geo-update-interval": 24,
-        "log-level": "warning",
-        ipv6: false,
-        "find-process-mode": "strict",
-        profile: { "store-selected": true, "store-fake-ip": true },
-        "unified-delay": true,
-        "tcp-concurrent":  true,
-        "global-client-fingerprint": "chrome",
+        "log-level":          "warning",
+        ipv6:                 false,
+        "find-process-mode":  "strict",
+        profile:              { "store-selected": true, "store-fake-ip": true },
+        "unified-delay":      true,
+        "tcp-concurrent":     true,
         sniffer: {
             enable: true,
             sniff: {
                 HTTP: { ports: [80, "8080-8880"], "override-destination": true },
-                TLS: { ports: [443, 8443] },
+                TLS:  { ports: [443, 8443] },
                 QUIC: { ports: [443, 8443] },
             },
-            "skip-domain":  ["Mijia Cloud", "+.push.apple.com"],
+            "skip-domain": ["Mijia Cloud", "+.push.apple.com"],
+        },
+        hosts: {
+            "dns.alidns.com":     ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
+            "127.0.0.1.sslip.io": "127.0.0.1",
+            "127.atlas.skk.moe":  "127.0.0.1",
+            "cdn.jsdelivr.net":   "cdn.jsdelivr.net.cdn.cloudflare.net",
         },
     });
 };
 
 const overrideExternalController = (config) => {
     Object.assign(config, {
-        "external-controller": `0.0.0.0:${Math.random().toString().slice(2, 6)}`,
-        secret: Math.random().toString(36).slice(2),
-        "external-ui": "ui",
-        "external-ui-url": "https://github.com/Zephyruso/zashboard/releases/download/v2.6.0/dist-no-fonts.zip",
-    })
+        "external-controller": `0.0.0.0:${Math.floor(Math.random() * 9999) + 10000}`,
+        secret:                Math.random().toString(36).slice(2),
+        "external-ui":         "ui",
+        "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/download/v2.6.0/dist-no-fonts.zip",
+    });
 };
 
 const overrideDns = (config) => {
-    const directDns = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
-    const proxyDns = ["tls://1.0.0.1:853", "tls://1.1.1.1", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
-    const defaultAdblockDns = ["dns.adguard-dns.com"];
-    const overrideAdblockDns = [
-    ];
-    const adblockDns = overrideAdblockDns.length ? overrideAdblockDns : defaultAdblockDns;
+    const directDns  = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
+    const proxyDns   = ["tls://1.0.0.1:853", "tls://1.1.1.1", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
+    const adblockDns = ["dns.adguard-dns.com"];
 
     const fakeIpFilter = [
         "+.m2m", "injections.adguard.org", "local.adguard.org", "+.bogon", "+.lan", "+.local",
@@ -62,621 +65,414 @@ const overrideDns = (config) => {
     ];
 
     config.dns = {
-        enable: true,
-        "prefer-h3": false,
-        ipv6: false,
-        "respect-rules": true,
-        "default-nameserver": ["quic://223.5.5.5:853", "tls://223.5.5.5:853"],
+        enable:                true,
+        "prefer-h3":           false,
+        ipv6:                  false,
+        "respect-rules":       true,
+        "default-nameserver":  ["quic://223.5.5.5:853", "tls://223.5.5.5:853"],
         "proxy-server-nameserver": directDns,
-        "enhanced-mode": "fake-ip",
-        "fake-ip-range": "198.18.0.1/16",
+        "enhanced-mode":       "fake-ip",
+        "fake-ip-range":       "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
-        "fake-ip-filter": [...fakeIpFilter, "geosite:private", "geosite:connectivity-check"],
+        "fake-ip-filter":      [...fakeIpFilter, "geosite:private", "geosite:connectivity-check"],
         "nameserver-policy": {
-            "+.twimg.com": proxyDns,
-            "+.pximg.net": proxyDns,
+            "+.twimg.com":        proxyDns,
+            "+.pximg.net":        proxyDns,
             "cdn.discordapp.com": proxyDns,
         },
-        "direct-nameserver": directDns,
+        "direct-nameserver":      directDns,
         "direct-nameserver-follow-policy": true,
-        nameserver: adblockDns,
-    };
-};
-
-const overrideHosts = (config) => {
-    config.hosts = {
-        "dns.alidns.com": ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
-        "127.0.0.1.sslip.io": "127.0.0.1",
-        "127.atlas.skk.moe": "127.0.0.1",
-        "cdn.jsdelivr.net": "cdn.jsdelivr.net.cdn.cloudflare.net",
+        nameserver:               adblockDns,
     };
 };
 
 /* ========== Rule-Providers Configuration ========== */
 const overrideRuleProviders = (config) => {
-    const ruleProviderConfig = { type: "http", interval: "3600" };
-    const ruleProviderBase = {
-        Classical: { ...ruleProviderConfig, format: "text", behavior: "classical" },
-        Domain: { ...ruleProviderConfig, format: "text", behavior:  "domain" },
-        Ipcodr: { ...ruleProviderConfig, format: "text", behavior:  "ipcidr" },
-        ClassicalYaml: { ...ruleProviderConfig, format: "yaml", behavior: "classical" },
-        DomainYaml:  { ...ruleProviderConfig, format: "yaml", behavior: "domain" },
-        IpcodrYaml: { ...ruleProviderConfig, format: "yaml", behavior: "ipcidr" },
-    };
-
+    /*
+    Docs:
+        https://wiki.metacubex.one/config/rule-providers/
+        https://wiki.metacubex.one/config/rule-providers/content/
+        https://wiki.metacubex.one/handbook/syntax/#_8
+    */
     config["rule-providers"] = {
         Hoyo_GI_CN: {
-            ...ruleProviderBase.Classical,
-            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_GI_CN.list",
-            path: "./Hoyo_GI_CN.list",
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "autopatchhk.yuanshen.com",
+                "oseurodispatch.yuanshen.com",
+                "osusadispatch.yuanshen.com",
+                "osuspider.yuanshen.com",
+            ],
         },
-        Hoyo_Bypass: {
-            ...ruleProviderBase.Classical,
-            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Bypass.list",
-            path: "./Hoyo_Bypass.list",
+        Hoyo_GI: {
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "osasiadispatch.yuanshen.com",
+            ],
+        },
+        Hoyo_GI_UGC: {
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "asia-ugc*.hoyoverse.com",
+            ],
+        },
+        Hoyo_Direct: {
+            type: "inline",
+            behavior: "classical",
+            payload: [
+                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
+                "DOMAIN-SUFFIX,yuanshen.com",
+                "DOMAIN-SUFFIX,mihoyo.com",
+                "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
+                "AND,((DST-PORT,23301/23801),(NETWORK,udp))", // HSR
+                "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
+            ],
         },
         Hoyo_Proxy: {
-            ...ruleProviderBase.Classical,
-            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/Hoyo_Proxy.list",
-            path: "./Hoyo_Proxy.list",
+            type: "inline",
+            behavior: "classical",
+            payload: [
+                "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
+                "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
+                "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY", // GI
+                "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",         // HSR
+                "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",   // ZZZ
+            ],
         },
         MIUI_Bloatware: {
-            ...ruleProviderBase.Classical,
-            url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/Ruleset/MIUI_Bloatware.list",
-            path: "./MIUI_Bloatware.list",
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                // Xiaomi / MIUI telemetry & ads
+                "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
+                "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
+                "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
+                "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "api.sec.miui.com",
+                "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
+                "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
+                "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
+                "test.ad.xiaomi.com",        "adinfo.ra1.xlmc.sec.miui.com",
+                // Avlyun / sec.miui CSE
+                "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
+                "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
+                "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
+                // MIUI Browser
+                "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
+                "hot.browser.miui.com",      "security.browser.miui.com",
+                "r.browser.miui.com",        "hd.browser.miui.com",
+                "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
+                "qsb.browser.miui.com",      "global-search.browser.miui.com",
+                "qsb.browser.miui.srv",
+                // Other Xiaomi services
+                "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
+                "global.search.xiaomi.net",  "ccc.sys.miui.com",
+                "jupiter.sys.miui.com",      "metok.sys.miui.com",
+                // Tencent SDK / ads
+                "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
+                "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
+                "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
+                "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
+                "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
+                "cfg.imtt.qq.com",           "android.bugly.qq.com",
+                // ByteDance
+                "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
+                "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
+                // QuickApp
+                "statres.quickapp.cn",       "qr.quickapp.cn",
+                // Xunlei / Sandai
+                "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
+                "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
+                "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
+                "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
+                "guid-xldw-ssl.n0808.com",
+                // Misc
+                "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
+                "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
+                "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
+                "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
+                "www.pangolin-dsp-toutiao.com",
+            ],
         },
     };
 };
 
 /* ========== Rules Configuration ========== */
-const RULE_SETS = {
-    Hoyo_GI_CN: [
-        "DOMAIN,autopatchhk.yuanshen.com,HOYO_GI_CN",
-        "DOMAIN,oseurodispatch.yuanshen.com,HOYO_GI_CN",
-        "DOMAIN,osusadispatch.yuanshen.com,HOYO_GI_CN",
-        "DOMAIN,osuspider.yuanshen.com,HOYO_GI_CN",
-    ],
-    Hoyo_GI: [
-        "DOMAIN,osasiadispatch.yuanshen.com,HOYO_GI",
-    ],
-    Hoyo_GI_UGC: [
-        "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com,HOYO_GI_UGC",
-    ],
-    Hoyo_Bypass: [
-        "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com,HOYO_BYPASS",
-        "DOMAIN-SUFFIX,yuanshen.com,HOYO_BYPASS",
-        "DOMAIN-SUFFIX,mihoyo.com,HOYO_BYPASS",
-        // GI
-        "AND,((DST-PORT,22101-22102),(NETWORK,udp)),HOYO_BYPASS",
-        // HSR
-        "AND,((DST-PORT,23301/23801),(NETWORK,udp)),HOYO_BYPASS",
-        // ZZZ
-        "AND,((DST-PORT,20501),(NETWORK,udp)),HOYO_BYPASS",
-    ],
-    Hoyo_Proxy: [
-        "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
-        "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
-        // GI
-        "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY",
-        // HSR
-        "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",
-        // ZZZ
-        "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",
-    ],
-    MIUI_Bloatware:  [
-        "DOMAIN,api.installer.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,tracking.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,data.mistat.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,diagnosis.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,log.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,m.track.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,sdkconfig.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,api.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,tracker.ai.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,grayconfig.ai.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,mazu.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,miui-fxcse.avlyun.com,MIUI_BLOATWARE",
-        "DOMAIN,sdkconf.avlyun.com,MIUI_BLOATWARE",
-        "DOMAIN,miav-cse.avlyun.com,MIUI_BLOATWARE",
-        "DOMAIN,update.avlyun.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,ixav-cse.avlyun.com,MIUI_BLOATWARE",
-        "DOMAIN,logupdate.avlyun.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,api.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,auth.be.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,flash.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,api.hybrid.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,o2o.api.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,api.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,ssl-cdn.static.browser.mi-img.com,MIUI_BLOATWARE",
-        "DOMAIN,security.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,hot.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,r.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,hd.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,c3-cache.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,api-ipv4.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,qsb.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,sentry.d.xiaomi.net,MIUI_BLOATWARE",
-        "DOMAIN,global-search.browser.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,global.search.xiaomi.net,MIUI_BLOATWARE",
-        "DOMAIN,api.developer.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,update.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,port.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,qsb.browser.miui.srv,MIUI_BLOATWARE",
-        "DOMAIN,rom.pt.miui.srv,MIUI_BLOATWARE",
-        "DOMAIN,ccc.sys.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,jupiter.sys.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,metok.sys.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,tmfsdk.m.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tmfsdk4.m.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tbm.snssdk.com,MIUI_BLOATWARE",
-        "DOMAIN,othstr.beacon.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tools.3g.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tmfsdktcp.m.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,h.trace.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,hub5pn.wap.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,tpstelemetry.tencent.com,MIUI_BLOATWARE",
-        "DOMAIN,pssn.alicdn.com,MIUI_BLOATWARE",
-        "DOMAIN,tmfsdktcpv4.m.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tmeadcomm.y.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tangram.e.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,us.l.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,tdid.m.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,h.trace.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,api.yky.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,sdk.e.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,android.bugly.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,toblog.ctobsnssdk.com,MIUI_BLOATWARE",
-        "DOMAIN,tobapplog.ctobsnssdk.com,MIUI_BLOATWARE",
-        "DOMAIN,cfg.imtt.qq.com,MIUI_BLOATWARE",
-        "DOMAIN,statres.quickapp.cn,MIUI_BLOATWARE",
-        "DOMAIN,qr.quickapp.cn,MIUI_BLOATWARE",
-        "DOMAIN,hybrid.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,hybrid.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,s1.irs03.com,MIUI_BLOATWARE",
-        "DOMAIN,up.cm.ksmobile.com,MIUI_BLOATWARE",
-        "DOMAIN,dl.cm.ksmobile.com,MIUI_BLOATWARE",
-        "DOMAIN,dw-online.ksosoft.com,MIUI_BLOATWARE",
-        "DOMAIN,zzhc.vnet.cn,MIUI_BLOATWARE",
-        "DOMAIN,beacon-api.aliyuncs.com,MIUI_BLOATWARE",
-        "DOMAIN,mpush-api.aliyun.com,MIUI_BLOATWARE",
-        "DOMAIN,ug.snssdk.com,MIUI_BLOATWARE",
-        "DOMAIN,t7z.cupid.iqiyi.com,MIUI_BLOATWARE",
-        "DOMAIN,worldwide.sogou.com,MIUI_BLOATWARE",
-        "DOMAIN,www.pangolin-dsp-toutiao.com,MIUI_BLOATWARE",
-        "DOMAIN,master.wap.dphub.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,hub5u.wap.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,idx.m.hub.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,tw13b093.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,adinfo.ra1.xlmc.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,test.ad.xiaomi.com,MIUI_BLOATWARE",
-        "DOMAIN,uploadlog.xlmc.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,t03-api.xlmc.xunlei.com,MIUI_BLOATWARE",
-        "DOMAIN,pre.api.tw06.xlmc.sandai.net,MIUI_BLOATWARE",
-        "DOMAIN,guid-xldw-ssl.n0808.com,MIUI_BLOATWARE",
-        "DOMAIN,data.sec.miui.com,MIUI_BLOATWARE",
-        "DOMAIN,pgdt.gtimg.cn,MIUI_BLOATWARE",
-        "DOMAIN,rdt.tfogc.com,MIUI_BLOATWARE",
-    ],
-    Download:  [
-        "DOMAIN-REGEX,api.[\\w]+raplay.com,DOWNLOAD 〇",
-        "DOMAIN-REGEX,[\\w]+.raplay.*workers.dev,DOWNLOAD 〇",
-        "DOMAIN-REGEX,.*\\.[\\w]+[eo](hu|ze|ko).workers.dev,DOWNLOAD 〇",
-    ],
-};
-
 const overrideRules = (config) => {
-    const customRules = [
-        ...RULE_SETS.Download,
-        "DOMAIN-SUFFIX,workers.dev,WORKERS.DEV 〇",
-        ...RULE_SETS.Hoyo_GI_CN,
-        ...RULE_SETS.Hoyo_GI,
-        ...RULE_SETS.Hoyo_GI_UGC,
-        ...RULE_SETS.Hoyo_Bypass,
-        ...RULE_SETS.Hoyo_Proxy,
-        "GEOSITE,hoyoverse,HOYO_PROXY",
-        ...RULE_SETS.MIUI_Bloatware,
-        "GEOSITE,category-ads-all,AD_BLOCK",
-        "GEOSITE,steam@cn,STEAM_CN",
-        "DOMAIN-SUFFIX,steamserver.net,STEAM_CN",
-        "GEOSITE,steam,STEAM",
-        "GEOSITE,pixiv,PIXIV",
-        "GEOSITE,category-ai-!cn,AI",
-        "GEOSITE,youTube,YOUTUBE",
-        "GEOIP,google,GOOGLE,no-resolve",
-        "GEOSITE,google,GOOGLE",
-        "GEOIP,twitter,TWITTER,no-resolve",
-        "GEOSITE,twitter,TWITTER",
-        "GEOIP,telegram,TELEGRAM,no-resolve",
-        "GEOSITE,telegram,TELEGRAM",
-        "GEOSITE,discord,DISCORD",
-        "GEOSITE,microsoft,MICROSOFT",
-        "GEOSITE,apple,APPLE",
-        "GEOSITE,apple-intelligence,APPLE",
-        "DOMAIN-SUFFIX,hinative.com,NON_JP ∆",
-        "GEOIP,JP,JP,no-resolve",
-        "GEOSITE,geolocation-!cn,PROXY",
-        "GEOSITE,private,BYPASS",
-        "GEOSITE,CN,BYPASS",
-        "GEOIP,private,BYPASS",
-        "GEOIP,CN,BYPASS",
+    config.rules = [
+        "RULE-SET,      Hoyo_GI_CN,         HOYO_GI_CN",
+        "RULE-SET,      Hoyo_GI,            HOYO_GI",
+        "RULE-SET,      Hoyo_GI_UGC,        HOYO_GI_UGC",
+        "RULE-SET,      Hoyo_Direct,        HOYO_DIRECT",
+        "RULE-SET,      Hoyo_Proxy,         HOYO_PROXY",
+        "GEOSITE,       hoyoverse,          HOYO_PROXY",
+        "RULE-SET,      MIUI_Bloatware,     MIUI_BLOATWARE",
+        "GEOSITE,       category-ads-all,   AD_BLOCK",
+        "GEOSITE,       steam@cn,           STEAM_CN",
+        "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
+        "GEOSITE,       steam,              STEAM",
+        "GEOSITE,       pixiv,              PIXIV",
+        "GEOSITE,       category-ai-!cn,    AI",
+        "GEOSITE,       youTube,            YOUTUBE",
+        "GEOIP,         google,             GOOGLE,          no-resolve",
+        "GEOSITE,       google,             GOOGLE",
+        "GEOIP,         twitter,            TWITTER,         no-resolve",
+        "GEOSITE,       twitter,            TWITTER",
+        "GEOIP,         telegram,           TELEGRAM,        no-resolve",
+        "GEOSITE,       telegram,           TELEGRAM",
+        "GEOSITE,       discord,            DISCORD",
+        "GEOSITE,       microsoft,          MICROSOFT",
+        "GEOSITE,       apple,              APPLE",
+        "GEOSITE,       apple-intelligence, APPLE",
+        "DOMAIN-SUFFIX, hinative.com,       NON_JP",
+        "GEOIP,         JP,                 JP,              no-resolve",
+        "GEOSITE,       geolocation-!cn,    PROXY",
+        "GEOSITE,       private,            BYPASS",
+        "GEOSITE,       CN,                 BYPASS",
+        "GEOIP,         private,            BYPASS",
+        "GEOIP,         CN,                 BYPASS",
         "MATCH,FINAL",
     ];
-
-    config.rules = customRules;
 };
 
-/* ========== Constants & Utilities ========== */
-const CONST = {
-    TEST_URL: "https://www.google.com/generate_204",
-    STATUS_CODES: "200/204/302",
-    TIMEOUT: 3000,
-    INTERVAL: 300,
-    TOLERANCE: 100,
-    REGEX_REMOVE: /(\/i|\/)/g,
+/* ========== Proxy Groups Configuration ========== */
+const FILTER = {
+    HK:      "香港|HK|Hong|🇭🇰",
+    TW:      "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
+    SG:      "新加坡|狮城|SG|Singapore|🇸🇬",
+    JP:      "日本|JP|Japan|🇯🇵",
+    KR:      "韩国|韓|KR|Korea|🇰🇷",
+    AU:      "澳大利亚|澳|AU|Australia|🇦🇺",
+    US:      "美国|US|United States|America|🇺🇸",
+    UK:      "英国|UK|United Kingdom|🇬🇧",
+    FR:      "法国|FR|France|🇫🇷",
+    DE:      "德国|DE|Germany|🇩🇪",
+    EXCLUDE: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
+    ALL:     ".",
 };
 
-const EXCLUDE_TERMS = "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系";
-
-const INCLUDE_TERMS = {
-    HK: "香港|HK|Hong|🇭🇰",
-    TW: "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
-    SG: "新加坡|狮城|SG|Singapore|🇸🇬",
-    JP: "日本|JP|Japan|🇯🇵",
-    KR: "韩国|韓|KR|Korea|🇰🇷",
-    AU: "澳大利亚|澳|AU|Australia|🇦🇺",
-    US: "美国|US|United States|America|🇺🇸",
-    UK: "英国|UK|United Kingdom|🇬🇧",
-    FR: "法国|FR|France|🇫🇷",
-    DE: "德国|DE|Germany|🇩🇪",
+const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE, flag = "") => {
+    const pattern = `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`;
+    return flag ? new RegExp(pattern, flag) : pattern;
 };
 
-const DEEP_CLONE = (obj) => {
-    return typeof structuredClone === "function" ?  structuredClone(obj) : JSON.parse(JSON.stringify(obj));
-};
+const IS_NOT_EMPTY = (value) => {
+    if (value == null)             return false;
+    if (typeof value === "string") return value.trim().length > 0;
+    if (Array.isArray(value))      return value.length > 0;
+    if (value instanceof Object)   return Object.keys(value).length > 0;
+    return true;
+}
 
-const REGEX_TO_FILTER_STRING = (r) => String(r).replace(CONST.REGEX_REMOVE, "");
+const DEEP_CLONE = (obj) =>
+    typeof structuredClone === "function"
+        ? structuredClone(obj)
+        : JSON.parse(JSON.stringify(obj));
 
-const SAFE_PROVIDERS_KEYS = (config) => Object.keys(config?.["proxy-providers"] || {});
-
-const RECREATE_PROXY_GROUP_WITH_PROVIDER = (group = [], provider) => {
-    if (!Array.isArray(group) || group.length === 0) return [];
-    return group.map((e) => ({ ...e, name: `${provider} ${e.name}`, proxies: [], use: [provider] }));
-};
-
-/* ========== Pre-built Regex Cache ========== */
-const REGEXS = (() => {
-    const regexes = [
-        { name: "JPHKSG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}|${INCLUDE_TERMS.HK}|${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "JP", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.JP}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "HK", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.HK}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "SG", regex: new RegExp(`^(?=.*(${INCLUDE_TERMS.SG}))(?!.*${EXCLUDE_TERMS}).*$`, "i") },
-        { name: "NON-JP", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}|${INCLUDE_TERMS.JP}).)*$`, "i") },
-        { name: "ALL", regex: new RegExp(`^((?!.*${EXCLUDE_TERMS}).)*$`, "i") },
-    ];
-    // Precompute the regex -> filter string once to avoid repeated String(regex).replace calls
-    regexes.forEach((it) => { it.filter = REGEX_TO_FILTER_STRING(it.regex); });
-
-    // Cache computation of matched proxy names per regex for a given proxies list.
-    const computeMatchesForProxies = (proxies) => {
-        const names = (proxies || []).map((p) => p.name || "");
-        for (let i = 0; i < regexes.length; i++) {
-            const it = regexes[i];
-            const matched = [];
-            for (let j = 0; j < names.length; j++) {
-                const n = names[j];
-                if (it.regex.test(n)) matched.push(n);
-            }
-            it._matched = matched.length ? matched : ["COMPATIBLE"];
-        }
-    };
-
-    return { auto: regexes, load: regexes, computeMatchesForProxies };
-})();
-
-/* ========== Group Builder Functions ========== */
-const buildAutoProxyGroups = (proxies, suffix = "") => {
-    const { auto, computeMatchesForProxies } = REGEXS;
-    computeMatchesForProxies(proxies);
-    return auto
-        .map((item) => ({
-            hidden: true,
-            name: `AUTO | ${item.name}${suffix}`,
-            type: "url-test",
-            url:  CONST.TEST_URL,
-            "expected-status": CONST.STATUS_CODES,
-            timeout: CONST.TIMEOUT,
-            interval: CONST.INTERVAL,
-            filter: item.filter,
-            "exclude-filter": "0.[0-9]",
-            "exclude-type": item["exclude-type"] || "",
-            proxies: item._matched,
-            tolerance: CONST.TOLERANCE,
-        }))
-};
-
-const buildLoadBalanceGroups = (proxies, suffix = "") => {
-    const { load, computeMatchesForProxies } = REGEXS;
-    const strategies = [
-        //"consistent-hashing",
-        "round-robin",
-        //"sticky-sessions",
-    ];
-    const prefixes = [
-        //"CH_LOAD_BA"],
-        "RR_LOAD_BA",
-        //"SS_LOAD_BA"
-    ];
-
-    computeMatchesForProxies(proxies);
-
-    return strategies.flatMap((strategy, idx) =>
-        load
-            .filter((item) => item.name.match(/ (HK|SG)/g))
-            .map((item) => ({
-                hidden: true,
-                name: `${prefixes[idx]} | ${item.name}${suffix}`,
-                type: "load-balance",
-                url: CONST.TEST_URL,
-                "expected-status": CONST.STATUS_CODES,
-                timeout: CONST.TIMEOUT,
-                interval: CONST.INTERVAL,
-                filter: item.filter,
-                "exclude-filter": "0.[0-9]",
-                "exclude-type": item["exclude-type"] || "",
-                proxies: item._matched,
-                strategy,
-            }))
-    );
-};
-
-const createProxyGroup = (name, base, extraProxies) => ({
-    ...base,
-    name,
-    proxies: extraProxies ?  [...extraProxies, ...base.proxies] : base.proxies,
+const CREATE_PROXY_GROUP = (overrides) => ({
+    hidden:            true,
+    url:               "https://www.google.com/generate_204",
+    "expected-status": "200/204/302",
+    timeout:           3000,
+    interval:          300,
+    "exclude-filter":  "0.[0-9]",
+    tolerance:         100,
+    ...overrides,
 });
 
+const CREATE_RELAY_PROVIDER = (obj) =>
+    Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [
+            `🔗${key}`,
+            { ...value, override: { "dialer-proxy": "SELECTOR", "additional-prefix": "🔗" } },
+        ])
+    );
 
-/* ========== Proxy Groups Override ========== */
-const overrideProxyGroups = (config) => {
-    const allProxies = DEEP_CLONE(config.proxies || []);
-    const autoProxyGroups = buildAutoProxyGroups(allProxies);
-    const loadBalanceGroups = buildLoadBalanceGroups(allProxies);
-    const allGroups = [...autoProxyGroups, ...loadBalanceGroups];
+const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes=[], proxyProviders = {}, prefix = "") => {
+    const proxyProviderKeys = Object.keys(proxyProviders);
 
-    const groups = [{ name: "SELECTOR", type: "select", proxies: [] }];
+    let proxyGroups = [
+        { type: "url-test",     name: "AUTO HKJPSG", filter: REGEX(["HK", "JP", "SG"].map((e) => FILTER[e]).join("|")) },
+        { type: "url-test",     name: "AUTO HK",     filter: REGEX(FILTER.HK) },
+        { type: "url-test",     name: "AUTO JP",     filter: REGEX(FILTER.JP) },
+        { type: "url-test",     name: "AUTO SG",     filter: REGEX(FILTER.SG) },
+        { type: "url-test",     name: "AUTO !JP",    filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
+        { type: "url-test",     name: "AUTO ALL",    filter: REGEX(FILTER.ALL) },
+        { type: "load-balance", name: "LB HK",       filter: REGEX(FILTER.HK), strategy: "round-robin" },
+        { type: "load-balance", name: "LB SG",       filter: REGEX(FILTER.SG), strategy: "round-robin" },
+    ].map((e) => CREATE_PROXY_GROUP({
+        ...e,
+        name:    `${prefix}${e.name}`,
+        proxies: IS_NOT_EMPTY(proxyNodes)
+            ? proxyNodes.map((p) => p.name).filter((n) => n.match(e.filter))
+            : [],
+        use:     proxyProviderKeys,
+    }));
+    if (!IS_NOT_EMPTY(proxyProviders))
+        proxyGroups = proxyGroups.filter((p) => IS_NOT_EMPTY(p.proxies));
 
-    const providerKeys = SAFE_PROVIDERS_KEYS(config);
-    const tempGroups = [];
+    const selectorGroup = [{
+        type:          "select",
+        name:          `${prefix}SELECTOR`,
+        "include-all": true,
+        proxies:       proxyGroups.map((p) => p.name),
+        use:           proxyProviderKeys,
+        hidden:        false,
+    }];
 
-    if (providerKeys.length) {
-        groups[0].proxies.push(...allGroups.map((g) => g.name));
-        groups.push(...allGroups);
+    const relayProxies   = IS_NOT_EMPTY(proxyProviders)
+        ? proxyProviders
+        : DEEP_CLONE(proxyNodes);
+    const relayProviders = IS_NOT_EMPTY(proxyProviders)
+        ? CREATE_RELAY_PROVIDER(proxyProviders)
+        : CREATE_RELAY_PROVIDER({ "provider-relay": { type: "inline", payload: relayProxies } });
+    const relayProviderKeys = Object.keys(relayProviders);
 
-        groups[0].proxies.push(...allProxies.map((p) => p.name));
+    let relayGroups = [
+        { type: "url-test", name: "AUTO JP",  filter: REGEX(FILTER.JP) },
+        { type: "url-test", name: "AUTO !JP", filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
+    ].map((e) => CREATE_PROXY_GROUP({
+        ...e,
+        name:    `${prefix}🔗${e.name}`,
+        proxies: IS_NOT_EMPTY(relayProxies)
+            ? relayProxies.map((p) => p.name).filter((n) => n.match(e.filter))
+            : [],
+        use:     relayProviderKeys,
+    }));
+    if (IS_NOT_EMPTY(relayProxies))
+        relayGroups = relayGroups.filter((p) => IS_NOT_EMPTY(p.proxies));
 
-        groups.forEach((g) => {
-            g.use = providerKeys.slice();
-            if (g.name !== "SELECTOR") g.proxies = [];
-        });
+    const relaySelectorGroup = [{
+        type:    "select",
+        name:    `${prefix}🔗RELAY`,
+        filter:  REGEX(FILTER.ALL),
+        proxies: relayGroups.map((p) => p.name),
+        use:     relayProviderKeys,
+        hidden:  false,
+    }];
 
-        const tempNames = [];
-        providerKeys.forEach((provider) => {
-            const newGroups = [{ name: `SELECTOR ${provider}`, type: "select", proxies: [], use: [provider] }];
-            const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, provider);
-            const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, provider);
-            const newAll = [...newAuto, ...newLoad];
-
-            newGroups[0].proxies.push(...newAll.map((i) => i.name));
-            newGroups.push(...newAll);
-            tempNames.push(newGroups[0].name);
-            tempGroups.push(...newGroups);
-        });
-
-        groups[0].proxies.unshift(...tempNames);
-        groups.push(...tempGroups);
-    } else {
-        const nonEmptyGroups = allGroups.filter((g) => !g.proxies.includes("COMPATIBLE"));
-        groups[0].proxies.push(...nonEmptyGroups.map((g) => g.name));
-        groups.push(...nonEmptyGroups);
-
-        groups[0].proxies.push(...allProxies.map((p) => p.name));
-    }
-
-    const proxyGroupBase = {
-        customFirst : { type: "select", proxies: ["CUSTOM", "SELECTOR", ...groups[0].proxies, "DIRECT", "REJECT"] },
-        directFirst: { type: "select", proxies: ["DIRECT", "SELECTOR", "CUSTOM", "REJECT"] },
-        rejectFirst: { type: "select", proxies: ["REJECT", "SELECTOR", "CUSTOM", "DIRECT"] },
-    };
-
-    const customProxyGroups = [
-        { name: "CUSTOM", type: "select", proxies: ["SELECTOR", ...groups[0].proxies, "DIRECT", "REJECT"] },
-        createProxyGroup("DOWNLOAD 〇", proxyGroupBase.customFirst, []),
-        createProxyGroup("WORKERS.DEV 〇", proxyGroupBase.customFirst, ["DOWNLOAD 〇"]),
-        createProxyGroup("HOYO_GI_CN", proxyGroupBase.customFirst, ["HOYO_BYPASS", "HOYO_PROXY"]),
-        createProxyGroup("HOYO_GI", proxyGroupBase.customFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
-        createProxyGroup("HOYO_GI_UGC", proxyGroupBase.customFirst, ["HOYO_PROXY", "HOYO_BYPASS"]),
-        createProxyGroup("HOYO_BYPASS", proxyGroupBase.directFirst),
-        createProxyGroup("HOYO_PROXY", proxyGroupBase.customFirst),
-        createProxyGroup("MIUI_BLOATWARE", proxyGroupBase.rejectFirst),
-        createProxyGroup("AD_BLOCK", proxyGroupBase.rejectFirst),
-        createProxyGroup("STEAM_CN", proxyGroupBase.directFirst),
-        createProxyGroup("STEAM", proxyGroupBase.customFirst),
-        createProxyGroup("PIXIV", proxyGroupBase.customFirst),
-        createProxyGroup("AI", proxyGroupBase.customFirst),
-        createProxyGroup("YOUTUBE", proxyGroupBase.customFirst),
-        createProxyGroup("GOOGLE", proxyGroupBase.customFirst),
-        createProxyGroup("TWITTER", proxyGroupBase.customFirst),
-        createProxyGroup("TELEGRAM", proxyGroupBase.customFirst),
-        createProxyGroup("DISCORD", proxyGroupBase.customFirst),
-        createProxyGroup("MICROSOFT", proxyGroupBase.customFirst),
-        createProxyGroup("APPLE", proxyGroupBase.customFirst),
-        createProxyGroup("NON_JP ∆", proxyGroupBase.customFirst, []),
-        createProxyGroup("JP", proxyGroupBase.customFirst),
-        createProxyGroup("PROXY", proxyGroupBase.customFirst),
-        createProxyGroup("BYPASS", proxyGroupBase.directFirst),
-        createProxyGroup("FINAL", proxyGroupBase.customFirst),
-    ];
-
-    groups.push(...customProxyGroups);
-
-    if (tempGroups.length) {
-        const tempNames = tempGroups.map((m) => m.name).filter((name) => !name.includes(groups[0].name));
-        groups.filter((g) => g.name.includes("〇")).forEach((g) => g.proxies.push(...tempNames));
-    }
-
-    config["proxy-groups"] = groups;
+    return { proxyGroups, selectorGroup, relayGroups, relaySelectorGroup, relayProviders };
 };
 
-/* ========== Dialer / Relay Support ========== */
-const dialerProxy = (config, dialer) => {
-    const allProxies = DEEP_CLONE(config.proxies || []);
-    const relayProviders = {
-        "provider-config-relay": {
-            type: "inline",
-            override: { "dialer-proxy": dialer, "additional-prefix": "🛬" },
-            payload: allProxies,
-        },
-    };
+const overrideProxyGroups = (config) => {
+    const proxyProviders = config?.["proxy-providers"] ?? {};
 
-    const autoProxyGroups = buildAutoProxyGroups(allProxies, "🛬")
-        .filter((item) => item.name.match(/ (JP|NON-JP)🛬/));
-    //const loadBalanceGroups = buildLoadBalanceGroups(allProxies, "🛬");
-    const allGroups = [...autoProxyGroups];//, ...loadBalanceGroups];
+    let { proxyGroups, selectorGroup, relayGroups, relaySelectorGroup, relayProviders } =
+        CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, proxyProviders);
 
-    const groups = [{ name: "RELAY", type: "select", proxies: [], "exclude-filter":  EXCLUDE_TERMS }];
-
-    const providerKeys = SAFE_PROVIDERS_KEYS(config);
-    const tempGroups = [];
-
-    if (providerKeys.length) {
-        groups[0].proxies.push(...allGroups.map((g) => g.name));
-        groups.push(...allGroups);
-
-        const proxyProviders = config["proxy-providers"] || {};
-        const tempNames = [];
-
-        providerKeys.forEach((provider) => {
-            const newProvider = `${provider}-Relay`;
-            relayProviders[newProvider] = {
-                ...proxyProviders[provider],
-                override: { ...proxyProviders[provider]?.override, "dialer-proxy": dialer, "additional-suffix": "🛬" },
-            };
-
-            const newGroups = [{ name: `RELAY ${provider}`, type: "select", proxies: [], use: [newProvider] }];
-            const newAuto = RECREATE_PROXY_GROUP_WITH_PROVIDER(autoProxyGroups, newProvider);
-            //const newLoad = RECREATE_PROXY_GROUP_WITH_PROVIDER(loadBalanceGroups, newProvider);
-            const newAll = [...newAuto]//, ...newLoad];
-
-            newGroups[0].proxies.push(...newAll.map((i) => i.name));
-            newGroups.push(...newAll);
-
-            tempNames.push(newGroups[0].name);
-            tempGroups.push(...newGroups);
-        });
-
-        groups[0].proxies.unshift(...tempNames);
-
-        (config["proxy-groups"] || []).forEach((g) => {
-            if (g.type === "select" && !g.hidden && !g.proxies.includes(tempNames[0]) && !g.name.includes(dialer)) {
-                const n = g.proxies.indexOf("CUSTOM") >= 0 ? g.proxies.indexOf("CUSTOM") + 1 : 0;
-                g.proxies.splice(n, 0, ...tempNames);
-            }
-        });
-
-        Object.assign((config["proxy-providers"] = config["proxy-providers"] || {}), relayProviders);
-    } else {
-        const nonEmptyGroups = allGroups.filter((g) => !g.proxies.includes("COMPATIBLE"));
-        groups[0].proxies.push(...nonEmptyGroups.map((g) => g.name));
-        groups.push(...nonEmptyGroups);
-
-        config["proxy-providers"] = relayProviders;
+    if (IS_NOT_EMPTY(proxyProviders)) {
+        for (const [key, value] of Object.entries(proxyProviders)) {
+            const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
+            proxyGroups        = [...proxyGroups,        ...pr.proxyGroups];
+            selectorGroup      = [...selectorGroup,      ...pr.selectorGroup];
+            relayGroups        = [...relayGroups,        ...pr.relayGroups];
+            relaySelectorGroup = [...relaySelectorGroup, ...pr.relaySelectorGroup];
+            relayProviders     = { ...relayProviders,    ...pr.relayProviders };
+        }
     }
 
-    groups.forEach((g) => {
-        g.use = Object.keys(relayProviders);
-        if (g.name !== "RELAY") g.proxies = [];
-    });
+    const proxyGroupNames = [
+        ...relaySelectorGroup,
+        ...selectorGroup,
+        ...relayGroups,
+        ...proxyGroups,
+    ].map((e) => e.name);
 
-    tempGroups.forEach((g) => {
-        if (!g.name.includes("RELAY")) g.proxies = [];
-    });
+    const customFirst = { proxies: ["CUSTOM", ...proxyGroupNames, "DIRECT", "REJECT"] };
+    const directFirst = { proxies: ["DIRECT", "CUSTOM", "REJECT"] };
+    const rejectFirst = { proxies: ["REJECT", "CUSTOM", "DIRECT"] };
 
-    groups.push(...tempGroups);
+    const otherGroups = [
+        { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
+        { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
+        { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
+        { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
+        { name: "HOYO_DIRECT",    ...directFirst},
+        { name: "HOYO_PROXY",     ...customFirst},
+        { name: "MIUI_BLOATWARE", ...rejectFirst},
+        { name: "AD_BLOCK",       ...rejectFirst},
+        { name: "STEAM_CN",       ...directFirst},
+        { name: "STEAM",          ...customFirst},
+        { name: "PIXIV",          ...customFirst},
+        { name: "AI",             ...customFirst},
+        { name: "YOUTUBE",        ...customFirst},
+        { name: "GOOGLE",         ...customFirst},
+        { name: "TWITTER",        ...customFirst},
+        { name: "TELEGRAM",       ...customFirst},
+        { name: "DISCORD",        ...customFirst},
+        { name: "MICROSOFT",      ...customFirst},
+        { name: "APPLE",          ...customFirst},
+        { name: "NON_JP",         ...customFirst},
+        { name: "JP",             ...customFirst},
+        { name: "PROXY",          ...customFirst},
+        { name: "BYPASS",         ...directFirst},
+        { name: "FINAL",          ...customFirst},
+    ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
-    (config["proxy-groups"] || []).forEach((g) => {
-        if (g.name.includes("∆")) {
-            g.proxies.push(...groups.map((r) => r.name).filter((name) => !name.includes(groups[0].name)));
-        }
-        if (g.type === "select" && !g.hidden && !g.proxies.includes(groups[0].name) && !g.name.includes(dialer)) {
-            const n = g.proxies.indexOf("CUSTOM") >= 0 ? g.proxies.indexOf("CUSTOM") + 1 : 0;
-            g.proxies.splice(n, 0, groups[0].name);
-        }
-    });
-
-    config["proxy-groups"] = [...(config["proxy-groups"] || [])];
-    config["proxy-groups"].unshift(...groups);
+    config["proxy-groups"]    = [...relaySelectorGroup, ...selectorGroup, ...relayGroups, ...proxyGroups, ...otherGroups];
+    config["proxy-providers"] = { ...proxyProviders, ...relayProviders };
 };
 
 /* ========== Icon Support ========== */
-const GENERATE_ICON_URL = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
+const GENERATE_ICON_URL = (name) =>
+    `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
+
+const WIKI  = (path) => `https://upload.wikimedia.org/wikipedia/commons/${path}`;
+const GPLAY = (id)   => `https://play-lh.googleusercontent.com/${id}`;
+const FAV   = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
 
 const ICON_MAP = {
-    RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
-    SELECTOR:  GENERATE_ICON_URL("manual"),
-    CUSTOM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
-    "DOWNLOAD 〇": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    "WORKERS.DEV 〇": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cloudflare.com/&size=256",
-    HOYO_GI_CN: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_GI_UGC: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_BYPASS: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
-    HOYO_GI: "https://play-lh.googleusercontent.com/YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O",
-    HOYO_HSR: "https://play-lh.googleusercontent.com/IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw",
-    HOYO_ZZZ: "https://play-lh.googleusercontent.com/8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ",
-    HOYO_PROXY: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://hoyoverse.com&size=256",
+    RELAY:          WIKI("3/3a/Noto_Emoji_v2.034_1f517.svg"),
+    SELECTOR:       GENERATE_ICON_URL("manual"),
+    CUSTOM:         WIKI("c/c0/Noto_Emoji_v2.034_1f537.svg"),
+    HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
+    HOYO_GI_UGC:    GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
+    HOYO_GI:        GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
+    HOYO_DIRECT:    FAV("https://hoyoverse.com"),
+    HOYO_PROXY:     FAV("https://hoyoverse.com"),
+    HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
+    HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_BLOATWARE: "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.mi.com/&size=256",
-    AD_BLOCK: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
-    STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-    STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
-    PIXIV: "https://play-lh.googleusercontent.com/UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu",
-    AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
-    YOUTUBE: "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://youtube.com&size=256",
-    GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
-    TWITTER:  "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
-    TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
-    DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
-    MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
-    APPLE:  "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
-    "NON_JP ∆": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Noto_Emoji_v2.034_1f536.svg",
-    JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
-    PROXY: "https://upload.wikimedia.org/wikipedia/commons/2/26/Noto_Emoji_v2.034_1f310.svg",
-    BYPASS: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
-    FINAL:  GENERATE_ICON_URL("final"),
+    AD_BLOCK:       WIKI("1/1c/Codex_icon_Block_red.svg"),
+    STEAM_CN:       WIKI("8/83/Steam_icon_logo.svg"),
+    STEAM:          WIKI("8/83/Steam_icon_logo.svg"),
+    PIXIV:          GPLAY("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
+    AI:             GPLAY("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
+    YOUTUBE:        FAV("https://youtube.com"),
+    GOOGLE:         WIKI("c/c1/Google_%22G%22_logo.svg"),
+    TWITTER:        WIKI("6/6f/Logo_of_Twitter.svg"),
+    TELEGRAM:       WIKI("8/82/Telegram_logo.svg"),
+    DISCORD:        "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
+    MICROSOFT:      WIKI("2/25/Microsoft_icon.svg"),
+    APPLE:          WIKI("8/84/Apple_Computer_Logo_rainbow.svg"),
+    NON_JP:         WIKI("5/5c/Noto_Emoji_v2.034_1f536.svg"),
+    JP:             WIKI("5/54/Noto_Emoji_v2.034_1f338.svg"),
+    PROXY:          WIKI("2/26/Noto_Emoji_v2.034_1f310.svg"),
+    BYPASS:         WIKI("8/8b/Noto_Emoji_v2.034_2b50.svg"),
+    FINAL:          GENERATE_ICON_URL("final"),
 };
 
 const setProxyGroupIcon = (config) => {
-    (config["proxy-groups"] || []).forEach((g) => {
-        if (!g.hidden && ICON_MAP[g.name]) {
-            g.icon = ICON_MAP[g.name];
+    for (const g of config["proxy-groups"]) {
+        if (!g.hidden) {
+            g.icon = ICON_MAP?.[g.name.match(/[A-Za-z0-9_]+$/).toString()] ?? "";
         }
-    });
+    }
 };
 
-/* ========== Main Entry Point ========== */
 const main = (config) => {
-    if (!config?.proxies) return config;
-
     overrideBasicOptions(config);
     overrideExternalController(config);
     overrideDns(config);
-    overrideHosts(config);
-    overrideProxyGroups(config);
-    // overrideRuleProviders(config); // Uncomment to use remote rule-providers
+    overrideRuleProviders(config);
     overrideRules(config);
-    dialerProxy(config, "SELECTOR");
+    overrideProxyGroups(config);
     setProxyGroupIcon(config);
 
     return config;
 };
 
-const isNode = typeof process !== 'undefined' && !!process.versions && !!process.versions.node;
+const isNode = typeof process !== "undefined" && !!process.versions?.node;
 if (isNode) module.exports = { main };
