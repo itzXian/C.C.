@@ -1,7 +1,7 @@
 // Version: 1.0
 // Reference:
-// https://www.clashverge.dev/guide/script.html
-// https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
+//     https://www.clashverge.dev/guide/script.html
+//     https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
 /* ========== Base-Options Configuration ========== */
 const overrideBasicOptions = (config) => {
@@ -281,15 +281,15 @@ const CREATE_PROXY_GROUP = (overrides) => ({
 });
 
 const CREATE_RELAY_PROVIDER = (obj) => {
-    const result = Object.create(null);
+    const provider = Object.create(null);
     for (const key of Object.keys(obj)) {
         const relay = `🔗${key}`;
-        result[relay] = { ...obj[key], override: { "dialer-proxy": "SELECTOR", "additional-prefix": relay } };
+        provider[relay] = { ...obj[key], override: { "dialer-proxy": "SELECTOR", "additional-prefix": relay } };
     }
-    return result;
+    return provider;
 };
 
-const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes=[], proxyProviders = {}, prefix = "") => {
+const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes = [], proxyProviders = {}, prefix = "") => {
     const proxyProviderKeys = Object.keys(proxyProviders);
 
     let proxyGroups = [
@@ -480,5 +480,5 @@ const main = (config) => {
     return config;
 };
 
-const isNode = typeof process !== "undefined" && !!process.versions?.node;
-if (isNode) module.exports = { main };
+const IS_NODE = typeof process !== "undefined" && !!process.versions?.node;
+if (IS_NODE) module.exports = { main };
