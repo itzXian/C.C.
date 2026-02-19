@@ -289,8 +289,10 @@ const CREATE_RELAY_PROVIDER = (obj) => {
     return provider;
 };
 
-const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes = [], proxyProviders = {}, prefix = "") => {
-    const proxyProviderKeys = Object.keys(proxyProviders);
+const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix = "") => {
+    const providerKeys = Object.keys(providers);
+    const hasProviders = IS_NOT_EMPTY(providers);
+    const hasProxies   = IS_NOT_EMPTY(proxies);
 
     let proxyGroups = [
         { type: "url-test",     name: "AUTO HKJPSG", filter: REGEX(["HK", "JP", "SG"].map((e) => FILTER[e]).join("|")) },
@@ -304,30 +306,31 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes = [], proxyProviders = {},
     ].map((e) => CREATE_PROXY_GROUP({
         ...e,
         name:    `${prefix}${e.name}`,
-        proxies: IS_NOT_EMPTY(proxyNodes)
-            ? proxyNodes.map((p) => p.name).filter((n) => n.match(e.filter))
+        proxies: hasProxies
+            ? proxies.map((p) => p.name).filter((n) => n.match(e.filter))
             : [],
-        use:     proxyProviderKeys,
+        use:     providerKeys,
     }));
-    if (!IS_NOT_EMPTY(proxyProviders))
-        proxyGroups = proxyGroups.filter((p) => IS_NOT_EMPTY(p.proxies));
+    if (!hasProviders)
+        proxyGroups = proxyGroups.filter((p) => p.proxies);
 
     const selectorGroup = [{
         type:    "select",
         name:    `${prefix}SELECTOR`,
         filter:  REGEX(FILTER.ALL),
         proxies: proxyGroups.map((p) => p.name),
-        use:     proxyProviderKeys,
+        use:     providerKeys,
         hidden:  false,
     }];
 
-    const relayProxies   = IS_NOT_EMPTY(proxyProviders)
+    const relayProxies   = hasProviders
         ? []
-        : DEEP_CLONE(proxyNodes);
-    const relayProviders = IS_NOT_EMPTY(proxyProviders)
-        ? CREATE_RELAY_PROVIDER(proxyProviders)
+        : DEEP_CLONE(proxies);
+    const relayProviders = hasProviders
+        ? CREATE_RELAY_PROVIDER(providers)
         : CREATE_RELAY_PROVIDER({ "provider-relay": { type: "inline", payload: relayProxies } });
     const relayProviderKeys = Object.keys(relayProviders);
+    const hasRelayProxies   = IS_NOT_EMPTY(relayProxies);
 
     let relayGroups = [
         { type: "url-test", name: "AUTO JP",  filter: REGEX(FILTER.JP) },
@@ -335,13 +338,13 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes = [], proxyProviders = {},
     ].map((e) => CREATE_PROXY_GROUP({
         ...e,
         name:    `${prefix}🔗${e.name}`,
-        proxies: IS_NOT_EMPTY(relayProxies)
+        proxies: hasRelayProxies
             ? relayProxies.map((p) => p.name).filter((n) => n.match(e.filter))
             : [],
         use:     relayProviderKeys,
     }));
-    if (IS_NOT_EMPTY(relayProxies))
-        relayGroups = relayGroups.filter((p) => IS_NOT_EMPTY(p.proxies));
+    if (hasRelayProxies)
+        relayGroups = relayGroups.filter((p) => p.proxies);
 
     const relaySelectorGroup = [{
         type:    "select",
@@ -356,16 +359,17 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxyNodes = [], proxyProviders = {},
 };
 
 const overrideProxyGroups = (config) => {
-    const proxyProviders = config?.["proxy-providers"] ?? {};
+    const providers = config?.["proxy-providers"] ?? {};
+    const hasProviders = IS_NOT_EMPTY(providers);
 
     let { proxyGroups, selectorGroup, relayGroups, relaySelectorGroup, relayProviders } =
-        CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, proxyProviders);
+        CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, providers);
 
-    if (IS_NOT_EMPTY(proxyProviders)) {
+    if (hasProviders) {
         const tempSelector      = [];
         const tempRelaySelector = [];
 
-        for (const [key, value] of Object.entries(proxyProviders)) {
+        for (const [key, value] of Object.entries(providers)) {
             const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
             proxyGroups        = [...proxyGroups,        ...pr.proxyGroups];
             selectorGroup      = [...selectorGroup,      ...pr.selectorGroup];
@@ -420,7 +424,7 @@ const overrideProxyGroups = (config) => {
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
     config["proxy-groups"]    = [...allGroups, ...otherGroups];
-    config["proxy-providers"] = { ...proxyProviders, ...relayProviders };
+    config["proxy-providers"] = { ...providers, ...relayProviders };
 };
 
 /* ========== Icon Support ========== */
