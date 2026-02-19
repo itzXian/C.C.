@@ -402,11 +402,11 @@ const overrideProxyGroups = (config) => {
 
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
-        { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://yuanshen.com" },
-        { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
-        { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
-        { name: "HOYO_DIRECT",    ...directFirst },
-        { name: "HOYO_PROXY",     ...customFirst },
+        { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
+        { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://hk4e-sdk-os.hoyoverse.com/ping?callback=jsonptesting" },
+        { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
+        { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
+        { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_BLOATWARE", ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
         { name: "STEAM_CN",       ...directFirst },
