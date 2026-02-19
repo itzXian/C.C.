@@ -51,7 +51,7 @@ const overrideExternalController = (config) => {
 };
 
 const overrideDns = (config) => {
-    const directDns  = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
+    const directDns  = ["quic://223.5.5.5:853", "tls://223.5.5.5:853"];
     const proxyDns   = ["tls://1.0.0.1:853", "tls://1.1.1.1", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
     const adblockDns = ["dns.adguard-dns.com"];
 
@@ -65,24 +65,28 @@ const overrideDns = (config) => {
     ];
 
     config.dns = {
-        enable:                true,
-        "prefer-h3":           false,
-        ipv6:                  false,
-        "respect-rules":       true,
-        "default-nameserver":  ["quic://223.5.5.5:853", "tls://223.5.5.5:853"],
+        enable:                    true,
+        "prefer-h3":               false,
+        ipv6:                      false,
+        "respect-rules":           true,
+        "default-nameserver":      directDns,
         "proxy-server-nameserver": directDns,
-        "enhanced-mode":       "fake-ip",
-        "fake-ip-range":       "198.18.0.1/16",
-        "fake-ip-filter-mode": "blacklist",
-        "fake-ip-filter":      [...fakeIpFilter, "geosite:private", "geosite:connectivity-check"],
+        "enhanced-mode":           "fake-ip",
+        "fake-ip-range":           "198.18.0.1/16",
+        "fake-ip-filter-mode":     "blacklist",
+        "fake-ip-filter": [
+            ...fakeIpFilter,
+            "geosite:private",
+            "geosite:connectivity-check"
+        ],
         "nameserver-policy": {
-            "+.twimg.com":        proxyDns,
-            "+.pximg.net":        proxyDns,
-            "cdn.discordapp.com": proxyDns,
+            "+.twimg.com":         proxyDns,
+            "+.pximg.net":         proxyDns,
+            "cdn.discordapp.com":  proxyDns,
         },
-        "direct-nameserver":               directDns,
+        "direct-nameserver":       directDns,
         "direct-nameserver-follow-policy": true,
-        nameserver:                        adblockDns,
+        nameserver:                adblockDns,
     };
 };
 
@@ -398,7 +402,7 @@ const overrideProxyGroups = (config) => {
 
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
-        { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
+        { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://yuanshen.com" },
         { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
         { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
         { name: "HOYO_DIRECT",    ...directFirst },
@@ -419,7 +423,7 @@ const overrideProxyGroups = (config) => {
         { name: "NON_JP",         ...customFirst },
         { name: "JP",             ...customFirst },
         { name: "PROXY",          ...customFirst },
-        { name: "BYPASS",         ...directFirst },
+        { name: "BYPASS",         ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
         { name: "FINAL",          ...customFirst },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
