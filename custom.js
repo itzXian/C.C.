@@ -116,9 +116,9 @@ const overrideRuleProviders = (config) => {
         },
         Hoyo_GI_UGC: {
             type: "inline",
-            behavior: "domain",
+            behavior: "classical",
             payload: [
-                "asia-ugc*.hoyoverse.com",
+                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",
             ],
         },
         Hoyo_Direct: {
