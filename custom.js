@@ -64,13 +64,13 @@ const overrideDns = (config) => {
         "fake-ip-range":           "198.18.0.1/16",
         "fake-ip-filter-mode":     "blacklist",
         "fake-ip-filter": [
-            "rule-set:Local",
+            "rule-set:local",
             "geosite:private",
             "geosite:cn",
             "geosite:connectivity-check",
         ],
         "nameserver-policy": {
-            "rule-set:Local":      "system",
+            "rule-set:local":      "system",
             "geosite:private":     directDns,
             "geosite:cn":          directDns,
             "+.twimg.com":         proxyDns,
@@ -88,7 +88,7 @@ const overrideDns = (config) => {
 //     https://wiki.metacubex.one/handbook/syntax/#_8
 const overrideRuleProviders = (config) => {
     config["rule-providers"] = {
-        Local: {
+        local: {
             type: "inline",
             behavior: "domain",
             payload: [
@@ -101,7 +101,7 @@ const overrideRuleProviders = (config) => {
                 "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",       "*.127.*.*.*.nip.io",
             ],
         },
-        Hoyo_GI_CN: {
+        hoyo_gi_cn: {
             type: "inline",
             behavior: "domain",
             payload: [
@@ -111,21 +111,21 @@ const overrideRuleProviders = (config) => {
                 "osuspider.yuanshen.com",
             ],
         },
-        Hoyo_GI: {
+        hoyo_gi: {
             type: "inline",
             behavior: "domain",
             payload: [
                 "osasiadispatch.yuanshen.com",
             ],
         },
-        Hoyo_GI_UGC: {
+        hoyo_gi_ugc: {
             type: "inline",
             behavior: "classical",
             payload: [
                 "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",
             ],
         },
-        Hoyo_Direct: {
+        hoyo_direct: {
             type: "inline",
             behavior: "classical",
             payload: [
@@ -137,7 +137,7 @@ const overrideRuleProviders = (config) => {
                 "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
             ],
         },
-        Hoyo_Proxy: {
+        hoyo_proxy: {
             type: "inline",
             behavior: "classical",
             payload: [
@@ -148,7 +148,7 @@ const overrideRuleProviders = (config) => {
                 "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",   // ZZZ
             ],
         },
-        MIUI_Bloatware: {
+        miui_ad: {
             type: "inline",
             behavior: "domain",
             payload: [
@@ -208,13 +208,13 @@ const overrideRuleProviders = (config) => {
 /* ========== Rules Configuration ========== */
 const overrideRules = (config) => {
     config.rules = [
-        "RULE-SET,      Hoyo_GI_CN,         HOYO_GI_CN",
-        "RULE-SET,      Hoyo_GI,            HOYO_GI",
-        "RULE-SET,      Hoyo_GI_UGC,        HOYO_GI_UGC",
-        "RULE-SET,      Hoyo_Direct,        HOYO_DIRECT",
-        "RULE-SET,      Hoyo_Proxy,         HOYO_PROXY",
+        "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
+        "RULE-SET,      hoyo_gi,            HOYO_GI",
+        "RULE-SET,      hoyo_gi_ugc,        HOYO_GI_UGC",
+        "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
+        "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
-        "RULE-SET,      MIUI_Bloatware,     MIUI_BLOATWARE",
+        "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD_BLOCK",
         "GEOSITE,       steam@cn,           STEAM_CN",
         "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
@@ -235,7 +235,7 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX, hinative.com,       NON_JP",
         "GEOIP,         JP,                 JP,              no-resolve",
         "GEOSITE,       geolocation-!cn,    PROXY",
-        "RULE-SET,      Local,              BYPASS",
+        "RULE-SET,      local,              BYPASS",
         "GEOSITE,       private,            BYPASS",
         "GEOSITE,       CN,                 BYPASS",
         "GEOIP,         private,            BYPASS",
@@ -412,7 +412,7 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
-        { name: "MIUI_BLOATWARE", ...rejectFirst },
+        { name: "MIUI_AD", ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
         { name: "STEAM_CN",       ...directFirst },
         { name: "STEAM",          ...customFirst },
@@ -453,7 +453,7 @@ const ICON_MAP = {
     HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
-    MIUI_BLOATWARE: FAVICON("https://www.mi.com/"),
+    MIUI_AD:        FAVICON("https://www.mi.com/"),
     AD_BLOCK:       WIKI("1/1c/Codex_icon_Block_red.svg"),
     STEAM_CN:       WIKI("8/83/Steam_icon_logo.svg"),
     STEAM:          WIKI("8/83/Steam_icon_logo.svg"),
