@@ -55,37 +55,28 @@ const overrideDns = (config) => {
     const proxyDns   = ["tls://1.0.0.1:853", "tls://1.1.1.1", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
     const adblockDns = ["dns.adguard-dns.com"];
 
-    const fakeIpFilter = [
-        "+.m2m", "injections.adguard.org", "local.adguard.org", "+.bogon", "+.lan", "+.local",
-        "+.internal", "+.localdomain", "home.arpa", "127.0.0.1.sslip.io", "127.atlas.skk.moe",
-        "dns.msftncsi.com", "*.srv.nintendo.net", "*.stun.playstation.net", "xbox.*.microsoft.com",
-        "*.xboxlive.com", "*.turn.twilio.com", "*.stun.twilio.com", "stun.syncthing.net", "stun.*",
-        "127.*.*.*.sslip.io", "127-*-*-*.sslip.io", "*.127.*.*.*.sslip.io", "*-127-*-*-*.sslip.io",
-        "127.*.*.*.nip.io", "127-*-*-*.nip.io", "*.127.*.*.*.nip.io", "*-127-*-*.nip.io",
-    ];
-
     config.dns = {
         enable:                    true,
-        "prefer-h3":               false,
+        "prefer-h3":               true,
         ipv6:                      false,
-        "respect-rules":           true,
         "default-nameserver":      directDns,
-        "proxy-server-nameserver": directDns,
         "enhanced-mode":           "fake-ip",
         "fake-ip-range":           "198.18.0.1/16",
         "fake-ip-filter-mode":     "blacklist",
         "fake-ip-filter": [
-            ...fakeIpFilter,
+            "rule-set:Local",
             "geosite:private",
-            "geosite:connectivity-check"
+            "geosite:cn",
+            "geosite:connectivity-check",
         ],
         "nameserver-policy": {
+            "rule-set:Local":      "system",
+            "geosite:private":     directDns,
+            "geosite:cn":          directDns,
             "+.twimg.com":         proxyDns,
             "+.pximg.net":         proxyDns,
             "cdn.discordapp.com":  proxyDns,
         },
-        "direct-nameserver":       directDns,
-        "direct-nameserver-follow-policy": true,
         nameserver:                adblockDns,
     };
 };
@@ -97,6 +88,19 @@ const overrideDns = (config) => {
 //     https://wiki.metacubex.one/handbook/syntax/#_8
 const overrideRuleProviders = (config) => {
     config["rule-providers"] = {
+        Local: {
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "+.m2m",              "injections.adguard.org", "local.adguard.org",      "+.bogon",
+                "+.lan",              "+.local",                "+.internal",             "+.localdomain",
+                "home.arpa",          "127.atlas.skk.moe",      "dns.msftncsi.com",       "*.srv.nintendo.net",
+                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",   "*.xboxlive.com",
+                "*.turn.twilio.com",  "*.stun.twilio.com",      "stun.syncthing.net",     "127.0.0.1.sslip.io",
+                "127.*.*.*.sslip.io", "127-*-*-*.sslip.io",     "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
+                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",       "*.127.*.*.*.nip.io",
+            ],
+        },
         Hoyo_GI_CN: {
             type: "inline",
             behavior: "domain",
@@ -231,6 +235,7 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX, hinative.com,       NON_JP",
         "GEOIP,         JP,                 JP,              no-resolve",
         "GEOSITE,       geolocation-!cn,    PROXY",
+        "RULE-SET,      Local,              BYPASS",
         "GEOSITE,       private,            BYPASS",
         "GEOSITE,       CN,                 BYPASS",
         "GEOIP,         private,            BYPASS",
