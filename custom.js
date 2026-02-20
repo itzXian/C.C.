@@ -438,14 +438,14 @@ const overrideProxyGroups = (config) => {
 
 /* ========== Icon Support ========== */
 const GITHUB  = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
-const WIKI    = (path) => `https://upload.wikimedia.org/wikipedia/commons/${path}`;
+const WIKI    = (path) => `https://upload.wikimedia.org/wikipedia/${path}`;
 const GPLAY   = (id)   => `https://play-lh.googleusercontent.com/${id}`;
 const FAVICON = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
 
 const ICON_MAP = {
-    RELAY:          WIKI("3/3a/Noto_Emoji_v2.034_1f517.svg"),
+    RELAY:          WIKI("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     SELECTOR:       GITHUB("manual"),
-    CUSTOM:         WIKI("c/c0/Noto_Emoji_v2.034_1f537.svg"),
+    CUSTOM:         WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_GI_UGC:    GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_GI:        GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
@@ -454,22 +454,22 @@ const ICON_MAP = {
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
-    AD_BLOCK:       WIKI("1/1c/Codex_icon_Block_red.svg"),
-    STEAM_CN:       WIKI("8/83/Steam_icon_logo.svg"),
-    STEAM:          WIKI("8/83/Steam_icon_logo.svg"),
+    AD_BLOCK:       WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
+    STEAM_CN:       WIKI("commons/8/83/Steam_icon_logo.svg"),
+    STEAM:          WIKI("commons/8/83/Steam_icon_logo.svg"),
     PIXIV:          GPLAY("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
     AI:             GPLAY("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
     YOUTUBE:        FAVICON("https://youtube.com"),
-    GOOGLE:         WIKI("c/c1/Google_%22G%22_logo.svg"),
-    TWITTER:        WIKI("6/6f/Logo_of_Twitter.svg"),
-    TELEGRAM:       WIKI("8/82/Telegram_logo.svg"),
-    DISCORD:        "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
-    MICROSOFT:      WIKI("2/25/Microsoft_icon.svg"),
-    APPLE:          WIKI("8/84/Apple_Computer_Logo_rainbow.svg"),
-    NON_JP:         WIKI("5/5c/Noto_Emoji_v2.034_1f536.svg"),
-    JP:             WIKI("5/54/Noto_Emoji_v2.034_1f338.svg"),
-    PROXY:          WIKI("2/26/Noto_Emoji_v2.034_1f310.svg"),
-    BYPASS:         WIKI("8/8b/Noto_Emoji_v2.034_2b50.svg"),
+    GOOGLE:         WIKI("commons/c/c1/Google_%22G%22_logo.svg"),
+    TWITTER:        WIKI("commons/6/6f/Logo_of_Twitter.svg"),
+    TELEGRAM:       WIKI("commons/8/82/Telegram_logo.svg"),
+    DISCORD:        WIKI("fr/4/4f/Discord_Logo_sans_texte.svg"),
+    MICROSOFT:      WIKI("commons/2/25/Microsoft_icon.svg"),
+    APPLE:          WIKI("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
+    NON_JP:         WIKI("commons/5/5c/Noto_Emoji_v2.034_1f536.svg"),
+    JP:             WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
+    PROXY:          WIKI("commons/2/26/Noto_Emoji_v2.034_1f310.svg"),
+    BYPASS:         WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
     FINAL:          GITHUB("final"),
 };
 
