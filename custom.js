@@ -88,19 +88,6 @@ const overrideDns = (config) => {
 //     https://wiki.metacubex.one/handbook/syntax/#_8
 const overrideRuleProviders = (config) => {
     config["rule-providers"] = {
-        local: {
-            type: "inline",
-            behavior: "domain",
-            payload: [
-                "+.m2m",              "injections.adguard.org", "local.adguard.org",      "+.bogon",
-                "+.lan",              "+.local",                "+.internal",             "+.localdomain",
-                "home.arpa",          "127.atlas.skk.moe",      "dns.msftncsi.com",       "*.srv.nintendo.net",
-                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",   "*.xboxlive.com",
-                "*.turn.twilio.com",  "*.stun.twilio.com",      "stun.syncthing.net",     "127.0.0.1.sslip.io",
-                "127.*.*.*.sslip.io", "127-*-*-*.sslip.io",     "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
-                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",       "*.127.*.*.*.nip.io",
-            ],
-        },
         hoyo_gi_cn: {
             type: "inline",
             behavior: "domain",
@@ -202,6 +189,26 @@ const overrideRuleProviders = (config) => {
                 "www.pangolin-dsp-toutiao.com",
             ],
         },
+        download: {
+            type: "inline",
+            behavior: "classical",
+            payload: [
+                "PROCESS-NAME,idm.internet.download.manager",
+            ],
+        },
+        local: {
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "+.m2m",              "injections.adguard.org", "local.adguard.org",      "+.bogon",
+                "+.lan",              "+.local",                "+.internal",             "+.localdomain",
+                "home.arpa",          "127.atlas.skk.moe",      "dns.msftncsi.com",       "*.srv.nintendo.net",
+                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",   "*.xboxlive.com",
+                "*.turn.twilio.com",  "*.stun.twilio.com",      "stun.syncthing.net",     "127.0.0.1.sslip.io",
+                "127.*.*.*.sslip.io", "127-*-*-*.sslip.io",     "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
+                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",       "*.127.*.*.*.nip.io",
+            ],
+        },
     };
 };
 
@@ -216,6 +223,7 @@ const overrideRules = (config) => {
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD_BLOCK",
+        "RULE-SET,      download,           DOWNLOAD",
         "GEOSITE,       steam@cn,           STEAM_CN",
         "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
         "GEOSITE,       steam,              STEAM",
@@ -412,8 +420,9 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
-        { name: "MIUI_AD", ...rejectFirst },
+        { name: "MIUI_AD",        ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
+        { name: "DOWNLOAD",       ...customFirst },
         { name: "STEAM_CN",       ...directFirst },
         { name: "STEAM",          ...customFirst },
         { name: "PIXIV",          ...customFirst },
@@ -455,6 +464,7 @@ const ICON_MAP = {
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
     AD_BLOCK:       WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
+    DOWNLOAD:       WIKI("commons/5/5c/Noto_Emoji_v2.034_1f536.svg"),
     STEAM_CN:       WIKI("commons/8/83/Steam_icon_logo.svg"),
     STEAM:          WIKI("commons/8/83/Steam_icon_logo.svg"),
     PIXIV:          GPLAY("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
