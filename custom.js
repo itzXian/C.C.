@@ -94,6 +94,7 @@ const overrideRuleProviders = (config) => {
             behavior: "domain",
             payload: [
                 "autopatchhk.yuanshen.com",
+                "dispatchosglobal.yuanshen.com",
                 "oseurodispatch.yuanshen.com",
                 "osusadispatch.yuanshen.com",
                 "osuspider.yuanshen.com",
