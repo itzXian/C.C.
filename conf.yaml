@@ -20,12 +20,3 @@ proxy-providers:
     url: "https://example.com"
     override:
       additional-prefix: "🟢 "
-
-proxies:
-  - name: DNS
-    type: dns
-
-proxy-groups:
-  - name: ALL
-    type: select
-    include-all: true
