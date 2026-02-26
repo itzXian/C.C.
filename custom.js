@@ -51,8 +51,8 @@ const overrideExternalController = (config) => {
 };
 
 const overrideDns = (config) => {
-    const directDns  = ["quic://223.5.5.5:853", "tls://223.5.5.5:853"];
-    const proxyDns   = ["tls://1.0.0.1:853", "tls://1.1.1.1:853", "tls://8.8.8.8:853", "tls://8.8.4.4:853"];
+    const directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
+    const proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
     const adblockDns = ["dns.adguard-dns.com"];
 
     config.dns = {
