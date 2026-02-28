@@ -294,7 +294,7 @@ const DEEP_CLONE = (obj) =>
 
 const CREATE_PROXY_GROUP = (overrides) => ({
     hidden:            true,
-    url:               "https://www.google.com/generate_204",
+    url:               "https://cp.cloudflare.com",
     "expected-status": "200/204/302",
     timeout:           3000,
     interval:          300,
