@@ -1,5 +1,6 @@
 provider-base-config: &provider
   type: http
+  proxy: DIRECT
   interval: 1440
   health-check:
     enable: true
@@ -7,7 +8,6 @@ provider-base-config: &provider
     interval: 300
     timeout: 3000
     expected-status: 200/204/302
-  proxy: DIRECT
 
 proxy-providers:
   🟥:
