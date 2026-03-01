@@ -304,10 +304,10 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     hidden:            true,
     url:               "https://cp.cloudflare.com",
     "expected-status": "200/204/302",
-    timeout:           3000,
-    interval:          300,
+    timeout:           5000,
+    interval:          1800,
     "exclude-filter":  "0.[0-9]",
-    tolerance:         100,
+    tolerance:         50,
     ...overrides,
 });
 

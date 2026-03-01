@@ -1,11 +1,11 @@
 provider-base-config: &provider
   type: http
   proxy: DIRECT
-  interval: 1440
+  interval: 86400
   health-check:
     enable: true
     url: https://cp.cloudflare.com
-    interval: 300
+    interval: 1800
     timeout: 3000
     expected-status: 200/204/302
 
