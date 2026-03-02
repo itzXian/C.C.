@@ -118,7 +118,7 @@ const overrideRuleProviders = (config) => {
             type: "inline",
             behavior: "classical",
             payload: [
-                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
+                //"DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
                 "DOMAIN-SUFFIX,yuanshen.com",
                 "DOMAIN-SUFFIX,mihoyo.com",
                 "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
@@ -133,8 +133,6 @@ const overrideRuleProviders = (config) => {
                 "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
                 "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
                 "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY", // GI
-                "DOMAIN-SUFFIX,starrails.com,HOYO_PROXY",         // HSR
-                "DOMAIN-SUFFIX,zenlesszonezero.com,HOYO_PROXY",   // ZZZ
             ],
         },
         miui_ad: {
@@ -232,9 +230,9 @@ const overrideRules = (config) => {
         "RULE-SET,      hoyo_gi_ugc,        HOYO_GI_UGC",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
-        "GEOSITE,       hoyoverse,          HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD_BLOCK",
+        "GEOSITE,       hoyoverse,          HOYO_PROXY",
         "RULE-SET,      download,           DOWNLOAD",
         "GEOSITE,       ehentai,            EHENTAI",
         "RULE-SET,      github_uc,          GITHUB_UC",
