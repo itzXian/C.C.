@@ -100,18 +100,18 @@ const overrideRuleProviders = (config) => {
                 "osuspider.yuanshen.com",
             ],
         },
-        hoyo_gi: {
-            type: "inline",
-            behavior: "domain",
-            payload: [
-                "osasiadispatch.yuanshen.com",
-            ],
-        },
         hoyo_gi_ugc: {
             type: "inline",
             behavior: "classical",
             payload: [
                 "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",
+            ],
+        },
+        hoyo_gi: {
+            type: "inline",
+            behavior: "domain",
+            payload: [
+                "osasiadispatch.yuanshen.com",
             ],
         },
         hoyo_direct: {
@@ -226,8 +226,8 @@ const overrideRuleProviders = (config) => {
 const overrideRules = (config) => {
     config.rules = [
         "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
-        "RULE-SET,      hoyo_gi,            HOYO_GI",
         "RULE-SET,      hoyo_gi_ugc,        HOYO_GI_UGC",
+        "RULE-SET,      hoyo_gi,            HOYO_GI",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
@@ -428,8 +428,8 @@ const overrideProxyGroups = (config) => {
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
+        { name: "HOYO_GI_UGC", proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
         { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://hk4e-sdk-os.hoyoverse.com/ping?callback=jsonptesting" },
-        { name: "HOYO_GI_UGC", proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
