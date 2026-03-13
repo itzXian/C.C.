@@ -100,30 +100,17 @@ const overrideRuleProviders = (config) => {
                 "osuspider.yuanshen.com",
             ],
         },
-        hoyo_gi_ugc: {
-            type: "inline",
-            behavior: "classical",
-            payload: [
-                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",
-            ],
-        },
-        hoyo_gi: {
-            type: "inline",
-            behavior: "domain",
-            payload: [
-                "osasiadispatch.yuanshen.com",
-            ],
-        },
         hoyo_direct: {
             type: "inline",
             behavior: "classical",
             payload: [
-                //"DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
+                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
                 "DOMAIN-SUFFIX,yuanshen.com",
                 "DOMAIN-SUFFIX,mihoyo.com",
-                "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
-                "AND,((DST-PORT,23301/23801),(NETWORK,udp))", // HSR
-                "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
+                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
+                "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
+                "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
+                "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
             ],
         },
         hoyo_proxy: {
@@ -132,7 +119,9 @@ const overrideRuleProviders = (config) => {
             payload: [
                 "DOMAIN-SUFFIX,hoyoverse.com",
                 "DOMAIN-SUFFIX,hoyolab.com",
-                "AND,((DST-PORT,8999),(NETWORK,tcp))", // GI
+                "DOMAIN,osasiadispatch.yuanshen.com",    // GI
+                "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
+                "PROCESS-NAME,com.miHoYo.GenshinImpact", // GI
             ],
         },
         miui_ad: {
@@ -226,8 +215,6 @@ const overrideRuleProviders = (config) => {
 const overrideRules = (config) => {
     config.rules = [
         "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
-        "RULE-SET,      hoyo_gi_ugc,        HOYO_GI_UGC",
-        "RULE-SET,      hoyo_gi,            HOYO_GI",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
@@ -428,8 +415,6 @@ const overrideProxyGroups = (config) => {
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
-        { name: "HOYO_GI_UGC", proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://asia-ugc-api.hoyoverse.com/ping?callback=jsonptesting" },
-        { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"], url: "https://hk4e-sdk-os.hoyoverse.com/ping?callback=jsonptesting" },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
@@ -470,8 +455,6 @@ const ICON_MAP = {
     SELECTOR:       GITHUB("manual"),
     CUSTOM:         WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
-    HOYO_GI_UGC:    GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
-    HOYO_GI:        GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
     HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
