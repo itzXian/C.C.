@@ -130,9 +130,9 @@ const overrideRuleProviders = (config) => {
             type: "inline",
             behavior: "classical",
             payload: [
-                "DOMAIN-SUFFIX,hoyoverse.com,HOYO_PROXY",
-                "DOMAIN-SUFFIX,hoyolab.com,HOYO_PROXY",
-                "AND,((DST-PORT,8999),(NETWORK,tcp)),HOYO_PROXY", // GI
+                "DOMAIN-SUFFIX,hoyoverse.com",
+                "DOMAIN-SUFFIX,hoyolab.com",
+                "AND,((DST-PORT,8999),(NETWORK,tcp))", // GI
             ],
         },
         miui_ad: {
