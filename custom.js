@@ -5,15 +5,17 @@
 
 /* ========== Base-Options Configuration ========== */
 const overrideBasicOptions = (config) => {
+    const CDN = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
+
     Object.assign(config, {
         "mixed-port": 7890,
-        "allow-lan": true,
-        mode: "rule",
+        "allow-lan":  true,
+        mode:         "rule",
         "geox-url": {
-            geoip:   "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat",
-            geosite: "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat",
-            mmdb:    "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb",
-            asn:     "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb",
+            geoip:   `${CDN}/geoip.dat`,
+            geosite: `${CDN}/geosite.dat`,
+            mmdb:    `${CDN}/geoip.metadb`,
+            asn:     `${CDN}/GeoLite2-ASN.mmdb`,
         },
         "geo-auto-update":     true,
         "geo-update-interval": 24,
@@ -42,9 +44,12 @@ const overrideBasicOptions = (config) => {
 };
 
 const overrideExternalController = (config) => {
+    const port   = Math.floor(Math.random() * 9999) + 10000;
+    const secret = Math.random().toString(36).slice(2);
+
     Object.assign(config, {
-        "external-controller": `0.0.0.0:${Math.floor(Math.random() * 9999) + 10000}`,
-        secret:                Math.random().toString(36).slice(2),
+        "external-controller": `0.0.0.0:${port}`,
+        "secret":              secret,
         "external-ui":         "ui",
         "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
     });
@@ -90,7 +95,7 @@ const overrideDns = (config) => {
 const overrideRuleProviders = (config) => {
     config["rule-providers"] = {
         hoyo_gi_cn: {
-            type: "inline",
+            type:     "inline",
             behavior: "domain",
             payload: [
                 "autopatchhk.yuanshen.com",
@@ -101,7 +106,7 @@ const overrideRuleProviders = (config) => {
             ],
         },
         hoyo_direct: {
-            type: "inline",
+            type:     "inline",
             behavior: "classical",
             payload: [
                 "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
@@ -114,7 +119,7 @@ const overrideRuleProviders = (config) => {
             ],
         },
         hoyo_proxy: {
-            type: "inline",
+            type:     "inline",
             behavior: "classical",
             payload: [
                 "DOMAIN-SUFFIX,hoyoverse.com",
@@ -125,7 +130,7 @@ const overrideRuleProviders = (config) => {
             ],
         },
         miui_ad: {
-            type: "inline",
+            type:     "inline",
             behavior: "domain",
             payload: [
                 // Xiaomi / MIUI telemetry & ads
@@ -179,21 +184,21 @@ const overrideRuleProviders = (config) => {
             ],
         },
         download: {
-            type: "inline",
+            type:     "inline",
             behavior: "classical",
             payload: [
                 "PROCESS-NAME,idm.internet.download.manager",
             ],
         },
         github_uc: {
-            type: "inline",
+            type:     "inline",
             behavior: "domain",
             payload: [
                 "+.githubusercontent.com",
             ],
         },
         local: {
-            type: "inline",
+            type:     "inline",
             behavior: "domain",
             payload: [
                 "+.m2m",              "injections.adguard.org", "local.adguard.org",
@@ -278,7 +283,7 @@ const IS_NOT_EMPTY = (value) => {
     if (Array.isArray(value))      return value.length > 0;
     if (value instanceof Object)   return Object.keys(value).length > 0;
     return true;
-}
+};
 
 const DEEP_CLONE = (obj) =>
     typeof structuredClone === "function"
@@ -296,13 +301,19 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     ...overrides,
 });
 
-const CREATE_RELAY_PROVIDER = (obj) => {
-    const provider = Object.create(null);
-    for (const key of Object.keys(obj)) {
-        const relay = `🔗${key}`;
-        provider[relay] = { ...obj[key], override: { "dialer-proxy": "SELECTOR", "additional-prefix": relay } };
+const CREATE_RELAY_PROVIDER = (providers) => {
+    const result = Object.create(null);
+    for (const [key, value] of Object.entries(providers)) {
+        const relayKey = `🔗${key}`;
+        result[relayKey] = {
+            ...value,
+            override: {
+                "dialer-proxy":      "SELECTOR",
+                "additional-prefix": relayKey,
+            },
+        };
     }
-    return provider;
+    return result;
 };
 
 const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix = "") => {
@@ -323,18 +334,18 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         ...e,
         name:    `${prefix}${e.name}`,
         proxies: hasProxies
-            ? proxies.map((p) => p.name).filter((n) => n.match(e.filter))
+            ? proxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter))
             : [],
         use:     providerKeys,
     }));
     if (!hasProviders)
-        proxyGroups = proxyGroups.filter((p) => p.proxies);
+        proxyGroups = proxyGroups.filter((g) => g.proxies);
 
     const selectorGroup = [{
         type:    "select",
         name:    `${prefix}SELECTOR`,
         filter:  REGEX(FILTER.ALL),
-        proxies: proxyGroups.map((p) => p.name),
+        proxies: proxyGroups.map((g) => g.name),
         use:     providerKeys,
         hidden:  false,
     }];
@@ -355,18 +366,18 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         ...e,
         name:    `${prefix}🔗${e.name}`,
         proxies: hasRelayProxies
-            ? relayProxies.map((p) => p.name).filter((n) => n.match(e.filter))
+            ? relayProxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter))
             : [],
         use:     relayProviderKeys,
     }));
     if (hasRelayProxies)
-        relayGroups = relayGroups.filter((p) => p.proxies);
+        relayGroups = relayGroups.filter((g) => g.proxies);
 
     const relaySelectorGroup = [{
         type:    "select",
         name:    `${prefix}🔗RELAY`,
         filter:  REGEX(FILTER.ALL),
-        proxies: relayGroups.map((p) => p.name),
+        proxies: relayGroups.map((g) => g.name),
         use:     relayProviderKeys,
         hidden:  false,
     }];
@@ -387,13 +398,16 @@ const overrideProxyGroups = (config) => {
 
         for (const [key, value] of Object.entries(providers)) {
             const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
-            proxyGroups        = [...proxyGroups,        ...pr.proxyGroups];
-            selectorGroup      = [...selectorGroup,      ...pr.selectorGroup];
-            relayGroups        = [...relayGroups,        ...pr.relayGroups];
-            relaySelectorGroup = [...relaySelectorGroup, ...pr.relaySelectorGroup];
-            relayProviders     = { ...relayProviders,    ...pr.relayProviders };
+
+            proxyGroups.push(...pr.proxyGroups);
+            selectorGroup.push(...pr.selectorGroup);
+            relayGroups.push(...pr.relayGroups);
+            relaySelectorGroup.push(...pr.relaySelectorGroup);
+
             tempSelector.push(pr.selectorGroup[0].name);
             tempRelaySelector.push(pr.relaySelectorGroup[0].name);
+
+            Object.assign(relayProviders, pr.relayProviders);
         }
 
         selectorGroup[0].proxies.unshift(...tempSelector);
@@ -406,7 +420,7 @@ const overrideProxyGroups = (config) => {
         ...relayGroups,
         ...proxyGroups,
     ];
-    const proxyGroupNames = allGroups.map((e) => e.name);
+    const proxyGroupNames = allGroups.map((g) => g.name);
 
     const customFirst = { proxies: ["CUSTOM", ...proxyGroupNames, "DIRECT", "REJECT"] };
     const directFirst = { proxies: ["DIRECT", "CUSTOM", "REJECT"] };
@@ -482,10 +496,12 @@ const ICON_MAP = {
     FINAL:          GITHUB("final"),
 };
 
+const ICON_NAME_REGEX = /[A-Za-z0-9_]+$/;
+
 const setProxyGroupIcon = (config) => {
-    for (const g of config["proxy-groups"]) {
-        if (!g.hidden) {
-            g.icon = ICON_MAP?.[g.name.match(/[A-Za-z0-9_]+$/)?.[0]] ?? "";
+    for (const group of config["proxy-groups"]) {
+        if (!group.hidden) {
+            group.icon = ICON_MAP[group.name.match(ICON_NAME_REGEX)?.[0]] ?? "";
         }
     }
 };
