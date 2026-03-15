@@ -104,28 +104,6 @@ const overrideRuleProviders = (config) => {
                 "osuspider.yuanshen.com",
             ],
         },
-        hoyo_gi: {
-            type:     "inline",
-            behavior: "domain",
-            payload: [
-                "autopatchhk.yuanshen.com",
-                "osasiadispatch.yuanshen.com",
-            ],
-        },
-        hoyo_ugc_tun: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "AND,((IN-TYPE,Tun),(DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com))",
-            ],
-        },
-        hoyo_ugc_https: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "AND,((IN-TYPE,HTTPS),(DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com))",
-            ],
-        },
         hoyo_direct: {
             type:     "inline",
             behavior: "classical",
@@ -148,6 +126,8 @@ const overrideRuleProviders = (config) => {
             payload: [
                 "DOMAIN-SUFFIX,hoyoverse.com",
                 "DOMAIN-SUFFIX,hoyolab.com",
+                "DOMAIN,autopatchhk.yuanshen.com",       // GI
+                "DOMAIN,osasiadispatch.yuanshen.com",    // GI
                 "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
                 "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
             ],
@@ -243,7 +223,6 @@ const overrideRuleProviders = (config) => {
 const overrideRules = (config) => {
     config.rules = [
         "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
-        "RULE-SET,      hoyo_gi,            HOYO_GI_CN",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_ugc_tun,       HOYO_UGC_TUN",
         "RULE-SET,      hoyo_ugc_https,     HOYO_UGC_HTTPS",
@@ -455,7 +434,6 @@ const overrideProxyGroups = (config) => {
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
-        { name: "HOYO_GI",     proxies: ["HOYO_PROXY", "HOYO_DIRECT"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_UGC_TUN",   proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_UGC_HTTPS", proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
