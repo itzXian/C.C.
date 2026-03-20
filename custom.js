@@ -104,6 +104,13 @@ const overrideRuleProviders = (config) => {
                 "osuspider.yuanshen.com",
             ],
         },
+       hoyo_etc: {
+            type:     "inline",
+            behavior: "classical",
+            payload: [
+                "DOMAIN,minor-api-os.hoyoverse.com",
+            ],
+        },
         hoyo_direct: {
             type:     "inline",
             behavior: "classical",
@@ -223,6 +230,7 @@ const overrideRuleProviders = (config) => {
 const overrideRules = (config) => {
     config.rules = [
         "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
+        "RULE-SET,      hoyo_etc,           HOYO_ETC",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
@@ -432,6 +440,7 @@ const overrideProxyGroups = (config) => {
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
+        { name: "HOYO_ETC",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
