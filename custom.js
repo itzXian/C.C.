@@ -289,15 +289,15 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     ...overrides,
 });
 
-const CREATE_RELAY_PROVIDER = (providers) => {
+const CREATE_EXIT_PROVIDER = (providers) => {
     const result = Object.create(null);
     for (const [key, value] of Object.entries(providers)) {
-        const relayKey = `🔗${key}`;
-        result[relayKey] = {
+        const exitKey = `🔗${key}`;
+        result[exitKey] = {
             ...value,
             override: {
-                "dialer-proxy":      "SELECTOR",
-                "additional-prefix": relayKey,
+                "dialer-proxy":      "RELAY",
+                "additional-prefix": exitKey,
             },
         };
     }
@@ -329,83 +329,83 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     if (!hasProviders)
         proxyGroups = proxyGroups.filter((g) => g.proxies);
 
-    const selectorGroup = [{
+    const relayGroup = [{
         type:    "select",
-        name:    `${prefix}SELECTOR`,
+        name:    `${prefix}RELAY`,
         filter:  REGEX(FILTER.ALL),
         proxies: proxyGroups.map((g) => g.name),
         use:     providerKeys,
         hidden:  false,
     }];
 
-    const relayProxies   = hasProviders
+    const exitProxies   = hasProviders
         ? []
         : DEEP_CLONE(proxies);
-    const relayProviders = hasProviders
-        ? CREATE_RELAY_PROVIDER(providers)
-        : CREATE_RELAY_PROVIDER({ "provider-relay": { type: "inline", payload: relayProxies } });
-    const relayProviderKeys = Object.keys(relayProviders);
-    const hasRelayProxies   = IS_NOT_EMPTY(relayProxies);
+    const exitProviders = hasProviders
+        ? CREATE_EXIT_PROVIDER(providers)
+        : CREATE_EXIT_PROVIDER({ "provider-exit": { type: "inline", payload: exitProxies } });
+    const exitProviderKeys = Object.keys(exitProviders);
+    const hasExitProxies   = IS_NOT_EMPTY(exitProxies);
 
-    let relayGroups = [
+    let exitGroups = [
         { type: "url-test", name: "AUTO JP",  filter: REGEX(FILTER.JP) },
         { type: "url-test", name: "AUTO !JP", filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
     ].map((e) => CREATE_PROXY_GROUP({
         ...e,
         name:    `${prefix}🔗${e.name}`,
-        proxies: hasRelayProxies
-            ? relayProxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter))
+        proxies: hasExitProxies
+            ? exitProxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter))
             : [],
-        use:     relayProviderKeys,
+        use:     exitProviderKeys,
     }));
-    if (hasRelayProxies)
-        relayGroups = relayGroups.filter((g) => g.proxies);
+    if (hasExitProxies)
+        exitGroups = exitGroups.filter((g) => g.proxies);
 
-    const relaySelectorGroup = [{
+    const exitSelectorGroup = [{
         type:    "select",
-        name:    `${prefix}🔗RELAY`,
+        name:    `${prefix}🔗EXIT`,
         filter:  REGEX(FILTER.ALL),
-        proxies: relayGroups.map((g) => g.name),
-        use:     relayProviderKeys,
+        proxies: exitGroups.map((g) => g.name),
+        use:     exitProviderKeys,
         hidden:  false,
     }];
 
-    return { proxyGroups, selectorGroup, relayGroups, relaySelectorGroup, relayProviders };
+    return { proxyGroups, relayGroup, exitGroups, exitSelectorGroup, exitProviders };
 };
 
 const overrideProxyGroups = (config) => {
     const providers = config?.["proxy-providers"] ?? {};
     const hasProviders = IS_NOT_EMPTY(providers);
 
-    let { proxyGroups, selectorGroup, relayGroups, relaySelectorGroup, relayProviders } =
+    let { proxyGroups, relayGroup, exitGroups, exitSelectorGroup, exitProviders } =
         CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, providers);
 
     if (hasProviders) {
         const tempSelector      = [];
-        const tempRelaySelector = [];
+        const tempExitSelector = [];
 
         for (const [key, value] of Object.entries(providers)) {
             const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
 
             proxyGroups.push(...pr.proxyGroups);
-            selectorGroup.push(...pr.selectorGroup);
-            relayGroups.push(...pr.relayGroups);
-            relaySelectorGroup.push(...pr.relaySelectorGroup);
+            relayGroup.push(...pr.relayGroup);
+            exitGroups.push(...pr.exitGroups);
+            exitSelectorGroup.push(...pr.exitSelectorGroup);
 
-            tempSelector.push(pr.selectorGroup[0].name);
-            tempRelaySelector.push(pr.relaySelectorGroup[0].name);
+            tempSelector.push(pr.relayGroup[0].name);
+            tempExitSelector.push(pr.exitSelectorGroup[0].name);
 
-            Object.assign(relayProviders, pr.relayProviders);
+            Object.assign(exitProviders, pr.exitProviders);
         }
 
-        selectorGroup[0].proxies.unshift(...tempSelector);
-        relaySelectorGroup[0].proxies.unshift(...tempRelaySelector);
+        relayGroup[0].proxies.unshift(...tempSelector);
+        exitSelectorGroup[0].proxies.unshift(...tempExitSelector);
     }
 
     const allGroups = [
-        ...relaySelectorGroup,
-        ...selectorGroup,
-        ...relayGroups,
+        ...exitSelectorGroup,
+        ...relayGroup,
+        ...exitGroups,
         ...proxyGroups,
     ];
     const proxyGroupNames = allGroups.map((g) => g.name);
@@ -444,7 +444,7 @@ const overrideProxyGroups = (config) => {
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
     config["proxy-groups"]    = [...allGroups, ...otherGroups];
-    config["proxy-providers"] = { ...providers, ...relayProviders };
+    config["proxy-providers"] = { ...providers, ...exitProviders };
 };
 
 /* ========== Icon Support ========== */
@@ -454,8 +454,8 @@ const GPLAY   = (id)   => `https://play-lh.googleusercontent.com/${id}`;
 const FAVICON = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
 
 const ICON_MAP = {
-    RELAY:          WIKI("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
-    SELECTOR:       GITHUB("manual"),
+    EXIT:           WIKI("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
+    RELAY:          GITHUB("manual"),
     CUSTOM:         WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
