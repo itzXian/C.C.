@@ -381,7 +381,7 @@ const overrideProxyGroups = (config) => {
         CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, providers);
 
     if (hasProviders) {
-        const tempSelector      = [];
+        const tempSelector     = [];
         const tempExitSelector = [];
 
         for (const [key, value] of Object.entries(providers)) {
@@ -402,13 +402,13 @@ const overrideProxyGroups = (config) => {
         exitSelectorGroup[0].proxies.unshift(...tempExitSelector);
     }
 
-    const allGroups = [
+    const preGroups = [
         ...exitSelectorGroup,
         ...relayGroup,
         ...exitGroups,
         ...proxyGroups,
     ];
-    const proxyGroupNames = allGroups.map((g) => g.name);
+    const proxyGroupNames = preGroups.map((g) => g.name);
 
     const customFirst = { proxies: ["CUSTOM", ...proxyGroupNames, "DIRECT", "REJECT"] };
     const directFirst = { proxies: ["DIRECT", "CUSTOM", "REJECT"] };
@@ -443,7 +443,7 @@ const overrideProxyGroups = (config) => {
         { name: "FINAL",          ...customFirst },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
-    config["proxy-groups"]    = [...allGroups, ...otherGroups];
+    config["proxy-groups"]    = [...preGroups, ...otherGroups];
     config["proxy-providers"] = { ...providers, ...exitProviders };
 };
 
@@ -458,6 +458,7 @@ const ICON_MAP = {
     RELAY:          GITHUB("manual"),
     CUSTOM:         WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
+    HOYO_ETC:       FAVICON("https://hoyoverse.com"),
     HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
     HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
