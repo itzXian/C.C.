@@ -92,137 +92,114 @@ const overrideDns = (config) => {
 //     https://wiki.metacubex.one/config/rule-providers/
 //     https://wiki.metacubex.one/config/rule-providers/content/
 //     https://wiki.metacubex.one/handbook/syntax/#_8
+const CREATE_RULE_PROVIDER = (rules = [], options = {}) => {
+    return {
+        type:     "inline",
+        behavior: "classical",
+        payload:  rules,
+        ...options,
+    };
+};
+
 const overrideRuleProviders = (config) => {
     config["rule-providers"] = {
-        hoyo_gi_cn: {
-            type:     "inline",
-            behavior: "domain",
-            payload: [
-                "dispatchosglobal.yuanshen.com",
-                "oseurodispatch.yuanshen.com",
-                "osusadispatch.yuanshen.com",
-                "osuspider.yuanshen.com",
-            ],
-        },
-       hoyo_etc: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "DOMAIN,minor-api-os.hoyoverse.com",
-            ],
-        },
-        hoyo_direct: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
-                "DOMAIN-SUFFIX,yuanshen.com",
-                "DOMAIN-SUFFIX,mihoyo.com",
-                //"DOMAIN,asia-ugc-api.hoyoverse.com",
-                //"DOMAIN,asia-ugc-upload.hoyoverse.com",
-                //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
-                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
-                "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
-                "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
-                "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
-            ],
-        },
-        hoyo_proxy: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "DOMAIN-SUFFIX,hoyoverse.com",
-                "DOMAIN-SUFFIX,hoyolab.com",
-                "DOMAIN,autopatchhk.yuanshen.com",       // GI
-                "DOMAIN,osasiadispatch.yuanshen.com",    // GI
-                "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
-                "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
-            ],
-        },
-        miui_ad: {
-            type:     "inline",
-            behavior: "domain",
-            payload: [
-                // Xiaomi / MIUI telemetry & ads
-                "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
-                "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
-                "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
-                "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "api.sec.miui.com",
-                "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
-                "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
-                "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
-                "test.ad.xiaomi.com",        "adinfo.ra1.xlmc.sec.miui.com",
-                // Avlyun / sec.miui CSE
-                "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
-                "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
-                "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
-                // MIUI Browser
-                "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
-                "hot.browser.miui.com",      "security.browser.miui.com",
-                "r.browser.miui.com",        "hd.browser.miui.com",
-                "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
-                "qsb.browser.miui.com",      "global-search.browser.miui.com",
-                "qsb.browser.miui.srv",
-                // Other Xiaomi services
-                "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
-                "global.search.xiaomi.net",  "ccc.sys.miui.com",
-                "jupiter.sys.miui.com",      "metok.sys.miui.com",
-                // Tencent SDK / ads
-                "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
-                "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
-                "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
-                "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
-                "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
-                "cfg.imtt.qq.com",           "android.bugly.qq.com",
-                // ByteDance
-                "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
-                "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
-                // QuickApp
-                "statres.quickapp.cn",       "qr.quickapp.cn",
-                // Xunlei / Sandai
-                "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
-                "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
-                "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
-                "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
-                "guid-xldw-ssl.n0808.com",
-                // Misc
-                "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
-                "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
-                "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
-                "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
-                "www.pangolin-dsp-toutiao.com",
-            ],
-        },
-        download: {
-            type:     "inline",
-            behavior: "classical",
-            payload: [
-                "PROCESS-NAME,idm.internet.download.manager",
-            ],
-        },
-        github_uc: {
-            type:     "inline",
-            behavior: "domain",
-            payload: [
-                "+.githubusercontent.com",
-            ],
-        },
-        local: {
-            type:     "inline",
-            behavior: "domain",
-            payload: [
-                "+.m2m",              "injections.adguard.org", "local.adguard.org",
-                "+.bogon",            "+.lan",                  "+.local",
-                "+.internal",         "+.localdomain",          "home.arpa",
-                "127.atlas.skk.moe",  "dns.msftncsi.com",       "*.srv.nintendo.net",
-                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",
-                "*.xboxlive.com",     "*.turn.twilio.com",      "*.stun.twilio.com",
-                "stun.syncthing.net", "127.0.0.1.sslip.io",     "127.*.*.*.sslip.io",
-                "127-*-*-*.sslip.io", "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
-                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",
-                "*.127.*.*.*.nip.io",
-            ],
-        },
+        hoyo_gi_cn: CREATE_RULE_PROVIDER([
+            "DOMAIN,dispatchosglobal.yuanshen.com",
+            "DOMAIN,oseurodispatch.yuanshen.com",
+            "DOMAIN,osusadispatch.yuanshen.com",
+            "DOMAIN,osuspider.yuanshen.com",
+        ]),
+        hoyo_etc: CREATE_RULE_PROVIDER([
+            "DOMAIN,minor-api-os.hoyoverse.com",
+        ]),
+        hoyo_direct: CREATE_RULE_PROVIDER([
+            "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
+            "DOMAIN-SUFFIX,yuanshen.com",
+            "DOMAIN-SUFFIX,mihoyo.com",
+            //"DOMAIN,asia-ugc-api.hoyoverse.com",
+            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
+            "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
+            "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
+            "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
+            "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
+        ]),
+        hoyo_proxy: CREATE_RULE_PROVIDER([
+            "DOMAIN-SUFFIX,hoyoverse.com",
+            "DOMAIN-SUFFIX,hoyolab.com",
+            "DOMAIN,autopatchhk.yuanshen.com",       // GI
+            "DOMAIN,osasiadispatch.yuanshen.com",    // GI
+            "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
+            "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
+        ]),
+        miui_ad: CREATE_RULE_PROVIDER([
+            // Xiaomi / MIUI telemetry & ads
+            "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
+            "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
+            "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
+            "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "api.sec.miui.com",
+            "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
+            "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
+            "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
+            "test.ad.xiaomi.com",        "adinfo.ra1.xlmc.sec.miui.com",
+            // Avlyun / sec.miui CSE
+            "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
+            "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
+            "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
+            // MIUI Browser
+            "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
+            "hot.browser.miui.com",      "security.browser.miui.com",
+            "r.browser.miui.com",        "hd.browser.miui.com",
+            "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
+            "qsb.browser.miui.com",      "global-search.browser.miui.com",
+            "qsb.browser.miui.srv",
+            // Other Xiaomi services
+            "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
+            "global.search.xiaomi.net",  "ccc.sys.miui.com",
+            "jupiter.sys.miui.com",      "metok.sys.miui.com",
+            // Tencent SDK / ads
+            "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
+            "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
+            "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
+            "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
+            "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
+            "cfg.imtt.qq.com",           "android.bugly.qq.com",
+            // ByteDance
+            "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
+            "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
+            // QuickApp
+            "statres.quickapp.cn",       "qr.quickapp.cn",
+            // Xunlei / Sandai
+            "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
+            "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
+            "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
+            "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
+            "guid-xldw-ssl.n0808.com",
+            // Misc
+            "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
+            "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
+            "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
+            "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
+            "www.pangolin-dsp-toutiao.com",
+        ], { behavior: "domain" }),
+        download: CREATE_RULE_PROVIDER([
+            "PROCESS-NAME,idm.internet.download.manager",
+        ]),
+        github_uc: CREATE_RULE_PROVIDER([
+            "DOMAIN-SUFFIX,githubusercontent.com",
+        ]),
+        local: CREATE_RULE_PROVIDER([
+            "+.m2m",              "injections.adguard.org", "local.adguard.org",
+            "+.bogon",            "+.lan",                  "+.local",
+            "+.internal",         "+.localdomain",          "home.arpa",
+            "127.atlas.skk.moe",  "dns.msftncsi.com",       "*.srv.nintendo.net",
+            "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",
+            "*.xboxlive.com",     "*.turn.twilio.com",      "*.stun.twilio.com",
+            "stun.syncthing.net", "127.0.0.1.sslip.io",     "127.*.*.*.sslip.io",
+            "127-*-*-*.sslip.io", "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
+            "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",
+            "*.127.*.*.*.nip.io",
+        ], { behavior: "domain" }),
     };
 };
 
