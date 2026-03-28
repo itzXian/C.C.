@@ -290,7 +290,7 @@ const CREATE_PROXY_GROUP = (overrides) => ({
 });
 
 const CREATE_EXIT_PROVIDER = (providers) => {
-    const result = Object.create(null);
+    const result = {};
     for (const [key, value] of Object.entries(providers)) {
         const exitKey = `→${key}`;
         result[exitKey] = {
@@ -374,7 +374,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
 };
 
 const overrideProxyGroups = (config) => {
-    const providers = config?.["proxy-providers"] ?? {};
+    const providers    = config?.["proxy-providers"] ?? {};
     const hasProviders = IS_NOT_EMPTY(providers);
 
     let { proxyGroups, relaySelectorGroup, exitGroups, exitSelectorGroup, exitProviders } =
@@ -417,7 +417,7 @@ const overrideProxyGroups = (config) => {
     const otherGroups = [
         { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
-        { name: "HOYO_ETC",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
+        { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
