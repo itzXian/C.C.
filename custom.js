@@ -233,6 +233,7 @@ const overrideRules = (config) => {
         "GEOSITE,       apple,              APPLE",
         "GEOSITE,       apple-intelligence, APPLE",
         "DOMAIN-SUFFIX, hinative.com,       NON_JP",
+        "DOMAIN-REGEX,  .*\.jp,             JP",
         "GEOIP,         JP,                 JP,              no-resolve",
         "GEOSITE,       geolocation-!cn,    PROXY",
         "RULE-SET,      local,              BYPASS",
