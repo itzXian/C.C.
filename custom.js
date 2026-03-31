@@ -235,12 +235,12 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX, hinative.com,       NON_JP",
         "DOMAIN-REGEX,  .*\.jp,             JP",
         "GEOIP,         JP,                 JP,              no-resolve",
-        "GEOSITE,       geolocation-!cn,    PROXY",
-        "RULE-SET,      local,              BYPASS",
-        "GEOSITE,       private,            BYPASS",
-        "GEOSITE,       CN,                 BYPASS",
-        "GEOIP,         private,            BYPASS",
-        "GEOIP,         CN,                 BYPASS",
+        "GEOSITE,       geolocation-!cn,    NON_CN",
+        "RULE-SET,      local,              LOCAL",
+        "GEOSITE,       private,            LOCAL",
+        "GEOSITE,       CN,                 CN",
+        "GEOIP,         private,            LOCAL",
+        "GEOIP,         CN,                 CN",
         "MATCH,FINAL",
     ];
 };
@@ -411,37 +411,38 @@ const overrideProxyGroups = (config) => {
     ];
     const proxyGroupNames = preGroups.map((g) => g.name);
 
-    const customFirst = { proxies: ["CUSTOM", ...proxyGroupNames, "DIRECT", "REJECT"] };
-    const directFirst = { proxies: ["DIRECT", "CUSTOM", "REJECT"] };
-    const rejectFirst = { proxies: ["REJECT", "CUSTOM", "DIRECT"] };
+    const selectorFirst = { proxies: ["SELECTOR", ...proxyGroupNames, "DIRECT", "REJECT"] };
+    const directFirst = { proxies: ["DIRECT", "SELECTOR", "REJECT"] };
+    const rejectFirst = { proxies: ["REJECT", "SELECTOR", "DIRECT"] };
 
     const otherGroups = [
-        { name: "CUSTOM",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
+        { name: "SELECTOR",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
-        { name: "HOYO_PROXY",     ...customFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_PROXY",     ...selectorFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
-        { name: "DOWNLOAD",       ...customFirst },
-        { name: "EHENTAI",        ...customFirst, "include-all": true },
-        { name: "GITHUB_UC",      ...customFirst, "include-all": true },
+        { name: "DOWNLOAD",       ...selectorFirst },
+        { name: "EHENTAI",        ...selectorFirst, "include-all": true },
+        { name: "GITHUB_UC",      ...selectorFirst, "include-all": true },
         { name: "STEAM_CN",       ...directFirst },
-        { name: "STEAM",          ...customFirst },
-        { name: "PIXIV",          ...customFirst },
-        { name: "AI",             ...customFirst },
-        { name: "YOUTUBE",        ...customFirst },
-        { name: "GOOGLE",         ...customFirst },
-        { name: "TWITTER",        ...customFirst },
-        { name: "TELEGRAM",       ...customFirst },
-        { name: "DISCORD",        ...customFirst },
-        { name: "MICROSOFT",      ...customFirst },
-        { name: "APPLE",          ...customFirst },
-        { name: "NON_JP",         ...customFirst },
-        { name: "JP",             ...customFirst },
-        { name: "PROXY",          ...customFirst },
-        { name: "BYPASS",         ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
-        { name: "FINAL",          ...customFirst },
+        { name: "STEAM",          ...selectorFirst },
+        { name: "PIXIV",          ...selectorFirst },
+        { name: "AI",             ...selectorFirst },
+        { name: "YOUTUBE",        ...selectorFirst },
+        { name: "GOOGLE",         ...selectorFirst },
+        { name: "TWITTER",        ...selectorFirst },
+        { name: "TELEGRAM",       ...selectorFirst },
+        { name: "DISCORD",        ...selectorFirst },
+        { name: "MICROSOFT",      ...selectorFirst },
+        { name: "APPLE",          ...selectorFirst },
+        { name: "NON_JP",         ...selectorFirst },
+        { name: "JP",             ...selectorFirst },
+        { name: "NON_CN",         ...selectorFirst },
+        { name: "CN",             ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
+        { name: "LOCAL",          ...directFirst },
+        { name: "FINAL",          ...selectorFirst },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
     config["proxy-groups"]    = [...preGroups, ...otherGroups];
@@ -457,7 +458,7 @@ const FAVICON = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=F
 const ICON_MAP = {
     EXIT:           WIKI("commons/f/f2/Send_icon.svg"),
     RELAY:          WIKI("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
-    CUSTOM:         WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
+    SELECTOR:       WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_ETC:       FAVICON("https://hoyoverse.com"),
     HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
@@ -482,8 +483,9 @@ const ICON_MAP = {
     APPLE:          WIKI("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
     NON_JP:         WIKI("commons/4/45/Wikimania2019_flower_icon.svg"),
     JP:             WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
-    PROXY:          WIKI("commons/2/26/Noto_Emoji_v2.034_1f310.svg"),
-    BYPASS:         WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
+    NON_CN:         WIKI("commons/2/26/Noto_Emoji_v2.034_1f310.svg"),
+    CN:             WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
+    LOCAL:          WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
     FINAL:          GITHUB("final"),
 };
 
