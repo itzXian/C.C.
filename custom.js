@@ -509,7 +509,8 @@ const ICON_NAME_REGEX = /[A-Za-z0-9_]+$/;
 const setProxyGroupIcon = (config) => {
     for (const group of config["proxy-groups"]) {
         if (!group.hidden) {
-            group.icon = ICON_MAP[group.name.match(ICON_NAME_REGEX)?.[0]] ?? "";
+            //group.icon = ICON_MAP[group.name.match(ICON_NAME_REGEX)?.[0]] ?? "";
+            group.icon = ICON_MAP[group.name] ?? "";
         }
     }
 };
