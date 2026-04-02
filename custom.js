@@ -328,6 +328,8 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         { type: "url-test",     name: "AUTO HK",     filter: REGEX(FILTER.HK) },
         { type: "url-test",     name: "AUTO JP",     filter: REGEX(FILTER.JP) },
         { type: "url-test",     name: "AUTO SG",     filter: REGEX(FILTER.SG) },
+        { type: "url-test",     name: "AUTO AU",     filter: REGEX(FILTER.AU) },
+        { type: "url-test",     name: "AUTO US",     filter: REGEX(FILTER.US) },
         { type: "url-test",     name: "AUTO !JP",    filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
         { type: "url-test",     name: "AUTO ALL",    filter: REGEX(FILTER.ALL) },
         { type: "load-balance", name: "LB HK",       filter: REGEX(FILTER.HK), strategy: "round-robin" },
@@ -429,7 +431,7 @@ const overrideProxyGroups = (config) => {
     const rejectFirst = { proxies: ["REJECT", "SELECTOR", "DIRECT"] };
 
     const otherGroups = [
-        { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
+        { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT"], "include-all": true },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
