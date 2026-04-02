@@ -429,14 +429,14 @@ const overrideProxyGroups = (config) => {
     const rejectFirst = { proxies: ["REJECT", "SELECTOR", "DIRECT"] };
 
     const otherGroups = [
-        { name: "SELECTOR",      proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
+        { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT"] },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...selectorFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
-        { name: "DOWNLOAD",       ...selectorFirst },
+        { name: "DOWNLOAD",       ...selectorFirst, "include-all": true },
         { name: "EHENTAI",        ...selectorFirst, "include-all": true },
         { name: "GITHUB_UC",      ...selectorFirst, "include-all": true },
         { name: "STEAM_CN",       ...directFirst },
@@ -456,7 +456,7 @@ const overrideProxyGroups = (config) => {
         { name: "NON_CN",         ...selectorFirst },
         { name: "CN",             ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
         { name: "LOCAL",          ...directFirst },
-        { name: "FINAL",          ...selectorFirst },
+        { name: "FINAL",          ...selectorFirst, "include-all": true },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
     config["proxy-groups"]    = [...preGroups, ...otherGroups];
