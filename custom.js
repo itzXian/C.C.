@@ -248,11 +248,11 @@ const overrideRules = (config) => {
         "DOMAIN-SUFFIX, game8.jp,           NON_JP",
         "DOMAIN-REGEX,  .*\.jp,             JP",
         "GEOIP,         JP,                 JP,              no-resolve",
-        "GEOSITE,       geolocation-!cn,    NON_CN",
-        "RULE-SET,      local,              LOCAL",
-        "GEOSITE,       private,            LOCAL",
+        "GEOSITE,       geolocation-!cn,    FINAL",
+        "RULE-SET,      local,              CN",
+        "GEOSITE,       private,            CN",
         "GEOSITE,       CN,                 CN",
-        "GEOIP,         private,            LOCAL",
+        "GEOIP,         private,            CN",
         "GEOIP,         CN,                 CN",
         "MATCH,FINAL",
     ];
@@ -455,7 +455,6 @@ const overrideProxyGroups = (config) => {
         { name: "APPLE",          ...selectorFirst },
         { name: "NON_JP",         ...selectorFirst },
         { name: "JP",             ...selectorFirst },
-        { name: "NON_CN",         ...selectorFirst },
         { name: "CN",             ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
         { name: "LOCAL",          ...directFirst },
         { name: "FINAL",          ...selectorFirst, "include-all": true },
@@ -500,9 +499,7 @@ const ICON_MAP = {
     APPLE:          WIKI("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
     NON_JP:         WIKI("commons/4/45/Wikimania2019_flower_icon.svg"),
     JP:             WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
-    NON_CN:         WIKI("commons/2/26/Noto_Emoji_v2.034_1f310.svg"),
     CN:             WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
-    LOCAL:          WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
     FINAL:          GITHUB("final"),
 };
 
