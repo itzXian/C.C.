@@ -456,7 +456,6 @@ const overrideProxyGroups = (config) => {
         { name: "NON_JP",         ...selectorFirst },
         { name: "JP",             ...selectorFirst },
         { name: "CN",             ...directFirst, url: "http://connect.rom.miui.com/generate_204" },
-        { name: "LOCAL",          ...directFirst },
         { name: "FINAL",          ...selectorFirst, "include-all": true },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
