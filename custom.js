@@ -426,12 +426,12 @@ const overrideProxyGroups = (config) => {
     ];
     const proxyGroupNames = preGroups.map((g) => g.name);
 
-    const selectorFirst = { proxies: ["SELECTOR", ...proxyGroupNames, "DIRECT", "REJECT"] };
-    const directFirst = { proxies: ["DIRECT", "SELECTOR", "REJECT"] };
-    const rejectFirst = { proxies: ["REJECT", "SELECTOR", "DIRECT"] };
+    const selectorFirst = { proxies: ["SELECTOR", ...proxyGroupNames, "DIRECT", "REJECT-DROP", "REJECT"] };
+    const directFirst = { proxies: ["DIRECT", "SELECTOR", "REJECT-DROP", "REJECT"] };
+    const rejectFirst = { proxies: ["REJECT-DROP", "REJECT", "SELECTOR", "DIRECT"] };
 
     const otherGroups = [
-        { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT"], "include-all": true },
+        { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT-DROP", "REJECT"], "include-all": true },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
