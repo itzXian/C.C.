@@ -122,18 +122,8 @@ const overrideRuleProviders = (config) => {
         ]),
         hoyo_etc: CREATE_RULE_PROVIDER([
             "DOMAIN,minor-api-os.hoyoverse.com",
-        ]),
-        hoyo_direct: CREATE_RULE_PROVIDER([
+            "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",      // GI UGC
             "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
-            "DOMAIN-SUFFIX,yuanshen.com",
-            "DOMAIN-SUFFIX,mihoyo.com",
-            //"DOMAIN,asia-ugc-api.hoyoverse.com",
-            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
-            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
-            "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
-            "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
-            "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
-            "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
         ]),
         hoyo_proxy: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,hoyoverse.com",
@@ -142,6 +132,16 @@ const overrideRuleProviders = (config) => {
             "DOMAIN,osasiadispatch.yuanshen.com",    // GI
             "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
             "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
+        ]),
+        hoyo_direct: CREATE_RULE_PROVIDER([
+            "DOMAIN-SUFFIX,yuanshen.com",
+            "DOMAIN-SUFFIX,mihoyo.com",
+            //"DOMAIN,asia-ugc-api.hoyoverse.com",
+            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
+            "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
+            "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
+            "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
         ]),
         miui_ad: CREATE_RULE_PROVIDER([
             // Xiaomi / MIUI telemetry & ads
@@ -219,8 +219,8 @@ const overrideRules = (config) => {
     config.rules = [
         "RULE-SET,      hoyo_gi_cn,         HOYO_GI_CN",
         "RULE-SET,      hoyo_etc,           HOYO_ETC",
-        "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
+        "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD_BLOCK",
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
@@ -434,8 +434,8 @@ const overrideProxyGroups = (config) => {
         { name: "SELECTOR",    proxies: [...proxyGroupNames, "DIRECT", "REJECT-DROP", "REJECT"], "include-all": true },
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
-        { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "HOYO_PROXY",     ...selectorFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
         { name: "DOWNLOAD",       ...selectorFirst, "include-all": true },
@@ -475,8 +475,8 @@ const ICON_MAP = {
     SELECTOR:       WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
     HOYO_GI_CN:     GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
     HOYO_ETC:       FAVICON("https://hoyoverse.com"),
-    HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
     HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
+    HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
