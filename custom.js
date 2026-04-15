@@ -122,28 +122,28 @@ const overrideRuleProviders = (config) => {
         ]),
         hoyo_etc: CREATE_RULE_PROVIDER([
             "DOMAIN,minor-api-os.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api.hoyoverse.com",
+            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
             "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",      // GI UGC
             "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
         ]),
         hoyo_proxy: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,hoyoverse.com",
             "DOMAIN-SUFFIX,hoyolab.com",
-            "DOMAIN,autopatchhk.yuanshen.com",       // GI
-            "DOMAIN,osasiadispatch.yuanshen.com",    // GI
-            "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
+            "DOMAIN,autopatchhk.yuanshen.com",                // GI
+            "DOMAIN,osasiadispatch.yuanshen.com",             // GI
+            "AND,((DST-PORT,8999),(NETWORK,tcp))",            // GI
         ]),
         hoyo_direct: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,yuanshen.com",
             "DOMAIN-SUFFIX,mihoyo.com",
-            //"DOMAIN,asia-ugc-api.hoyoverse.com",
-            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
-            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
             "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
             "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
             "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
         ]),
         hoyo_final: CREATE_RULE_PROVIDER([
-            "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
+            "PROCESS-NAME-REGEX,.*GenshinImpact",             // GI
         ]),
         miui_ad: CREATE_RULE_PROVIDER([
             // Xiaomi / MIUI telemetry & ads
