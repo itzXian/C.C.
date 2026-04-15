@@ -131,7 +131,6 @@ const overrideRuleProviders = (config) => {
             "DOMAIN,autopatchhk.yuanshen.com",       // GI
             "DOMAIN,osasiadispatch.yuanshen.com",    // GI
             "AND,((DST-PORT,8999),(NETWORK,tcp))",   // GI
-            "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
         ]),
         hoyo_direct: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,yuanshen.com",
@@ -142,6 +141,9 @@ const overrideRuleProviders = (config) => {
             "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
             "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
             "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
+        ]),
+        hoyo_final: CREATE_RULE_PROVIDER([
+            "PROCESS-NAME-REGEX,.*GenshinImpact",    // GI
         ]),
         miui_ad: CREATE_RULE_PROVIDER([
             // Xiaomi / MIUI telemetry & ads
@@ -221,6 +223,7 @@ const overrideRules = (config) => {
         "RULE-SET,      hoyo_etc,           HOYO_ETC",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
+        "RULE-SET,      hoyo_final,         HOYO_PROXY",
         "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD_BLOCK",
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
