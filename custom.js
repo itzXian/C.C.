@@ -131,19 +131,19 @@ const overrideRuleProviders = (config) => {
         hoyo_proxy: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,hoyoverse.com",
             "DOMAIN-SUFFIX,hoyolab.com",
-            "DOMAIN,autopatchhk.yuanshen.com",                // GI
-            "DOMAIN,osasiadispatch.yuanshen.com",             // GI
-            "AND,((DST-PORT,8999),(NETWORK,tcp))",            // GI
+            "DOMAIN,autopatchhk.yuanshen.com",     // GI
+            "DOMAIN,osasiadispatch.yuanshen.com",  // GI
+            "AND,((DST-PORT,8999),(NETWORK,tcp))", // GI
         ]),
         hoyo_direct: CREATE_RULE_PROVIDER([
             "DOMAIN-SUFFIX,yuanshen.com",
             "DOMAIN-SUFFIX,mihoyo.com",
-            "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
-            "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
-            "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
+            "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
+            "AND,((DST-PORT,23301/23801),(NETWORK,udp))", // HSR
+            "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
         ]),
         hoyo_final: CREATE_RULE_PROVIDER([
-            "PROCESS-NAME-REGEX,.*GenshinImpact",             // GI
+            "PROCESS-NAME-REGEX,.*GenshinImpact.*",         // GI
         ]),
         miui_ad: CREATE_RULE_PROVIDER([
             // Xiaomi / MIUI telemetry & ads
@@ -419,7 +419,7 @@ const overrideProxyGroups = (config) => {
 
         relaySelectorGroup[0].proxies.unshift(...tempSelector);
         exitSelectorGroup[0].proxies.unshift(...tempExitSelector);
-    }
+    };
 
     const preGroups = [
         ...exitSelectorGroup,
@@ -438,7 +438,7 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_GI_CN",  proxies: ["HOYO_DIRECT", "HOYO_PROXY"], url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting" },
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_PROXY",     ...selectorFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
-        { name: "HOYO_DIRECT",    ...directFirst, url: "https://api.mihoyo.com/live?detect=123" },
+        { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://api.mihoyo.com/live?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
         { name: "AD_BLOCK",       ...rejectFirst },
         { name: "DOWNLOAD",       ...selectorFirst, "include-all": true },
