@@ -35,7 +35,7 @@ const overrideBasicOptions = (config) => {
             "skip-domain": ["Mijia Cloud", "+.push.apple.com"],
         },
         hosts: {
-            "dns.alidns.com":     ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
+            "dns.alidns.com":        ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
             "127.0.0.1.sslip.io":    "127.0.0.1",
             "127.atlas.skk.moe":     "127.0.0.1",
             "cdn.jsdelivr.net":      "cdn.jsdelivr.net.cdn.cloudflare.net",
@@ -146,19 +146,19 @@ const overrideRuleProviders = (config) => {
             "PROCESS-NAME-REGEX,.*GenshinImpact.*",         // GI
         ]),
         miui_ad: CREATE_RULE_PROVIDER([
-            // Xiaomi / MIUI telemetry & ads
-            "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
-            "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
-            "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
-            "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "api.sec.miui.com",
-            "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
-            "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
-            "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
-            "test.ad.xiaomi.com",        "adinfo.ra1.xlmc.sec.miui.com",
             // Avlyun / sec.miui CSE
             "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
             "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
             "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
+            // ByteDance
+            "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
+            "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
+            // Xunlei / Sandai
+            "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
+            "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
+            "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
+            "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
+            "guid-xldw-ssl.n0808.com",
             // MIUI Browser
             "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
             "hot.browser.miui.com",      "security.browser.miui.com",
@@ -166,6 +166,17 @@ const overrideRuleProviders = (config) => {
             "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
             "qsb.browser.miui.com",      "global-search.browser.miui.com",
             "qsb.browser.miui.srv",
+            // QuickApp
+            "statres.quickapp.cn",       "qr.quickapp.cn",
+            // Xiaomi / MIUI telemetry & ads
+            "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
+            "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
+            "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
+            "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "adinfo.ra1.xlmc.sec.miui.com",
+            "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
+            "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
+            "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
+            "test.ad.xiaomi.com",        "api.sec.miui.com",
             // Other Xiaomi services
             "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
             "global.search.xiaomi.net",  "ccc.sys.miui.com",
@@ -177,17 +188,6 @@ const overrideRuleProviders = (config) => {
             "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
             "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
             "cfg.imtt.qq.com",           "android.bugly.qq.com",
-            // ByteDance
-            "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
-            "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
-            // QuickApp
-            "statres.quickapp.cn",       "qr.quickapp.cn",
-            // Xunlei / Sandai
-            "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
-            "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
-            "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
-            "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
-            "guid-xldw-ssl.n0808.com",
             // Misc
             "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
             "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
@@ -327,7 +327,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     const hasProxies   = IS_NOT_EMPTY(proxies);
 
     let proxyGroups = [
-        { type: "url-test",     name: "AUTO HKJPSG", filter: REGEX(["HK", "JP", "SG"].map((e) => FILTER[e]).join("|")) },
+        { type: "url-test",     name: "AUTO HKSG", filter: REGEX(["HK", "SG"].map((e) => FILTER[e]).join("|")) },
         { type: "url-test",     name: "AUTO HK",     filter: REGEX(FILTER.HK) },
         { type: "url-test",     name: "AUTO JP",     filter: REGEX(FILTER.JP) },
         { type: "url-test",     name: "AUTO SG",     filter: REGEX(FILTER.SG) },
@@ -357,14 +357,14 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         hidden:  false,
     }];
 
-    const exitProxies   = hasProviders
+    const exitProxies      = hasProviders
         ? []
         : DEEP_CLONE(proxies);
-    const exitProviders = hasProviders
+    const hasExitProxies   = IS_NOT_EMPTY(exitProxies);
+    const exitProviders    = hasProviders
         ? CREATE_EXIT_PROVIDER(providers)
         : CREATE_EXIT_PROVIDER({ "provider-exit": { type: "inline", payload: exitProxies } });
     const exitProviderKeys = Object.keys(exitProviders);
-    const hasExitProxies   = IS_NOT_EMPTY(exitProxies);
 
     let exitGroups = [
         { type: "url-test", name: "AUTO JP",  filter: REGEX(FILTER.JP) },
@@ -393,12 +393,11 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
 };
 
 const overrideProxyGroups = (config) => {
-    const providers    = config?.["proxy-providers"] ?? {};
-    const hasProviders = IS_NOT_EMPTY(providers);
-
+    const providers = config?.["proxy-providers"] ?? {};
     let { proxyGroups, relaySelectorGroup, exitGroups, exitSelectorGroup, exitProviders } =
         CREATE_PROXY_GROUPS_WITH_PROVIDER(config.proxies, providers);
 
+    const hasProviders = IS_NOT_EMPTY(providers);
     if (hasProviders) {
         const tempSelector     = [];
         const tempExitSelector = [];
@@ -421,13 +420,13 @@ const overrideProxyGroups = (config) => {
         exitSelectorGroup[0].proxies.unshift(...tempExitSelector);
     };
 
-    const preGroups = [
+    const prebuiltGroups = [
         ...exitSelectorGroup,
         ...relaySelectorGroup,
         ...exitGroups,
         ...proxyGroups,
     ];
-    const proxyGroupNames = preGroups.map((g) => g.name);
+    const proxyGroupNames = prebuiltGroups.map((g) => g.name);
 
     const selectorFirst = { proxies: ["SELECTOR", ...proxyGroupNames, "DIRECT", "REJECT-DROP", "REJECT"] };
     const directFirst = { proxies: ["DIRECT", "SELECTOR", "REJECT-DROP", "REJECT"] };
@@ -462,7 +461,7 @@ const overrideProxyGroups = (config) => {
         { name: "FINAL",          ...selectorFirst, "include-all": true },
     ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
 
-    config["proxy-groups"]    = [...preGroups, ...otherGroups];
+    config["proxy-groups"]    = [...prebuiltGroups, ...otherGroups];
     config["proxy-providers"] = { ...providers, ...exitProviders };
 };
 
@@ -483,7 +482,7 @@ const ICON_MAP = {
     HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
-    //AD_BLOCK:       WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
+    //AD_BLOCK:     WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
     DOWNLOAD:       WIKI("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
     EHENTAI:        WIKI("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
     GITHUB_UC:      WIKI("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
@@ -505,12 +504,10 @@ const ICON_MAP = {
     FINAL:          GITHUB("final"),
 };
 
-const ICON_NAME_REGEX = /[A-Za-z0-9_]+$/;
-
 const setProxyGroupIcon = (config) => {
     for (const group of config["proxy-groups"]) {
         if (!group.hidden) {
-            //group.icon = ICON_MAP[group.name.match(ICON_NAME_REGEX)?.[0]] ?? "";
+            //group.icon = ICON_MAP[group.name.match(/[A-Za-z0-9_]+$/)?.[0]] ?? "";
             group.icon = ICON_MAP[group.name] ?? "";
         }
     }
