@@ -195,6 +195,9 @@ const overrideRuleProviders = (config) => {
             "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
             "www.pangolin-dsp-toutiao.com",
         ], { behavior: "domain" }),
+        browser: CREATE_RULE_PROVIDER([
+            "PROCESS-NAME,net.quetta.browser",
+        ]),
         download: CREATE_RULE_PROVIDER([
             "PROCESS-NAME,idm.internet.download.manager",
         ]),
@@ -227,6 +230,7 @@ const overrideRules = (config) => {
         "RULE-SET,      miui_ad,            MIUI_AD",
         //"GEOSITE,       category-ads-all,   AD_BLOCK",
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
+        "RULE-SET,      browser,            BROWSER",
         "RULE-SET,      download,           DOWNLOAD",
         "GEOSITE,       ehentai,            EHENTAI",
         "RULE-SET,      github_uc,          GITHUB_UC",
@@ -440,6 +444,7 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://api.mihoyo.com/live?detect=123" },
         { name: "MIUI_AD",        ...rejectFirst },
         //{ name: "AD_BLOCK",       ...rejectFirst },
+        { name: "BROWSER",        ...selectorFirst, "include-all": true },
         { name: "DOWNLOAD",       ...selectorFirst, "include-all": true },
         { name: "EHENTAI",        ...selectorFirst, "include-all": true },
         { name: "GITHUB_UC",      ...selectorFirst, "include-all": true },
@@ -483,6 +488,7 @@ const ICON_MAP = {
     HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
     //AD_BLOCK:     WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
+    BROWSER:        WIKI("commons/0/08/Internet-icon.svg"),
     DOWNLOAD:       WIKI("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
     EHENTAI:        WIKI("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
     GITHUB_UC:      WIKI("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
