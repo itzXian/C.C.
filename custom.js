@@ -145,6 +145,12 @@ const overrideRuleProviders = (config) => {
         hoyo_final: CREATE_RULE_PROVIDER([
             "PROCESS-NAME-REGEX,.*GenshinImpact.*",         // GI
         ]),
+        sbcz: CREATE_RULE_PROVIDER([
+            "DOMAIN-SUFFIX,xoyo.games",
+            "DOMAIN-SUFFIX,amazingseasun.com",
+            "DOMAIN-SUFFIX,amazingseasuncdn.com",
+            "AND,((PROCESS-NAME,com.seasun.snowbreak.google),(DST-PORT,1883))",
+        ]),
         miui_ad: CREATE_RULE_PROVIDER([
             // Avlyun / sec.miui CSE
             "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
@@ -227,6 +233,7 @@ const overrideRules = (config) => {
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
         "RULE-SET,      hoyo_final,         HOYO_PROXY",
+        "RULE-SET,      sbcz,               DIRECT",
         "RULE-SET,      miui_ad,            MIUI_AD",
         //"GEOSITE,       category-ads-all,   AD_BLOCK",
         "GEOSITE,       hoyoverse,          HOYO_PROXY",
@@ -442,6 +449,7 @@ const overrideProxyGroups = (config) => {
         { name: "HOYO_ETC",    proxies: ["HOYO_DIRECT", "HOYO_PROXY"] },
         { name: "HOYO_PROXY",     ...selectorFirst, url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://api.mihoyo.com/live?detect=123" },
+        //{ name: "SBCZ",           ...directFirst },
         { name: "MIUI_AD",        ...rejectFirst },
         //{ name: "AD_BLOCK",       ...rejectFirst },
         { name: "BROWSER",        ...selectorFirst, "include-all": true },
@@ -484,8 +492,9 @@ const ICON_MAP = {
     HOYO_ETC:       FAVICON("https://hoyoverse.com"),
     HOYO_PROXY:     FAVICON("https://hoyoverse.com"),
     HOYO_DIRECT:    FAVICON("https://hoyoverse.com"),
-    HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
-    HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
+    //HOYO_HSR:       GPLAY("IqXUfiwbK-NCu5KyyK9P3po1kd4ZPOC4QJVWRk2ooJXnUcSpkCUQRYYJ-9vZkCEnPOxDIEWjNpS30OwHNZTtCKw"),
+    //HOYO_ZZZ:       GPLAY("8jEmEvTsNIRW1vLlrDXXCcDlKkQrNb8NzccOXrln4G_DOUZpcBPbN9ssjuwBWz7_yZQ"),
+    //SBCZ:           GPLAY("rzvj2FaKgGNlLOjMPl0DVXX5uL9ash2u_2JZu_eAmYcleMrw4Hgecla1dF8XRw5rgfY"),
     MIUI_AD:        FAVICON("https://www.mi.com/"),
     //AD_BLOCK:     WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
     BROWSER:        WIKI("commons/0/08/Internet-icon.svg"),
