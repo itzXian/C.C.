@@ -643,7 +643,36 @@ const Units = {
             },
         ],
     },
-    final: {
+    non_jp: {
+        "rules": [
+            "DOMAIN-SUFFIX, hinative.com,       NON_JP",
+            "DOMAIN-SUFFIX, game8.jp,           NON_JP",
+        ],
+        "proxy-groups": [
+            {
+                name: "NON_JP",
+                icon: WIKI("commons/4/45/Wikimania2019_flower_icon.svg"),
+            },
+        ],
+    },
+    jp: {
+        "rules": [
+            "DOMAIN-REGEX,  .*\.jp,             JP",
+            "GEOIP,         JP,                 JP,              no-resolve",
+        ],
+        "proxy-groups": [
+            {
+                name: "JP",
+                icon: WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
+            },
+        ],
+    },
+    non_cn: {
+        "rules": [
+            "GEOSITE,       geolocation-!cn,    FINAL",
+        ],
+    },
+    cn: {
         "rule-providers": {
             local: CREATE_RULE_PROVIDER([
                 "+.m2m",              "injections.adguard.org", "local.adguard.org",
@@ -659,33 +688,26 @@ const Units = {
             ], { behavior: "domain" }),
         },
         "rules": [
-            "DOMAIN-SUFFIX, hinative.com,       NON_JP",
-            "DOMAIN-SUFFIX, game8.jp,           NON_JP",
-            "DOMAIN-REGEX,  .*\.jp,             JP",
-            "GEOIP,         JP,                 JP,              no-resolve",
-            "GEOSITE,       geolocation-!cn,    FINAL",
             "RULE-SET,      local,              CN",
             "GEOSITE,       private,            CN",
             "GEOSITE,       CN,                 CN",
             "GEOIP,         private,            CN",
             "GEOIP,         CN,                 CN",
-            "MATCH,FINAL",
         ],
         "proxy-groups": [
-            {
-                name: "NON_JP",
-                icon: WIKI("commons/4/45/Wikimania2019_flower_icon.svg"),
-            },
-            {
-                name: "JP",
-                icon: WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
-            },
             {
                 name: "CN",
                 proxies: ["DIRECT", "SELECTOR", "REJECT"],
                 url: "http://connect.rom.miui.com/generate_204",
                 icon: WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
             },
+        ],
+    },
+    final: {
+        "rules": [
+            "MATCH,FINAL",
+        ],
+        "proxy-groups": [
             {
                 name: "FINAL",
                 "include-all": true,
@@ -748,6 +770,10 @@ const main = (config) => {
         "telegram",
         "discord",
         "apple",
+        "non_jp",
+        "jp",
+        "non_cn",
+        "cn",
         "final",
     ]);
     return config;
