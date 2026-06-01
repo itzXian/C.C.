@@ -66,31 +66,33 @@ const directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
 const adblockDns = ["dns.adguard-dns.com"];
 
-const dns = { dns: {
-    enable:                    true,
-    "prefer-h3":               true,
-    ipv6:                      false,
-    "default-nameserver":      directDns,
-    "enhanced-mode":           "fake-ip",
-    "fake-ip-range":           "198.18.0.1/16",
-    "fake-ip-filter-mode":     "blacklist",
-    "fake-ip-filter": [
-        "rule-set:local",
-        "geosite:private",
-        "geosite:cn",
-        "geosite:connectivity-check",
-    ],
-    "nameserver-policy": {
-        "rule-set:local":      "system",
-        "geosite:private":     directDns,
-        "geosite:cn":          directDns,
-        "geosite:hoyoverse":   directDns,
-        "+.twimg.com":         proxyDns,
-        "+.pximg.net":         proxyDns,
-        "cdn.discordapp.com":  proxyDns,
+const dns = {
+    dns: {
+        enable:                true,
+        "prefer-h3":           true,
+        ipv6:                  false,
+        "default-nameserver":  directDns,
+        "enhanced-mode":       "fake-ip",
+        "fake-ip-range":       "198.18.0.1/16",
+        "fake-ip-filter-mode": "blacklist",
+        "fake-ip-filter": [
+            "rule-set:local",
+            "geosite:private",
+            "geosite:cn",
+            "geosite:connectivity-check",
+        ],
+        "nameserver-policy": {
+            "rule-set:local":     "system",
+            "geosite:private":    directDns,
+            "geosite:cn":         directDns,
+            "geosite:hoyoverse":  directDns,
+            "+.twimg.com":        proxyDns,
+            "+.pximg.net":        proxyDns,
+            "cdn.discordapp.com": proxyDns,
+        },
+        nameserver: adblockDns,
     },
-    nameserver:                adblockDns,
-}};
+};
 
 /* ========== Proxy Groups Configuration ========== */
 const FILTER = {
@@ -117,7 +119,7 @@ const IS_NOT_EMPTY = (value) => {
     if (value == null)             return false;
     if (typeof value === "string") return value.trim().length > 0;
     if (Array.isArray(value))      return value.length > 0;
-    if (value instanceof Object)   return Object.keys(value).length > 0;
+    if (typeof value === "object") return Object.keys(value).length > 0;
     return true;
 };
 
@@ -284,7 +286,7 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
         ...proxyGroups,
         ...otherGroups,
     ];
-    const prebuiltProviders = { ...providers, ...exitProviders };
+    const prebuiltProviders = Object.assign({}, providers, exitProviders);
 
     return { prebuiltProxies, prebuiltGroups, prebuiltProviders };
 };
@@ -294,14 +296,12 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
 //     https://wiki.metacubex.one/config/rule-providers/
 //     https://wiki.metacubex.one/config/rule-providers/content/
 //     https://wiki.metacubex.one/handbook/syntax/#_8
-const CREATE_RULE_PROVIDER = (rules = [], options = {}) => {
-    return {
-        type:     "inline",
-        behavior: "classical",
-        payload:  rules,
-        ...options,
-    };
-};
+const CREATE_RULE_PROVIDER = (rules = [], options = {}) => ({
+    type:     "inline",
+    behavior: "classical",
+    payload:  rules,
+    ...options,
+});
 
 const Units = {
     hoyo: {
@@ -657,7 +657,7 @@ const Units = {
     },
     jp: {
         "rules": [
-            "DOMAIN-REGEX,  .*\.jp,             JP",
+            "DOMAIN-REGEX,  .*\\.jp,             JP",
             "GEOIP,         JP,                 JP,              no-resolve",
         ],
         "proxy-groups": [
@@ -720,17 +720,15 @@ const Units = {
 const Apply = (config, keys=[]) => {
     const { prebuiltProxies, prebuiltGroups, prebuiltProviders } = CREATE_PROXIES_GROUPS_PROVIDERS(config.proxies, config["proxy-providers"]);
 
-    let ruleProviders = {};
-    const rules = [];
-    let proxyGroups = [];
+    const ruleProviders = {};
+    const rules         = [];
+    let   proxyGroups   = [];
     for (const key of keys) {
-        if (Units[key]["rule-providers"])
-            ruleProviders = { ...ruleProviders, ...Units[key]["rule-providers"] };
-        if (Units[key].rules)
-            rules.push(...Units[key].rules);
-        if (Units[key]["proxy-groups"])
-            proxyGroups = [...proxyGroups, ...Units[key]["proxy-groups"]];
-    };
+        const unit = Units[key];
+        if (unit["rule-providers"]) Object.assign(ruleProviders, unit["rule-providers"]);
+        if (unit.rules)             rules.push(...unit.rules);
+        if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
+    }
     proxyGroups = proxyGroups.map((g) => CREATE_PROXY_GROUP({
         ...g,
         type: "select",
