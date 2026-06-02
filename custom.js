@@ -501,7 +501,7 @@ const Units = {
                 "include-all": true,
                 icon: WIKI("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
             },
-       ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false })),
+        ],
     },
     ehentai: {
         "rules": [
