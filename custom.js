@@ -114,10 +114,16 @@ const FILTER = {
     ALL:     "",
 };
 
-const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) =>
-    includeTerm
+const _regexCache = new Map();
+const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) => {
+    const key = `${includeTerm}|${excludeTerm}`;
+    if (_regexCache.has(key)) return _regexCache.get(key);
+    const result = includeTerm
         ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
         : `^((?!.*${excludeTerm}).)*$`;
+    _regexCache.set(key, result);
+    return result;
+};
 
 const IS_NOT_EMPTY = (value) => {
     if (value == null)             return false;
@@ -144,20 +150,19 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     ...overrides,
 });
 
-const CREATE_EXIT_PROVIDER = (providers) => {
-    const result = {};
-    for (const [key, value] of Object.entries(providers)) {
-        const exitKey = `→${key}`;
-        result[exitKey] = {
-            ...value,
-            override: {
-                "dialer-proxy":      "RELAY",
-                "additional-prefix": exitKey,
-            },
-        };
-    }
-    return result;
-};
+const CREATE_EXIT_PROVIDER = (providers) =>
+    Object.fromEntries(
+        Object.entries(providers).map(([key, value]) => {
+            const exitKey = `→${key}`;
+            return [exitKey, {
+                ...value,
+                override: {
+                    "dialer-proxy":      "RELAY",
+                    "additional-prefix": exitKey,
+                },
+            }];
+        })
+    );
 
 /* ========== Icon Support ========== */
 const GITHUB  = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
@@ -255,8 +260,10 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
             exitGroups.push(...pr.exitGroups);
             exitSelectorGroup.push(...pr.exitSelectorGroup);
 
-            tempSelector.push(pr.relaySelectorGroup[0].name);
-            tempExitSelector.push(pr.exitSelectorGroup[0].name);
+            const [relayName] = pr.relaySelectorGroup.map(g => g.name);
+            const [exitName]  = pr.exitSelectorGroup.map(g => g.name);
+            tempSelector.push(relayName);
+            tempExitSelector.push(exitName);
 
             Object.assign(exitProviders, pr.exitProviders);
         }
@@ -733,15 +740,10 @@ const Apply = (config, keys=[]) => {
         if (unit.rules)             rules.push(...unit.rules);
         if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
     }
-    proxyGroups = proxyGroups.map((g) => CREATE_PROXY_GROUP({
-        ...g,
-        type: "select",
-        hidden: false,
-    }));
-    proxyGroups = proxyGroups.map((g) => ({
-        ...g,
-        proxies: IS_NOT_EMPTY(g.proxies) ? g.proxies : prebuiltProxies,
-    }));
+    proxyGroups = proxyGroups.map((g) => {
+        const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
+        return { ...base, proxies: IS_NOT_EMPTY(base.proxies) ? base.proxies : prebuiltProxies };
+    });
 
     config["proxy-providers"] = { ...prebuiltProviders };
     config["rule-providers"] = ruleProviders;
