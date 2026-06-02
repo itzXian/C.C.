@@ -522,22 +522,23 @@ const Units = {
             },
         ],
     },
-    microsoft: {
-        "rule-providers": {
-            github_uc: CREATE_RULE_PROVIDER([
-                "DOMAIN-SUFFIX,githubusercontent.com",
-            ]),
-        },
+    github: {
         "rules": [
-            "RULE-SET,      github_uc,          GITHUB_UC",
-            "GEOSITE,       microsoft,          MICROSOFT",
+            "GEOSITE, github, GITHUB",
         ],
         "proxy-groups": [
             {
-                name: "GITHUB_UC",
+                name: "GITHUB",
                 "include-all": true,
                 icon: WIKI("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
             },
+        ],
+    },
+    microsoft: {
+        "rules": [
+            "GEOSITE,       microsoft,          MICROSOFT",
+        ],
+        "proxy-groups": [
             {
                 name: "MICROSOFT",
                 icon: WIKI("commons/2/25/Microsoft_icon.svg"),
@@ -768,6 +769,7 @@ const main = (config) => {
         "pixiv",
         "ai",
         "steam",
+        "github",
         "microsoft",
         "google",
         "apple",
