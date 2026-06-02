@@ -524,7 +524,7 @@ const Units = {
     },
     github: {
         "rules": [
-            "GEOSITE, github, GITHUB",
+            "GEOSITE,       github,             GITHUB",
         ],
         "proxy-groups": [
             {
