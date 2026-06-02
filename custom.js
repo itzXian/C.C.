@@ -4,20 +4,11 @@
 //     https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
 /* ========== Base-Options Configuration ========== */
-const CDN = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
 
 const baseOptions = {
     "mixed-port": 7890,
     "allow-lan":  true,
     mode:         "rule",
-    "geox-url": {
-        geoip:   `${CDN}/geoip.dat`,
-        geosite: `${CDN}/geosite.dat`,
-        mmdb:    `${CDN}/geoip.metadb`,
-        asn:     `${CDN}/GeoLite2-ASN.mmdb`,
-    },
-    "geo-auto-update":     true,
-    "geo-update-interval": 24,
     "log-level":           "warning",
     ipv6:                  false,
     "find-process-mode":   "strict",
@@ -33,6 +24,30 @@ const baseOptions = {
         },
         "skip-domain": ["Mijia Cloud", "+.push.apple.com"],
     },
+};
+
+const CDN = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
+const geo = {
+    "geox-url": {
+        geoip:   `${CDN}/geoip.dat`,
+        geosite: `${CDN}/geosite.dat`,
+        mmdb:    `${CDN}/geoip.metadb`,
+        asn:     `${CDN}/GeoLite2-ASN.mmdb`,
+    },
+    "geo-auto-update":     true,
+    "geo-update-interval": 24,
+};
+
+const PORT   = Math.floor(Math.random() * 9999) + 10000;
+const SECRET = Math.random().toString(36).slice(2);
+const externalController = {
+    "external-controller": `0.0.0.0:${PORT}`,
+    "secret":              SECRET,
+    "external-ui":         "ui",
+    "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
+};
+
+const host = {
     hosts: {
         "dns.alidns.com":        ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
         "127.0.0.1.sslip.io":    "127.0.0.1",
@@ -52,26 +67,15 @@ const baseOptions = {
     },
 };
 
-const port   = Math.floor(Math.random() * 9999) + 10000;
-const secret = Math.random().toString(36).slice(2);
-
-const externalController = {
-    "external-controller": `0.0.0.0:${port}`,
-    "secret":              secret,
-    "external-ui":         "ui",
-    "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
-};
-
-const directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
-const proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
-const adblockDns = ["dns.adguard-dns.com"];
-
+const DIRECT_DNS  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
+const PROXY_DNS   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
+const ADBLOCK_DNS = ["dns.adguard-dns.com"];
 const dns = {
     dns: {
         enable:                true,
         "prefer-h3":           true,
         ipv6:                  false,
-        "default-nameserver":  directDns,
+        "default-nameserver":  DIRECT_DNS,
         "enhanced-mode":       "fake-ip",
         "fake-ip-range":       "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
@@ -83,14 +87,14 @@ const dns = {
         ],
         "nameserver-policy": {
             "rule-set:local":     "system",
-            "geosite:private":    directDns,
-            "geosite:cn":         directDns,
-            "geosite:hoyoverse":  directDns,
-            "+.twimg.com":        proxyDns,
-            "+.pximg.net":        proxyDns,
-            "cdn.discordapp.com": proxyDns,
+            "geosite:private":    DIRECT_DNS,
+            "geosite:cn":         DIRECT_DNS,
+            "geosite:hoyoverse":  DIRECT_DNS,
+            "+.twimg.com":        PROXY_DNS,
+            "+.pximg.net":        PROXY_DNS,
+            "cdn.discordapp.com": PROXY_DNS,
         },
-        nameserver: adblockDns,
+        nameserver: ADBLOCK_DNS,
     },
 };
 
@@ -749,7 +753,9 @@ const Apply = (config, keys=[]) => {
 const main = (config) => {
     Object.assign(config,
         baseOptions,
+        geo,
         externalController,
+        host,
         dns,
     );
     Apply(config, [
