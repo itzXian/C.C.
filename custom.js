@@ -671,7 +671,7 @@ const Units = {
     },
     jp: {
         "rules": [
-            "DOMAIN-REGEX,  .*\\.jp,             JP",
+            "DOMAIN-REGEX,  .*\\.jp,            JP",
             "GEOIP,         JP,                 JP,              no-resolve",
         ],
         "proxy-groups": [
@@ -705,8 +705,8 @@ const Units = {
             "RULE-SET,      local,              CN",
             "GEOSITE,       private,            CN",
             "GEOSITE,       CN,                 CN",
-            "GEOIP,         private,            CN",
-            "GEOIP,         CN,                 CN",
+            "GEOIP,         private,            CN,              no-resolve",
+            "GEOIP,         CN,                 CN,              no-resolve",
         ],
         "proxy-groups": [
             {
@@ -787,10 +787,10 @@ const main = (config) => {
         "discord",
         "non_jp",
         "jp",
-        "non_cn",
         "cn",
         "browser",
         "downloader",
+        "non_cn",
         "final",
     ]);
     return config;
