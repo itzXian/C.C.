@@ -116,7 +116,7 @@ const FILTER = {
 
 const _regexCache = new Map();
 const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) => {
-    const key = `${includeTerm}|${excludeTerm}`;
+    const key = `${includeTerm}\0${excludeTerm}`;
     if (_regexCache.has(key)) return _regexCache.get(key);
     const result = includeTerm
         ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
@@ -127,7 +127,7 @@ const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) => {
 
 const IS_NOT_EMPTY = (value) => {
     if (value == null)             return false;
-    if (typeof value === "string") return value.trim().length > 0;
+    if (typeof value === "string") return value.trim() !== "";
     if (Array.isArray(value))      return value.length > 0;
     if (typeof value === "object") return Object.keys(value).length > 0;
     return true;
@@ -195,7 +195,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         use:     providerKeys,
     }));
     if (!hasProviders)
-        proxyGroups = proxyGroups.filter((g) => g.proxies);
+        proxyGroups = proxyGroups.filter((g) => IS_NOT_EMPTY(g.proxies));
 
     const relaySelectorGroup = [{
         name:    `${prefix}RELAY`,
@@ -228,7 +228,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         use:     exitProviderKeys,
     }));
     if (hasExitProxies)
-        exitGroups = exitGroups.filter((g) => g.proxies);
+        exitGroups = exitGroups.filter((g) => IS_NOT_EMPTY(g.proxies));
 
     const exitSelectorGroup = [{
         name:    `${prefix}EXIT`,
@@ -748,9 +748,9 @@ const Apply = (config, keys=[]) => {
 
         if (!IS_NOT_EMPTY(base.proxies)) {
             base.proxies = prebuiltProxies.selectFirst;
-        } else if (typeof(base.proxies) === 'string') {
+        } else if (typeof base.proxies === 'string') {
             base.proxies = prebuiltProxies[base.proxies];
-        };
+        }
 
         return base;
     });
