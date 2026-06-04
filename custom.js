@@ -278,14 +278,16 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
         ...exitGroups,
         ...proxyGroups,
     ].map((g) => g.name);
-    const prebuiltProxies = [
-        "SELECTOR", ...proxyGroupNames, "DIRECT", "REJECT",
-    ];
+    const prebuiltProxies = {
+        selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
+        rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
+        directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
+    };
 
     const otherGroups = [
         {
             name: "SELECTOR",
-            proxies: [...proxyGroupNames, "DIRECT", "REJECT"],
+            proxies: [...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
             "include-all": true,
             icon: WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
@@ -400,7 +402,7 @@ const Units = {
         "proxy-groups": [
             {
                 name: "SBCZ",
-                proxies: ["DIRECT", "SELECTOR", "REJECT"],
+                proxies: "directFirst",
                icon: GPLAY("rzvj2FaKgGNlLOjMPl0DVXX5uL9ash2u_2JZu_eAmYcleMrw4Hgecla1dF8XRw5rgfY"),
             },
         ],
@@ -465,12 +467,12 @@ const Units = {
         "proxy-groups": [
             {
                 name: "MIUI_AD",
-                proxies: ["REJECT", "SELECTOR", "DIRECT"],
+                proxies: "rejectFirst",
                 icon: FAVICON("https://www.mi.com/"),
             },
             {
                 name: "AD",
-                proxies: ["REJECT", "SELECTOR", "DIRECT"],
+                proxies: "rejectFirst",
                 icon: WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
             },
 
@@ -554,7 +556,7 @@ const Units = {
         "proxy-groups": [
             {
                 name: "STEAM_CN",
-                proxies: ["DIRECT", "SELECTOR", "REJECT"],
+                proxies: "directFirst",
                 icon: WIKI("commons/8/83/Steam_icon_logo.svg"),
             },
             {
@@ -599,7 +601,7 @@ const Units = {
             },
             {
                 name: "GOOGLE_FCM",
-                proxies: ["DIRECT", "SELECTOR", "REJECT"],
+                proxies: "directFirst",
                 icon: FAVICON("https://firebase.google.com"),
             },
             {
@@ -709,7 +711,7 @@ const Units = {
         "proxy-groups": [
             {
                 name: "CN",
-                proxies: ["DIRECT", "SELECTOR", "REJECT"],
+                proxies: "directFirst",
                 url: "http://connect.rom.miui.com/generate_204",
                 icon: WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
             },
@@ -743,7 +745,14 @@ const Apply = (config, keys=[]) => {
     }
     proxyGroups = proxyGroups.map((g) => {
         const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
-        return { ...base, proxies: IS_NOT_EMPTY(base.proxies) ? base.proxies : prebuiltProxies };
+
+        if (!IS_NOT_EMPTY(base.proxies)) {
+            base.proxies = prebuiltProxies.selectFirst;
+        } else if (typeof(base.proxies) === 'string') {
+            base.proxies = prebuiltProxies[base.proxies];
+        };
+
+        return base;
     });
 
     config["proxy-providers"] = { ...prebuiltProviders };
