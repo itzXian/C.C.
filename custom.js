@@ -729,6 +729,18 @@ const Units = {
             },
         ],
     },
+    tiktok: {
+        "rules": [
+            "GEOSITE,       tiktok,             TIKTOK",
+        ],
+        "proxy-groups": [
+            {
+                name: "TIKTOK",
+                "include-all": true,
+                icon: GITHUB("tiktok"),
+            },
+        ],
+    },
 };
 
 const Apply = (config, keys=[]) => {
@@ -785,6 +797,7 @@ const main = (config) => {
         "twitter",
         "telegram",
         "discord",
+        "tiktok",
         "non_jp",
         "jp",
         "cn",
