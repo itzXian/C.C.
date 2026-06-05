@@ -485,8 +485,19 @@ const Units = {
             ]),
         },
         "rules": [
-            "RULE-SET,      browser,            BROWSER",
+            "SUB-RULE,(RULE-SET,browser),sub_browser",
         ],
+        "sub-rules": {
+            sub_browser: [
+                "GEOSITE,       geolocation-!cn,    BROWSER",
+                "RULE-SET,      local,              CN",
+                "GEOSITE,       private,            CN",
+                "GEOSITE,       CN,                 CN",
+                "GEOIP,         private,            CN,              no-resolve",
+                "GEOIP,         CN,                 CN,              no-resolve",
+                "MATCH,BROWSER",
+            ],
+        },
         "proxy-groups": [
             {
                 name: "BROWSER",
@@ -502,8 +513,19 @@ const Units = {
             ]),
         },
         "rules": [
-            "RULE-SET,      downloader,         DOWNLOADER",
+            "SUB-RULE,(RULE-SET,downloader),sub_downloader",
         ],
+        "sub-rules": {
+            sub_downloader: [
+                "GEOSITE,       geolocation-!cn,    DOWNLOADER",
+                "RULE-SET,      local,              CN",
+                "GEOSITE,       private,            CN",
+                "GEOSITE,       CN,                 CN",
+                "GEOIP,         private,            CN,              no-resolve",
+                "GEOIP,         CN,                 CN,              no-resolve",
+                "MATCH,DOWNLOADER",
+            ],
+        },
         "proxy-groups": [
             {
                 name: "DOWNLOADER",
@@ -748,11 +770,13 @@ const Apply = (config, keys=[]) => {
 
     const ruleProviders = {};
     const rules         = [];
+    const subRules      = {};
     let   proxyGroups   = [];
     for (const key of keys) {
         const unit = Units[key];
         if (unit["rule-providers"]) Object.assign(ruleProviders, unit["rule-providers"]);
         if (unit.rules)             rules.push(...unit.rules);
+        if (unit["sub-rules"])      Object.assign(subRules, unit["sub-rules"]);
         if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
     }
     proxyGroups = proxyGroups.map((g) => {
@@ -770,6 +794,7 @@ const Apply = (config, keys=[]) => {
     config["proxy-providers"] = { ...prebuiltProviders };
     config["rule-providers"] = ruleProviders;
     config.rules = rules;
+    config["sub-rules"] = subRules;
     config["proxy-groups"] = [...prebuiltGroups, ...proxyGroups];
 };
 
@@ -786,6 +811,8 @@ const main = (config) => {
         "hoyo",
         "sbcz",
         "ad",
+        "browser",
+        "downloader",
         "ehentai",
         "pixiv",
         "ai",
@@ -800,10 +827,8 @@ const main = (config) => {
         "tiktok",
         "non_jp",
         "jp",
-        "cn",
-        "browser",
-        "downloader",
         "non_cn",
+        "cn",
         "final",
     ]);
     return config;
