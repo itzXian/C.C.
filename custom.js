@@ -792,10 +792,10 @@ const Apply = (config, keys=[]) => {
     });
 
     config["proxy-providers"] = { ...prebuiltProviders };
-    config["rule-providers"] = ruleProviders;
-    config.rules = rules;
-    config["sub-rules"] = subRules;
-    config["proxy-groups"] = [...prebuiltGroups, ...proxyGroups];
+    config["rule-providers"]  = ruleProviders;
+    config.rules              = rules;
+    config["sub-rules"]       = subRules;
+    config["proxy-groups"]    = [...prebuiltGroups, ...proxyGroups];
 };
 
 /* ========== Entry Point ========== */
