@@ -69,7 +69,6 @@ const host = {
 
 const DIRECT_DNS  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const PROXY_DNS   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
-const ADBLOCK_DNS = ["dns.adguard-dns.com"];
 const dns = {
     dns: {
         enable:                true,
@@ -94,7 +93,7 @@ const dns = {
             "+.pximg.net":        PROXY_DNS,
             "cdn.discordapp.com": PROXY_DNS,
         },
-        nameserver: ADBLOCK_DNS,
+        nameserver: PROXY_DNS,
     },
 };
 
@@ -807,6 +806,7 @@ const main = (config) => {
         host,
         dns,
     );
+    //config.dns.nameserver = ["dns.adguard-dns.com"];
     Apply(config, [
         "hoyo",
         "sbcz",
