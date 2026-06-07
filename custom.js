@@ -81,7 +81,6 @@ const dns = {
         "fake-ip-filter-mode": "blacklist",
         "fake-ip-filter": [
             "rule-set:local",
-            "geosite:private",
             "geosite:cn",
             "geosite:connectivity-check",
         ],
