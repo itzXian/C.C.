@@ -47,54 +47,50 @@ const externalController = {
     "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
 };
 
-const host = {
-    hosts: {
-        "dns.alidns.com":        ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
-        "127.0.0.1.sslip.io":    "127.0.0.1",
-        "127.atlas.skk.moe":     "127.0.0.1",
-        "cdn.jsdelivr.net":      "cdn.jsdelivr.net.cdn.cloudflare.net",
-        "mtalk.google.com":      "172.253.63.188",
-        "alt1-mtalk.google.com": "192.178.131.188",
-        "alt2-mtalk.google.com": "209.85.144.188",
-        "alt3-mtalk.google.com": "108.177.11.188",
-        "alt4-mtalk.google.com": "192.178.218.188",
-        "alt5-mtalk.google.com": "64.233.178.188",
-        "alt6-mtalk.google.com": "192.178.213.188",
-        "alt7-mtalk.google.com": "172.253.116.188",
-        "alt8-mtalk.google.com": "192.178.223.188",
-        "dl.google.com":         "142.250.31.93",
-        "dl.l.google.com":       "142.250.31.136",
-    },
+const hosts = {
+    "dns.alidns.com":        ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
+    "127.0.0.1.sslip.io":    "127.0.0.1",
+    "127.atlas.skk.moe":     "127.0.0.1",
+    "cdn.jsdelivr.net":      "cdn.jsdelivr.net.cdn.cloudflare.net",
+    "mtalk.google.com":      "172.253.63.188",
+    "alt1-mtalk.google.com": "192.178.131.188",
+    "alt2-mtalk.google.com": "209.85.144.188",
+    "alt3-mtalk.google.com": "108.177.11.188",
+    "alt4-mtalk.google.com": "192.178.218.188",
+    "alt5-mtalk.google.com": "64.233.178.188",
+    "alt6-mtalk.google.com": "192.178.213.188",
+    "alt7-mtalk.google.com": "172.253.116.188",
+    "alt8-mtalk.google.com": "192.178.223.188",
+    "dl.google.com":         "142.250.31.93",
+    "dl.l.google.com":       "142.250.31.136",
 };
 
 const _directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const _proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
 const _adblockDns = ["dns.adguard-dns.com"];
 const dns = {
-    dns: {
-        enable:                true,
-        "prefer-h3":           true,
-        ipv6:                  false,
-        "default-nameserver":  _directDns,
-        "enhanced-mode":       "fake-ip",
-        "fake-ip-range":       "198.18.0.1/16",
-        "fake-ip-filter-mode": "blacklist",
-        "fake-ip-filter": [
-            "rule-set:local",
-            "geosite:cn",
-            "geosite:connectivity-check",
-        ],
-        "nameserver-policy": {
-            "rule-set:local":     "system",
-            "geosite:private":    _directDns,
-            "geosite:cn":         _directDns,
-            "geosite:hoyoverse":  _directDns,
-            "+.twimg.com":        _proxyDns,
-            "+.pximg.net":        _proxyDns,
-            "cdn.discordapp.com": _proxyDns,
-        },
-        nameserver: _proxyDns,
+    enable:                true,
+    "prefer-h3":           true,
+    ipv6:                  false,
+    "default-nameserver":  _directDns,
+    "enhanced-mode":       "fake-ip",
+    "fake-ip-range":       "198.18.0.1/16",
+    "fake-ip-filter-mode": "blacklist",
+    "fake-ip-filter": [
+        "rule-set:local",
+        "geosite:cn",
+        "geosite:connectivity-check",
+    ],
+    "nameserver-policy": {
+        "rule-set:local":     "system",
+        "geosite:private":    _directDns,
+        "geosite:cn":         _directDns,
+        "geosite:hoyoverse":  _directDns,
+        "+.twimg.com":        _proxyDns,
+        "+.pximg.net":        _proxyDns,
+        "cdn.discordapp.com": _proxyDns,
     },
+    nameserver: _proxyDns,
 };
 
 /* ========== Proxy Groups Configuration ========== */
@@ -316,24 +312,12 @@ const CREATE_RULE_PROVIDER = (rules = [], options = {}) => ({
 });
 
 const units = {
-    baseOptions: {
-        override: (config) => Object.assign(config, baseOptions),
-    },
-    geo: {
-        override: (config) => Object.assign(config, geo),
-    },
-    externalController: {
-        override: (config) => Object.assign(config, externalController),
-    },
-    host: {
-        override: (config) => Object.assign(config, host),
-    },
-    dns: {
-        override: (config) => Object.assign(config, dns),
-    },
-    adblockDns: {
-        override: (config) => config.dns.nameserver = _adblockDns,
-    },
+    baseOptions:        { override: (config) => Object.assign(config, baseOptions) },
+    geo:                { override: (config) => Object.assign(config, geo) },
+    externalController: { override: (config) => Object.assign(config, externalController) },
+    hosts:              { override: (config) => config.hosts = hosts },
+    dns:                { override: (config) => config.dns = dns},
+    adblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
     hoyo: {
         "rule-providers": {
             hoyo_gi_cn: CREATE_RULE_PROVIDER([
