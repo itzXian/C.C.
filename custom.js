@@ -69,6 +69,7 @@ const host = {
 
 const DIRECT_DNS  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const PROXY_DNS   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
+const ADBLOCK_DNS = [ "dns.adguard-dns.com"];
 const dns = {
     dns: {
         enable:                true,
@@ -316,6 +317,24 @@ const CREATE_RULE_PROVIDER = (rules = [], options = {}) => ({
 });
 
 const Units = {
+    baseOptions: {
+        override: (config) => Object.assign(config, baseOptions),
+    },
+    geo: {
+        override: (config) => Object.assign(config, geo),
+    },
+    externalController: {
+        override: (config) => Object.assign(config, externalController),
+    },
+    host: {
+        override: (config) => Object.assign(config, host),
+    },
+    dns: {
+        override: (config) => Object.assign(config, dns),
+    },
+    adblockDns: {
+        override: (config) => config.dns.nameserver = ADBLOCK_DNS,
+    },
     hoyo: {
         "rule-providers": {
             hoyo_gi_cn: CREATE_RULE_PROVIDER([
@@ -762,6 +781,38 @@ const Units = {
             },
         ],
     },
+    tailscale: {
+        "rule-providers": {
+            tailscale: CREATE_RULE_PROVIDER([
+                "DOMAIN-REGEX,.*\\.tail[\\w]*\\.ts\\.net",
+            ]),
+        },
+        "rules": [
+            "RULE-SET,      tailscale,          TAILSCALE",
+        ],
+        "proxy-groups": [
+            {
+                name: "TAILSCALE",
+                proxies: ["Tailscale"],
+                "include-all": true,
+                icon: FAVICON("https://tailscale.com"),
+            },
+        ],
+        override: (config) => {
+            const proxies = {
+                name:       "Tailscale",
+                type:       "tailscale",
+                hostname:   "mihomo",
+                "auth-key": "tskey-blabla",
+            };
+            if (config.proxies) {
+                config.proxies.push(proxies);
+            } else {
+                config.proxies = proxies;
+            };
+        },
+    },
+
 };
 
 const Apply = (config, keys=[]) => {
@@ -777,6 +828,7 @@ const Apply = (config, keys=[]) => {
         if (unit.rules)             rules.push(...unit.rules);
         if (unit["sub-rules"])      Object.assign(subRules, unit["sub-rules"]);
         if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
+        if (unit.override)          unit.override(config);
     }
     proxyGroups = proxyGroups.map((g) => {
         const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
@@ -799,15 +851,14 @@ const Apply = (config, keys=[]) => {
 
 /* ========== Entry Point ========== */
 const main = (config) => {
-    Object.assign(config,
-        baseOptions,
-        geo,
-        externalController,
-        host,
-        dns,
-    );
-    //config.dns.nameserver = ["dns.adguard-dns.com"];
     Apply(config, [
+        "baseOptions",
+        "geo",
+        "externalController",
+        "host",
+        "dns",
+        //"adblockDns",
+        //"tailscale",
         "hoyo",
         "sbcz",
         "ad",
