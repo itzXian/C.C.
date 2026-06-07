@@ -794,7 +794,6 @@ const units = {
             {
                 name: "TAILSCALE",
                 proxies: ["Tailscale"],
-                "include-all": true,
                 icon: FAVICON("https://tailscale.com"),
             },
         ],
