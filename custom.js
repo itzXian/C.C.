@@ -745,8 +745,8 @@ const units = {
             "RULE-SET,      local,              CN",
             "GEOSITE,       private,            CN",
             "GEOSITE,       CN,                 CN",
-            "GEOIP,         private,            CN,              no-resolve",
-            "GEOIP,         CN,                 CN,              no-resolve",
+            "GEOIP,         private,            CN",
+            "GEOIP,         CN,                 CN",
         ],
         "proxy-groups": [
             {
