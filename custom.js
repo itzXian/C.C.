@@ -815,7 +815,7 @@ const Units = {
 
 };
 
-const Apply = (config, keys=[]) => {
+const apply = (config, keys=[]) => {
     const { prebuiltProxies, prebuiltGroups, prebuiltProviders } = CREATE_PROXIES_GROUPS_PROVIDERS(config.proxies, config["proxy-providers"]);
 
     const ruleProviders = {};
@@ -851,7 +851,7 @@ const Apply = (config, keys=[]) => {
 
 /* ========== Entry Point ========== */
 const main = (config) => {
-    Apply(config, [
+    apply(config, [
         "baseOptions",
         "geo",
         "externalController",
@@ -886,4 +886,4 @@ const main = (config) => {
 };
 
 const IS_NODE = typeof process !== "undefined" && !!process.versions?.node;
-if (IS_NODE) module.exports = { main };
+if (IS_NODE) module.exports = { main, apply };
