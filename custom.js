@@ -26,23 +26,23 @@ const baseOptions = {
     },
 };
 
-const CDN = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
+const _cdn = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
 const geo = {
     "geox-url": {
-        geoip:   `${CDN}/geoip.dat`,
-        geosite: `${CDN}/geosite.dat`,
-        mmdb:    `${CDN}/geoip.metadb`,
-        asn:     `${CDN}/GeoLite2-ASN.mmdb`,
+        geoip:   `${_cdn}/geoip.dat`,
+        geosite: `${_cdn}/geosite.dat`,
+        mmdb:    `${_cdn}/geoip.metadb`,
+        asn:     `${_cdn}/GeoLite2-ASN.mmdb`,
     },
     "geo-auto-update":     true,
     "geo-update-interval": 24,
 };
 
-const PORT   = Math.floor(Math.random() * 9999) + 10000;
-const SECRET = Math.random().toString(36).slice(2);
+const _port   = Math.floor(Math.random() * 9999) + 10000;
+const _secret = Math.random().toString(36).slice(2);
 const externalController = {
-    "external-controller": `0.0.0.0:${PORT}`,
-    "secret":              SECRET,
+    "external-controller": `0.0.0.0:${_port}`,
+    "secret":              _secret,
     "external-ui":         "ui",
     "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
 };
@@ -67,15 +67,15 @@ const host = {
     },
 };
 
-const DIRECT_DNS  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
-const PROXY_DNS   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
-const ADBLOCK_DNS = [ "dns.adguard-dns.com"];
+const _directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
+const _proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
+const _adblockDns = [ "dns.adguard-dns.com"];
 const dns = {
     dns: {
         enable:                true,
         "prefer-h3":           true,
         ipv6:                  false,
-        "default-nameserver":  DIRECT_DNS,
+        "default-nameserver":  _directDns,
         "enhanced-mode":       "fake-ip",
         "fake-ip-range":       "198.18.0.1/16",
         "fake-ip-filter-mode": "blacklist",
@@ -87,19 +87,19 @@ const dns = {
         ],
         "nameserver-policy": {
             "rule-set:local":     "system",
-            "geosite:private":    DIRECT_DNS,
-            "geosite:cn":         DIRECT_DNS,
-            "geosite:hoyoverse":  DIRECT_DNS,
-            "+.twimg.com":        PROXY_DNS,
-            "+.pximg.net":        PROXY_DNS,
-            "cdn.discordapp.com": PROXY_DNS,
+            "geosite:private":    _directDns,
+            "geosite:cn":         _directDns,
+            "geosite:hoyoverse":  _directDns,
+            "+.twimg.com":        _proxyDns,
+            "+.pximg.net":        _proxyDns,
+            "cdn.discordapp.com": _proxyDns,
         },
-        nameserver: PROXY_DNS,
+        nameserver: _proxyDns,
     },
 };
 
 /* ========== Proxy Groups Configuration ========== */
-const FILTER = {
+const _filter = {
     HK:      "香港|HK|Hong|🇭🇰",
     TW:      "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
     SG:      "新加坡|狮城|SG|Singapore|🇸🇬",
@@ -115,7 +115,7 @@ const FILTER = {
 };
 
 const _regexCache = new Map();
-const REGEX = (includeTerm, excludeTerm = FILTER.EXCLUDE) => {
+const REGEX = (includeTerm, excludeTerm = _filter.EXCLUDE) => {
     const key = `${includeTerm}\0${excludeTerm}`;
     if (_regexCache.has(key)) return _regexCache.get(key);
     const result = includeTerm
@@ -176,16 +176,16 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     const hasProxies   = IS_NOT_EMPTY(proxies);
 
     let proxyGroups = [
-        { name: "AUTO HKSG", type: "url-test",     filter: REGEX(["HK", "SG"].map((e) => FILTER[e]).join("|")) },
-        { name: "AUTO HK",   type: "url-test",     filter: REGEX(FILTER.HK) },
-        { name: "AUTO JP",   type: "url-test",     filter: REGEX(FILTER.JP) },
-        { name: "AUTO SG",   type: "url-test",     filter: REGEX(FILTER.SG) },
-        { name: "AUTO AU",   type: "url-test",     filter: REGEX(FILTER.AU) },
-        { name: "AUTO US",   type: "url-test",     filter: REGEX(FILTER.US) },
-        { name: "AUTO !JP",  type: "url-test",     filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
-        { name: "AUTO ALL",  type: "url-test",     filter: REGEX(FILTER.ALL) },
-        { name: "LB HK",     type: "load-balance", filter: REGEX(FILTER.HK), strategy: "round-robin" },
-        { name: "LB SG",     type: "load-balance", filter: REGEX(FILTER.SG), strategy: "round-robin" },
+        { name: "AUTO HKSG", type: "url-test",     filter: REGEX(["HK", "SG"].map((e) => _filter[e]).join("|")) },
+        { name: "AUTO HK",   type: "url-test",     filter: REGEX(_filter.HK) },
+        { name: "AUTO JP",   type: "url-test",     filter: REGEX(_filter.JP) },
+        { name: "AUTO SG",   type: "url-test",     filter: REGEX(_filter.SG) },
+        { name: "AUTO AU",   type: "url-test",     filter: REGEX(_filter.AU) },
+        { name: "AUTO US",   type: "url-test",     filter: REGEX(_filter.US) },
+        { name: "AUTO !JP",  type: "url-test",     filter: REGEX(_filter.ALL, `${_filter.EXCLUDE}|${_filter.JP}`) },
+        { name: "AUTO ALL",  type: "url-test",     filter: REGEX(_filter.ALL) },
+        { name: "LB HK",     type: "load-balance", filter: REGEX(_filter.HK), strategy: "round-robin" },
+        { name: "LB SG",     type: "load-balance", filter: REGEX(_filter.SG), strategy: "round-robin" },
     ].map((e) => CREATE_PROXY_GROUP({
         ...e,
         name:    `${prefix}${e.name}`,
@@ -200,7 +200,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     const relaySelectorGroup = [{
         name:    `${prefix}RELAY`,
         type:    "select",
-        filter:  REGEX(FILTER.ALL),
+        filter:  REGEX(_filter.ALL),
         proxies: proxyGroups.map((g) => g.name),
         use:     providerKeys,
         hidden:  false,
@@ -217,8 +217,8 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     const exitProviderKeys = Object.keys(exitProviders);
 
     let exitGroups = [
-        { name: "AUTO JP",  type: "url-test", filter: REGEX(FILTER.JP) },
-        { name: "AUTO !JP", type: "url-test", filter: REGEX(FILTER.ALL, `${FILTER.EXCLUDE}|${FILTER.JP}`) },
+        { name: "AUTO JP",  type: "url-test", filter: REGEX(_filter.JP) },
+        { name: "AUTO !JP", type: "url-test", filter: REGEX(_filter.ALL, `${_filter.EXCLUDE}|${_filter.JP}`) },
     ].map((e) => CREATE_PROXY_GROUP({
         ...e,
         name:    `→${prefix}${e.name}`,
@@ -233,7 +233,7 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
     const exitSelectorGroup = [{
         name:    `${prefix}EXIT`,
         type:    "select",
-        filter:  REGEX(FILTER.ALL),
+        filter:  REGEX(_filter.ALL),
         proxies: exitGroups.map((g) => g.name),
         use:     exitProviderKeys,
         hidden:  false,
@@ -316,7 +316,7 @@ const CREATE_RULE_PROVIDER = (rules = [], options = {}) => ({
     ...options,
 });
 
-const Units = {
+const units = {
     baseOptions: {
         override: (config) => Object.assign(config, baseOptions),
     },
@@ -333,7 +333,7 @@ const Units = {
         override: (config) => Object.assign(config, dns),
     },
     adblockDns: {
-        override: (config) => config.dns.nameserver = ADBLOCK_DNS,
+        override: (config) => config.dns.nameserver = _adblockDns,
     },
     hoyo: {
         "rule-providers": {
@@ -799,12 +799,12 @@ const Units = {
             },
         ],
         override: (config) => {
-            const proxies = {
+            const proxies = [{
                 name:       "Tailscale",
                 type:       "tailscale",
                 hostname:   "mihomo",
                 "auth-key": "tskey-blabla",
-            };
+            }];
             if (config.proxies) {
                 config.proxies.push(proxies);
             } else {
@@ -823,7 +823,7 @@ const apply = (config, keys=[]) => {
     const subRules      = {};
     let   proxyGroups   = [];
     for (const key of keys) {
-        const unit = Units[key];
+        const unit = units[key];
         if (unit["rule-providers"]) Object.assign(ruleProviders, unit["rule-providers"]);
         if (unit.rules)             rules.push(...unit.rules);
         if (unit["sub-rules"])      Object.assign(subRules, unit["sub-rules"]);
@@ -886,4 +886,4 @@ const main = (config) => {
 };
 
 const IS_NODE = typeof process !== "undefined" && !!process.versions?.node;
-if (IS_NODE) module.exports = { main, apply };
+if (IS_NODE) module.exports = { main, apply, units };
