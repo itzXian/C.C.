@@ -69,7 +69,7 @@ const host = {
 
 const _directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const _proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
-const _adblockDns = [ "dns.adguard-dns.com"];
+const _adblockDns = ["dns.adguard-dns.com"];
 const dns = {
     dns: {
         enable:                true,
