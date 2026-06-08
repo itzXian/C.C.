@@ -430,7 +430,8 @@ const units = {
                 "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
                 "hot.browser.miui.com",      "security.browser.miui.com",
                 "r.browser.miui.com",        "hd.browser.miui.com",
-                "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com", "qsb.browser.miui.com",      "global-search.browser.miui.com",
+                "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
+                "qsb.browser.miui.com",      "global-search.browser.miui.com",
                 "qsb.browser.miui.srv",
                 // QuickApp
                 "statres.quickapp.cn",       "qr.quickapp.cn",
