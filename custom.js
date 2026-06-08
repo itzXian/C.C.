@@ -82,15 +82,16 @@ const dns = {
         "geosite:connectivity-check",
     ],
     "nameserver-policy": {
-        "rule-set:local":     "system",
-        "geosite:private":    _directDns,
-        "geosite:cn":         _directDns,
-        "geosite:hoyoverse":  _directDns,
-        "+.twimg.com":        _proxyDns,
-        "+.pximg.net":        _proxyDns,
-        "cdn.discordapp.com": _proxyDns,
+        "rule-set:local":      "system",
+        "geosite:private":     _directDns,
+        "geosite:cn":          _directDns,
+        "geosite:hoyoverse":   _directDns,
+        "+.twimg.com":         _proxyDns,
+        "+.pximg.net":         _proxyDns,
+        "cdn.discordapp.com":  _proxyDns,
     },
-    nameserver: _proxyDns,
+    nameserver:                _proxyDns,
+    "proxy-server-nameserver": _directDns,
 };
 
 /* ========== Proxy Groups Configuration ========== */
