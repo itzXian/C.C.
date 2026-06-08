@@ -770,6 +770,7 @@ const units = {
         "rule-providers": {
             tailscale: CREATE_RULE_PROVIDER([
                 "DOMAIN-REGEX,.*\\.tail[\\w]*\\.ts\\.net",
+                "IP-CIDR,100.0.0.0/8",
             ]),
         },
         "rules": [
