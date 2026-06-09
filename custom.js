@@ -361,20 +361,6 @@ const units = {
             "RULE-SET,      hoyo_final,         HOYO_PROXY",
         ],
         "proxy-groups": [
-            /*
-            {
-                name: "HOYO_GI_CN",
-                proxies: ["HOYO_DIRECT", "HOYO_PROXY"],
-                url: "https://hk4e-sdk.mihoyo.com/ping?callback=jsonptesting",
-                icon: GPLAY("YQqyKaXX-63krqsfIzUEJWUWLINxcb5tbS6QVySdxbS7eZV7YB2dUjUvX27xA0TIGtfxQ5v-tQjwlT5tTB-O"),
-
-            },
-            {
-                name: "HOYO_ETC",
-                proxies: ["HOYO_DIRECT", "HOYO_PROXY"],
-                icon: FAVICON("https://hoyoverse.com"),
-            },
-            */
             {
                 name: "HOYO_PROXY",
                 url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
@@ -383,10 +369,10 @@ const units = {
             {
                 name: "HOYO_DIRECT",
                 proxies: ["DIRECT", "HOYO_PROXY"],
-                url: "https://api.mihoyo.com/live?detect=123",
+                url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
                 icon: FAVICON("https://hoyoverse.com"),
             },
-        ],
+         ],
     },
     sbcz: {
         "rule-providers": {
@@ -572,19 +558,25 @@ const units = {
             },
         ],
     },
-    steam: {
+    steam_cn: {
         "rules": [
             "GEOSITE,       steam@cn,           STEAM_CN",
             "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
-            "GEOSITE,       steam,              STEAM",
         ],
         "proxy-groups": [
-            {
+           {
                 name: "STEAM_CN",
                 proxies: "directFirst",
                 icon: WIKI("commons/8/83/Steam_icon_logo.svg"),
             },
-            {
+        ],
+    },
+    steam: {
+        "rules": [
+            "GEOSITE,       steam,              STEAM",
+        ],
+        "proxy-groups": [
+             {
                 name: "STEAM",
                 icon: WIKI("commons/8/83/Steam_icon_logo.svg"),
             },
@@ -612,24 +604,36 @@ const units = {
             },
         ],
     },
-    google: {
+    youtube: {
         "rules": [
             "GEOSITE,       youTube,            YOUTUBE",
-            "GEOSITE,       googlefcm,          GOOGLE_FCM",
-            "GEOIP,         google,             GOOGLE,          no-resolve",
-            "GEOSITE,       google,             GOOGLE",
         ],
         "proxy-groups": [
             {
                 name: "YOUTUBE",
                 icon: FAVICON("https://youtube.com"),
             },
+       ],
+    },
+    google_fcm: {
+        "rules": [
+            "GEOSITE,       googlefcm,          GOOGLE_FCM",
+        ],
+        "proxy-groups": [
             {
                 name: "GOOGLE_FCM",
                 proxies: "directFirst",
                 icon: FAVICON("https://firebase.google.com"),
             },
-            {
+        ],
+    },
+    google: {
+        "rules": [
+            "GEOIP,         google,             GOOGLE,          no-resolve",
+            "GEOSITE,       google,             GOOGLE",
+        ],
+        "proxy-groups": [
+             {
                 name: "GOOGLE",
                 icon: WIKI("commons/c/c1/Google_%22G%22_logo.svg"),
             },
@@ -853,9 +857,12 @@ const main = (config) => {
         "ehentai",
         "pixiv",
         "ai",
+        "steam_cn",
         "steam",
         "github",
         "microsoft",
+        "youtube",
+        "google_fcm",
         "google",
         "apple",
         "twitter",
