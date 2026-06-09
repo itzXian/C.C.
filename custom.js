@@ -781,6 +781,7 @@ const units = {
                 name: "TAILSCALE",
                 proxies: ["Tailscale"],
                 icon: FAVICON("https://tailscale.com"),
+                url: "https://hello.ts.net",
             },
         ],
         override: (config) => {
