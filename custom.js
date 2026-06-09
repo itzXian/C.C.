@@ -783,7 +783,9 @@ const units = {
         "proxy-groups": [
             {
                 name: "TAILSCALE",
+                filter: "Tailscale-.*",
                 proxies: ["Tailscale"],
+                "include-all": true,
                 icon: FAVICON("https://tailscale.com"),
                 url: "https://hello.ts.net",
             },
