@@ -814,13 +814,15 @@ const units = {
 
 };
 
-const apply = (config, keys=[]) => {
+const apply = (config, keys = []) => {
     const { prebuiltProxies, prebuiltGroups, prebuiltProviders } = CREATE_PROXIES_GROUPS_PROVIDERS(config.proxies, config["proxy-providers"]);
 
-    const ruleProviders = {};
-    const rules         = [];
-    const subRules      = {};
-    let   proxyGroups   = [];
+    const ruleProviders  = {};
+    const rules          = [];
+    const subRules       = {};
+    let   proxyGroups    = [];
+    const laterCallbacks = [];
+
     for (const key of keys) {
         const unit = units[key];
         if (unit["rule-providers"]) Object.assign(ruleProviders, unit["rule-providers"]);
@@ -828,16 +830,16 @@ const apply = (config, keys=[]) => {
         if (unit["sub-rules"])      Object.assign(subRules, unit["sub-rules"]);
         if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
         if (unit.override)          unit.override(config);
+        if (unit.overrideLater)     laterCallbacks.push(unit.overrideLater);
     }
+
     proxyGroups = proxyGroups.map((g) => {
         const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
-
         if (!IS_NOT_EMPTY(base.proxies)) {
             base.proxies = prebuiltProxies.selectFirst;
-        } else if (typeof base.proxies === 'string') {
+        } else if (typeof base.proxies === "string") {
             base.proxies = prebuiltProxies[base.proxies];
         }
-
         return base;
     });
 
@@ -847,11 +849,9 @@ const apply = (config, keys=[]) => {
     config["sub-rules"]       = subRules;
     config["proxy-groups"]    = [...prebuiltGroups, ...proxyGroups];
 
-    for (const key of keys) {
-        const unit = units[key];
-        if (unit.overrideLater)          unit.overrideLater(config);
+    for (const overrideLater of laterCallbacks) {
+        overrideLater(config);
     };
-
 };
 
 /* ========== Entry Point ========== */
@@ -860,7 +860,7 @@ const main = (config) => {
         "baseOptions",
         "geo",
         "externalController",
-        "host",
+        "hosts",
         "dns",
         //"adblockDns",
         //"tailscale",
