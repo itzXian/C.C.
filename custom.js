@@ -805,6 +805,7 @@ const units = {
                         type:       "tailscale",
                         hostname:   "mihomo",
                         "auth-key": "tskey-blabla",
+                        "state-dir": "./tailscale", // requie an unique dir name per tailscale node
                     },
                 ],
             },
