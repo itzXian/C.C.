@@ -831,7 +831,7 @@ const apply = (config, keys = []) => {
         if (unit["proxy-groups"])   proxyGroups.push(...unit["proxy-groups"]);
         if (unit.override)          unit.override(config);
         if (unit.overrideLater)     laterCallbacks.push(unit.overrideLater);
-    }
+    };
 
     proxyGroups = proxyGroups.map((g) => {
         const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
