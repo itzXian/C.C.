@@ -783,24 +783,32 @@ const units = {
         "proxy-groups": [
             {
                 name: "TAILSCALE",
-                proxies: ["Tailscale"],
-                icon: FAVICON("https://tailscale.com"),
                 url: "https://hello.ts.net",
+                proxies: "empty",
+                use: ["tailscale"],
+                icon: FAVICON("https://tailscale.com"),
             },
         ],
-        override: (config) => {
-            const proxies = [{
-                name:       "Tailscale",
-                type:       "tailscale",
-                hostname:   "mihomo",
-                "auth-key": "tskey-blabla",
-            }];
-            if (config.proxies) {
-                config.proxies.push(proxies);
-            } else {
-                config.proxies = proxies;
-            };
-        },
+        overrideLater: (config) => { Object.assign(config["proxy-providers"], {
+            tailscale: {
+                type: "inline",
+                "health-check": {
+                    enable: true,
+                    url: "https://hello.ts.net",
+                    interval: 1800,
+                    timeout: 3000,
+                    "expected-status": "200/204/302",
+                },
+                payload: [
+                    {
+                        name:       "Tailscale",
+                        type:       "tailscale",
+                        hostname:   "mihomo",
+                        "auth-key": "tskey-blabla",
+                    },
+                ],
+            },
+        })},
     },
 
 };
@@ -837,6 +845,12 @@ const apply = (config, keys=[]) => {
     config.rules              = rules;
     config["sub-rules"]       = subRules;
     config["proxy-groups"]    = [...prebuiltGroups, ...proxyGroups];
+
+    for (const key of keys) {
+        const unit = units[key];
+        if (unit.overrideLater)          unit.overrideLater(config);
+    };
+
 };
 
 /* ========== Entry Point ========== */
