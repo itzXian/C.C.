@@ -471,6 +471,7 @@ const units = {
         "rule-providers": {
             browser: CREATE_RULE_PROVIDER([
                 "PROCESS-NAME,net.quetta.browser",
+                "PROCESS-NAME,org.torproject.torbrowser",
             ]),
         },
         "rules": [
