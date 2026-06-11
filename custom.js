@@ -77,12 +77,11 @@ const dns = {
     "fake-ip-range":       "198.18.0.1/16",
     "fake-ip-filter-mode": "blacklist",
     "fake-ip-filter": [
-        "rule-set:local",
+        "rule-set:fakeIpFilter",
         "geosite:cn",
         "geosite:connectivity-check",
     ],
     "nameserver-policy": {
-        "rule-set:local":      "system",
         "geosite:private":     _directDns,
         "geosite:cn":          _directDns,
         "geosite:hoyoverse":   _directDns,
@@ -317,7 +316,23 @@ const units = {
     geo:                { override: (config) => Object.assign(config, geo) },
     externalController: { override: (config) => Object.assign(config, externalController) },
     hosts:              { override: (config) => config.hosts = hosts },
-    dns:                { override: (config) => config.dns = dns},
+    dns: {
+        "rule-providers": {
+            fakeIpFilter: CREATE_RULE_PROVIDER([
+                "+.m2m",              "injections.adguard.org", "local.adguard.org",
+                "+.bogon",            "+.lan",                  "+.local",
+                "+.internal",         "+.localdomain",          "home.arpa",
+                "127.atlas.skk.moe",  "dns.msftncsi.com",       "*.srv.nintendo.net",
+                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",
+                "*.xboxlive.com",     "*.turn.twilio.com",      "*.stun.twilio.com",
+                "stun.syncthing.net", "127.0.0.1.sslip.io",     "127.*.*.*.sslip.io",
+                "127-*-*-*.sslip.io", "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
+                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",
+                "*.127.*.*.*.nip.io",
+            ], { behavior: "domain" }),
+        },
+        override: (config) => config.dns = dns,
+    },
     adblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
     hoyo: {
         "rule-providers": {
@@ -717,22 +732,7 @@ const units = {
         ],
     },
     cn: {
-        "rule-providers": {
-            local: CREATE_RULE_PROVIDER([
-                "+.m2m",              "injections.adguard.org", "local.adguard.org",
-                "+.bogon",            "+.lan",                  "+.local",
-                "+.internal",         "+.localdomain",          "home.arpa",
-                "127.atlas.skk.moe",  "dns.msftncsi.com",       "*.srv.nintendo.net",
-                "stun.*",             "*.stun.playstation.net", "xbox.*.microsoft.com",
-                "*.xboxlive.com",     "*.turn.twilio.com",      "*.stun.twilio.com",
-                "stun.syncthing.net", "127.0.0.1.sslip.io",     "127.*.*.*.sslip.io",
-                "127-*-*-*.sslip.io", "*.127.*.*.*.sslip.io",   "*-127-*-*.nip.io",
-                "127-*-*-*.nip.io",   "*-127-*-*-*.sslip.io",   "127.*.*.*.nip.io",
-                "*.127.*.*.*.nip.io",
-            ], { behavior: "domain" }),
-        },
         "rules": [
-            "RULE-SET,      local,              CN",
             "GEOSITE,       private,            CN",
             "GEOSITE,       CN,                 CN",
             "GEOIP,         private,            CN",
