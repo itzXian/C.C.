@@ -495,7 +495,6 @@ const units = {
         "sub-rules": {
             sub_browser: [
                 "GEOSITE,       geolocation-!cn,    BROWSER",
-                "RULE-SET,      local,              CN",
                 "GEOSITE,       private,            CN",
                 "GEOSITE,       CN,                 CN",
                 "GEOIP,         private,            CN,              no-resolve",
@@ -523,7 +522,6 @@ const units = {
         "sub-rules": {
             sub_downloader: [
                 "GEOSITE,       geolocation-!cn,    DOWNLOADER",
-                "RULE-SET,      local,              CN",
                 "GEOSITE,       private,            CN",
                 "GEOSITE,       CN,                 CN",
                 "GEOIP,         private,            CN,              no-resolve",
