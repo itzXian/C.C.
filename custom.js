@@ -5,7 +5,7 @@
 
 /* ========== Base-Options Configuration ========== */
 
-const baseOptions = {
+const configBase = {
     "mixed-port": 7890,
     "allow-lan":  true,
     mode:         "rule",
@@ -27,7 +27,7 @@ const baseOptions = {
 };
 
 const _cdn = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
-const geo = {
+const configGeo = {
     "geox-url": {
         geoip:   `${_cdn}/geoip.dat`,
         geosite: `${_cdn}/geosite.dat`,
@@ -40,14 +40,14 @@ const geo = {
 
 const _port   = Math.floor(Math.random() * 9999) + 10000;
 const _secret = Math.random().toString(36).slice(2);
-const externalController = {
+const configExternalController = {
     "external-controller": `0.0.0.0:${_port}`,
     "secret":              _secret,
     "external-ui":         "ui",
     "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
 };
 
-const hosts = {
+const configHosts = {
     "dns.alidns.com":        ["223.5.5.5", "223.6.6.6", "2400:3200:baba::1", "2400:3200::1"],
     "127.0.0.1.sslip.io":    "127.0.0.1",
     "127.atlas.skk.moe":     "127.0.0.1",
@@ -68,7 +68,7 @@ const hosts = {
 const _directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
 const _proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
 const _adblockDns = ["dns.adguard-dns.com"];
-const dns = {
+const configDns = {
     enable:                true,
     "prefer-h3":           true,
     ipv6:                  false,
@@ -94,27 +94,27 @@ const dns = {
 };
 
 /* ========== Proxy Groups Configuration ========== */
-const _filter = {
-    HK:      "香港|HK|Hong|🇭🇰",
-    TW:      "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
-    SG:      "新加坡|狮城|SG|Singapore|🇸🇬",
-    JP:      "日本|JP|Japan|🇯🇵",
-    KR:      "韩国|韓|KR|Korea|🇰🇷",
-    AU:      "澳大利亚|澳|AU|Australia|🇦🇺",
-    US:      "美国|US|United States|America|🇺🇸",
-    UK:      "英国|UK|United Kingdom|🇬🇧",
-    FR:      "法国|FR|France|🇫🇷",
-    DE:      "德国|DE|Germany|🇩🇪",
-    EXCLUDE: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
-    ALL:     "",
+const Filter = {
+    hk:      "香港|HK|Hong|🇭🇰",
+    tw:      "台湾|TW|Taiwan|Wan|🇹🇼|🇨🇳",
+    sg:      "新加坡|狮城|SG|Singapore|🇸🇬",
+    jp:      "日本|JP|Japan|🇯🇵",
+    kr:      "韩国|韓|KR|Korea|🇰🇷",
+    au:      "澳大利亚|澳|AU|Australia|🇦🇺",
+    us:      "美国|US|United States|America|🇺🇸",
+    uk:      "英国|UK|United Kingdom|🇬🇧",
+    fr:      "法国|FR|France|🇫🇷",
+    de:      "德国|DE|Germany|🇩🇪",
+    exclude: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
+    all:     "",
 };
 
-const REGEX = (includeTerm, excludeTerm = _filter.EXCLUDE) =>
+const buildRegex = (includeTerm, excludeTerm = Filter.exclude) =>
     includeTerm
         ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
         : `^((?!.*${excludeTerm}).)*$`;
 
-const IS_NOT_EMPTY = (value) => {
+const isNotEmpty = (value) => {
     if (value == null)             return false;
     if (typeof value === "string") return value.trim() !== "";
     if (Array.isArray(value))      return value.length > 0;
@@ -122,12 +122,20 @@ const IS_NOT_EMPTY = (value) => {
     return true;
 };
 
-const DEEP_CLONE = (obj) =>
+const deepClone = (obj) =>
     typeof structuredClone === "function"
         ? structuredClone(obj)
         : JSON.parse(JSON.stringify(obj));
 
-const CREATE_PROXY_GROUP = (overrides) => ({
+/* ========== Icon Support ========== */
+const Icon = {
+    github:  (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`,
+    wiki:    (path) => `https://upload.wikimedia.org/wikipedia/${path}`,
+    gplay:   (hash) => `https://play-lh.googleusercontent.com/${hash}`,
+    favicon: (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`,
+};
+
+const buildGroup = (overrides) => ({
     name:              overrides.name, // keep the name first, for easier viewing
     hidden:            true,
     url:               "https://cp.cloudflare.com",
@@ -139,43 +147,37 @@ const CREATE_PROXY_GROUP = (overrides) => ({
     ...overrides,
 });
 
-const CREATE_EXIT_PROVIDER = (providers) =>
+const buildExitProvider = (providers) =>
     Object.fromEntries(
         Object.entries(providers).map(([key, value]) => {
-            const exitKey = `→${key}`;
-            return [exitKey, {
+            const exitProviderKey = `→${key}`;
+            return [exitProviderKey, {
                 ...value,
                 override: {
                     "dialer-proxy":      "RELAY",
-                    "additional-prefix": exitKey,
+                    "additional-prefix": exitProviderKey,
                 },
             }];
         })
     );
 
-/* ========== Icon Support ========== */
-const GITHUB  = (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`;
-const WIKI    = (path) => `https://upload.wikimedia.org/wikipedia/${path}`;
-const GPLAY   = (id)   => `https://play-lh.googleusercontent.com/${id}`;
-const FAVICON = (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`;
-
-const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix = "") => {
+const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     const providerKeys = Object.keys(providers);
-    const hasProviders = IS_NOT_EMPTY(providers);
-    const hasProxies   = IS_NOT_EMPTY(proxies);
+    const hasProviders = isNotEmpty(providers);
+    const hasProxies   = isNotEmpty(proxies);
 
     let proxyGroups = [
-        { name: "AUTO HKSG", type: "url-test",     filter: REGEX(["HK", "SG"].map((e) => _filter[e]).join("|")) },
-        { name: "AUTO HK",   type: "url-test",     filter: REGEX(_filter.HK) },
-        { name: "AUTO JP",   type: "url-test",     filter: REGEX(_filter.JP) },
-        { name: "AUTO SG",   type: "url-test",     filter: REGEX(_filter.SG) },
-        { name: "AUTO AU",   type: "url-test",     filter: REGEX(_filter.AU) },
-        { name: "AUTO US",   type: "url-test",     filter: REGEX(_filter.US) },
-        { name: "AUTO !JP",  type: "url-test",     filter: REGEX(_filter.ALL, `${_filter.EXCLUDE}|${_filter.JP}`) },
-        { name: "AUTO ALL",  type: "url-test",     filter: REGEX(_filter.ALL) },
-        { name: "LB HK",     type: "load-balance", filter: REGEX(_filter.HK), strategy: "round-robin" },
-        { name: "LB SG",     type: "load-balance", filter: REGEX(_filter.SG), strategy: "round-robin" },
-    ].map((e) => CREATE_PROXY_GROUP({
+        { name: "AUTO HKSG", type: "url-test",     filter: buildRegex(["hk", "sg"].map((e) => Filter[e]).join("|")) },
+        { name: "AUTO HK",   type: "url-test",     filter: buildRegex(Filter.hk) },
+        { name: "AUTO JP",   type: "url-test",     filter: buildRegex(Filter.jp) },
+        { name: "AUTO SG",   type: "url-test",     filter: buildRegex(Filter.sg) },
+        { name: "AUTO AU",   type: "url-test",     filter: buildRegex(Filter.au) },
+        { name: "AUTO US",   type: "url-test",     filter: buildRegex(Filter.us) },
+        { name: "AUTO !JP",  type: "url-test",     filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+        { name: "AUTO ALL",  type: "url-test",     filter: buildRegex(Filter.all) },
+        { name: "LB HK",     type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin" },
+        { name: "LB SG",     type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin" },
+    ].map((e) => buildGroup({
         ...e,
         name:    `${prefix}${e.name}`,
         proxies: hasProxies
@@ -184,31 +186,31 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         use:     providerKeys,
     }));
     if (!hasProviders)
-        proxyGroups = proxyGroups.filter((g) => IS_NOT_EMPTY(g.proxies));
+        proxyGroups = proxyGroups.filter((g) => isNotEmpty(g.proxies));
 
     const relaySelectorGroup = [{
         name:    `${prefix}RELAY`,
         type:    "select",
-        filter:  REGEX(_filter.ALL),
+        filter:  buildRegex(Filter.all),
         proxies: proxyGroups.map((g) => g.name),
         use:     providerKeys,
         hidden:  false,
-        icon:    prefix ? "" : WIKI("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
+        icon:    prefix ? "" : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
     const exitProxies      = hasProviders
         ? []
-        : DEEP_CLONE(proxies);
-    const hasExitProxies   = IS_NOT_EMPTY(exitProxies);
+        : deepClone(proxies);
+    const hasExitProxies   = isNotEmpty(exitProxies);
     const exitProviders    = hasProviders
-        ? CREATE_EXIT_PROVIDER(providers)
-        : CREATE_EXIT_PROVIDER({ "provider-exit": { type: "inline", payload: exitProxies } });
+        ? buildExitProvider(providers)
+        : buildExitProvider({ "provider-exit": { type: "inline", payload: exitProxies } });
     const exitProviderKeys = Object.keys(exitProviders);
 
     let exitGroups = [
-        { name: "AUTO JP",  type: "url-test", filter: REGEX(_filter.JP) },
-        { name: "AUTO !JP", type: "url-test", filter: REGEX(_filter.ALL, `${_filter.EXCLUDE}|${_filter.JP}`) },
-    ].map((e) => CREATE_PROXY_GROUP({
+        { name: "AUTO JP",  type: "url-test", filter: buildRegex(Filter.jp) },
+        { name: "AUTO !JP", type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+    ].map((e) => buildGroup({
         ...e,
         name:    `→${prefix}${e.name}`,
         proxies: hasExitProxies
@@ -217,32 +219,32 @@ const CREATE_PROXY_GROUPS_WITH_PROVIDER = (proxies = [], providers = {}, prefix 
         use:     exitProviderKeys,
     }));
     if (hasExitProxies)
-        exitGroups = exitGroups.filter((g) => IS_NOT_EMPTY(g.proxies));
+        exitGroups = exitGroups.filter((g) => isNotEmpty(g.proxies));
 
     const exitSelectorGroup = [{
         name:    `${prefix}EXIT`,
         type:    "select",
-        filter:  REGEX(_filter.ALL),
+        filter:  buildRegex(Filter.all),
         proxies: exitGroups.map((g) => g.name),
         use:     exitProviderKeys,
         hidden:  false,
-        icon:    prefix ? "" : WIKI("commons/f/f2/Send_icon.svg"),
+        icon:    prefix ? "" : Icon.wiki("commons/f/f2/Send_icon.svg"),
     }];
 
     return { proxyGroups, relaySelectorGroup, exitGroups, exitSelectorGroup, exitProviders };
 };
 
-const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
+const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     let { proxyGroups, relaySelectorGroup, exitGroups, exitSelectorGroup, exitProviders } =
-        CREATE_PROXY_GROUPS_WITH_PROVIDER(proxies, providers);
+        buildGroupsWithProvider(proxies, providers);
 
-    const hasProviders = IS_NOT_EMPTY(providers);
+    const hasProviders = isNotEmpty(providers);
     if (hasProviders) {
         const tempSelector     = [];
         const tempExitSelector = [];
 
         for (const [key, value] of Object.entries(providers)) {
-            const pr = CREATE_PROXY_GROUPS_WITH_PROVIDER("", { [key]: value }, key);
+            const pr = buildGroupsWithProvider("", { [key]: value }, key);
 
             proxyGroups.push(...pr.proxyGroups);
             relaySelectorGroup.push(...pr.relaySelectorGroup);
@@ -278,9 +280,9 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
             name: "SELECTOR",
             proxies: [...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
             "include-all": true,
-            icon: WIKI("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
+            icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
-    ].map((e) => CREATE_PROXY_GROUP({ ...e, type: "select", hidden: false }));
+    ].map((e) => buildGroup({ ...e, type: "select", hidden: false }));
     const prebuiltGroups = [
         ...exitSelectorGroup,
         ...relaySelectorGroup,
@@ -298,21 +300,22 @@ const CREATE_PROXIES_GROUPS_PROVIDERS = (proxies = [], providers = {}) => {
 //     https://wiki.metacubex.one/config/rule-providers/
 //     https://wiki.metacubex.one/config/rule-providers/content/
 //     https://wiki.metacubex.one/handbook/syntax/#_8
-const CREATE_RULE_PROVIDER = (rules = [], options = {}) => ({
+const buildRuleSet = (rules = [], options = {}) => ({
     type:     "inline",
     behavior: "classical",
     payload:  rules,
     ...options,
 });
 
-const units = {
-    baseOptions:        { override: (config) => Object.assign(config, baseOptions) },
-    geo:                { override: (config) => Object.assign(config, geo) },
-    externalController: { override: (config) => Object.assign(config, externalController) },
-    hosts:              { override: (config) => config.hosts = hosts },
-    dns: {
+const Units = {
+    configBase:               { override: (config) => Object.assign(config, configBase) },
+    configGeo:                { override: (config) => Object.assign(config, configGeo) },
+    configExternalController: { override: (config) => Object.assign(config, configExternalController) },
+    configHosts:              { override: (config) => config.hosts = configHosts },
+    configAdblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
+    configDns: {
         "rule-providers": {
-            fakeIpFilter: CREATE_RULE_PROVIDER([
+            fakeIpFilter: buildRuleSet([
                 "+.m2m",              "injections.adguard.org", "local.adguard.org",
                 "+.bogon",            "+.lan",                  "+.local",
                 "+.internal",         "+.localdomain",          "home.arpa",
@@ -325,18 +328,17 @@ const units = {
                 "*.127.*.*.*.nip.io",
             ], { behavior: "domain" }),
         },
-        override: (config) => config.dns = dns,
+        override: (config) => config.dns = configDns,
     },
-    adblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
     hoyo: {
         "rule-providers": {
-            hoyo_gi_cn: CREATE_RULE_PROVIDER([
+            hoyo_gi_cn: buildRuleSet([
                 "DOMAIN,dispatchosglobal.yuanshen.com",
                 "DOMAIN,oseurodispatch.yuanshen.com",
                 "DOMAIN,osusadispatch.yuanshen.com",
                 "DOMAIN,osuspider.yuanshen.com",
             ]),
-            hoyo_etc: CREATE_RULE_PROVIDER([
+            hoyo_etc: buildRuleSet([
                 "DOMAIN,minor-api-os.hoyoverse.com",
                 //"DOMAIN,asia-ugc-api.hoyoverse.com",
                 //"DOMAIN,asia-ugc-upload.hoyoverse.com",
@@ -344,21 +346,21 @@ const units = {
                 "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",      // GI UGC
                 "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
             ]),
-            hoyo_proxy: CREATE_RULE_PROVIDER([
+            hoyo_proxy: buildRuleSet([
                 "DOMAIN-SUFFIX,hoyoverse.com",
                 "DOMAIN-SUFFIX,hoyolab.com",
                 "DOMAIN,autopatchhk.yuanshen.com",     // GI
                 "DOMAIN,osasiadispatch.yuanshen.com",  // GI
                 "AND,((DST-PORT,8999),(NETWORK,tcp))", // GI
             ]),
-            hoyo_direct: CREATE_RULE_PROVIDER([
+            hoyo_direct: buildRuleSet([
                 "DOMAIN-SUFFIX,yuanshen.com",
                 "DOMAIN-SUFFIX,mihoyo.com",
                 "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
                 "AND,((DST-PORT,23301/23801),(NETWORK,udp))", // HSR
                 "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
             ]),
-            hoyo_final: CREATE_RULE_PROVIDER([
+            hoyo_final: buildRuleSet([
                 "PROCESS-NAME-REGEX,.*GenshinImpact.*",         // GI
             ]),
         },
@@ -373,19 +375,19 @@ const units = {
             {
                 name: "HOYO_PROXY",
                 url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
-                icon: FAVICON("https://hoyoverse.com"),
+                icon: Icon.favicon("https://hoyoverse.com"),
             },
             {
                 name: "HOYO_DIRECT",
                 proxies: ["DIRECT", "HOYO_PROXY"],
                 url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
-                icon: FAVICON("https://hoyoverse.com"),
+                icon: Icon.favicon("https://hoyoverse.com"),
             },
          ],
     },
     sbcz: {
         "rule-providers": {
-            sbcz: CREATE_RULE_PROVIDER([
+            sbcz: buildRuleSet([
                 "DOMAIN-SUFFIX,xoyo.games",
                 "DOMAIN-SUFFIX,amazingseasun.com",
                 "DOMAIN-SUFFIX,amazingseasuncdn.com",
@@ -400,14 +402,14 @@ const units = {
             {
                 name: "SBCZ",
                 proxies: "directFirst",
-               icon: GPLAY("rzvj2FaKgGNlLOjMPl0DVXX5uL9ash2u_2JZu_eAmYcleMrw4Hgecla1dF8XRw5rgfY"),
+               icon: Icon.gplay("rzvj2FaKgGNlLOjMPl0DVXX5uL9ash2u_2JZu_eAmYcleMrw4Hgecla1dF8XRw5rgfY"),
             },
         ],
         */
     },
     ad: {
         "rule-providers": {
-            miui_ad: CREATE_RULE_PROVIDER([
+            miui_ad: buildRuleSet([
                 // Avlyun / sec.miui CSE
                 "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
                 "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
@@ -466,19 +468,19 @@ const units = {
             {
                 name: "MIUI_AD",
                 proxies: "rejectFirst",
-                icon: FAVICON("https://www.mi.com/"),
+                icon: Icon.favicon("https://www.mi.com/"),
             },
             {
                 name: "AD",
                 proxies: "rejectFirst",
-                icon: WIKI("commons/1/1c/Codex_icon_Block_red.svg"),
+                icon: Icon.wiki("commons/1/1c/Codex_icon_Block_red.svg"),
             },
 
         ],
     },
     browser: {
         "rule-providers": {
-            browser: CREATE_RULE_PROVIDER([
+            browser: buildRuleSet([
                 "PROCESS-NAME,net.quetta.browser",
                 "PROCESS-NAME,org.torproject.torbrowser",
             ]),
@@ -500,13 +502,13 @@ const units = {
             {
                 name: "BROWSER",
                 "include-all": true,
-                icon: WIKI("commons/0/08/Internet-icon.svg"),
+                icon: Icon.wiki("commons/0/08/Internet-icon.svg"),
             },
         ],
     },
     downloader: {
         "rule-providers": {
-            downloader: CREATE_RULE_PROVIDER([
+            downloader: buildRuleSet([
                 "PROCESS-NAME,idm.internet.download.manager",
             ]),
         },
@@ -527,7 +529,7 @@ const units = {
             {
                 name: "DOWNLOADER",
                 "include-all": true,
-                icon: WIKI("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
+                icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
             },
         ],
     },
@@ -539,7 +541,7 @@ const units = {
             {
                 name: "EHENTAI",
                 "include-all": true,
-                icon: WIKI("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
+                icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
             },
         ],
     },
@@ -551,7 +553,7 @@ const units = {
             {
                 name: "GITHUB",
                 "include-all": true,
-                icon: WIKI("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
+                icon: Icon.wiki("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
             },
         ],
     },
@@ -562,7 +564,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "MICROSOFT",
-                icon: WIKI("commons/2/25/Microsoft_icon.svg"),
+                icon: Icon.wiki("commons/2/25/Microsoft_icon.svg"),
             },
         ],
     },
@@ -575,7 +577,7 @@ const units = {
            {
                 name: "STEAM_CN",
                 proxies: "directFirst",
-                icon: WIKI("commons/8/83/Steam_icon_logo.svg"),
+                icon: Icon.wiki("commons/8/83/Steam_icon_logo.svg"),
             },
         ],
     },
@@ -586,7 +588,7 @@ const units = {
         "proxy-groups": [
              {
                 name: "STEAM",
-                icon: WIKI("commons/8/83/Steam_icon_logo.svg"),
+                icon: Icon.wiki("commons/8/83/Steam_icon_logo.svg"),
             },
         ],
     },
@@ -597,7 +599,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "PIXIV",
-                icon: GPLAY("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
+                icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
             },
         ],
     },
@@ -608,7 +610,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "AI",
-                icon: GPLAY("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
+                icon: Icon.gplay("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
             },
         ],
     },
@@ -619,7 +621,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "YOUTUBE",
-                icon: FAVICON("https://youtube.com"),
+                icon: Icon.favicon("https://youtube.com"),
             },
        ],
     },
@@ -631,7 +633,7 @@ const units = {
             {
                 name: "GOOGLE_FCM",
                 proxies: "directFirst",
-                icon: FAVICON("https://firebase.google.com"),
+                icon: Icon.favicon("https://firebase.google.com"),
             },
         ],
     },
@@ -643,7 +645,7 @@ const units = {
         "proxy-groups": [
              {
                 name: "GOOGLE",
-                icon: WIKI("commons/c/c1/Google_%22G%22_logo.svg"),
+                icon: Icon.wiki("commons/c/c1/Google_%22G%22_logo.svg"),
             },
         ],
     },
@@ -655,7 +657,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "TWITTER",
-                icon: WIKI("commons/6/6f/Logo_of_Twitter.svg"),
+                icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
             },
         ],
     },
@@ -667,7 +669,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "TELEGRAM",
-                icon: WIKI("commons/8/82/Telegram_logo.svg"),
+                icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
             },
         ],
     },
@@ -678,7 +680,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "DISCORD",
-                icon: WIKI("fr/4/4f/Discord_Logo_sans_texte.svg"),
+                icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
             },
         ],
     },
@@ -690,7 +692,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "APPLE",
-                icon: WIKI("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
+                icon: Icon.wiki("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
             },
         ],
     },
@@ -702,7 +704,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "NON_JP",
-                icon: WIKI("commons/4/45/Wikimania2019_flower_icon.svg"),
+                icon: Icon.wiki("commons/4/45/Wikimania2019_flower_icon.svg"),
             },
         ],
     },
@@ -714,7 +716,7 @@ const units = {
         "proxy-groups": [
             {
                 name: "JP",
-                icon: WIKI("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
+                icon: Icon.wiki("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
             },
         ],
     },
@@ -735,7 +737,7 @@ const units = {
                 name: "CN",
                 proxies: "directFirst",
                 url: "http://connect.rom.miui.com/generate_204",
-                icon: WIKI("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
+                icon: Icon.wiki("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
             },
         ],
     },
@@ -747,7 +749,7 @@ const units = {
             {
                 name: "FINAL",
                 "include-all": true,
-                icon: GITHUB("final"),
+                icon: Icon.github("final"),
             },
         ],
     },
@@ -759,13 +761,13 @@ const units = {
             {
                 name: "TIKTOK",
                 "include-all": true,
-                icon: GITHUB("tiktok"),
+                icon: Icon.github("tiktok"),
             },
         ],
     },
     tailscale: {
         "rule-providers": {
-            tailscale: CREATE_RULE_PROVIDER([
+            tailscale: buildRuleSet([
                 "DOMAIN-REGEX,.*\\.tail[\\w]*\\.ts\\.net",
                 "IP-CIDR,100.0.0.0/8",
             ]),
@@ -779,7 +781,7 @@ const units = {
                 url: "https://hello.ts.net",
                 proxies: "empty",
                 use: ["tailscale"],
-                icon: FAVICON("https://tailscale.com"),
+                icon: Icon.favicon("https://tailscale.com"),
             },
         ],
         overrideLater: (config) => { Object.assign(config["proxy-providers"], {
@@ -807,8 +809,8 @@ const units = {
 
 };
 
-const apply = (config, keys = []) => {
-    const { prebuiltProxies, prebuiltGroups, prebuiltProviders } = CREATE_PROXIES_GROUPS_PROVIDERS(config.proxies, config["proxy-providers"]);
+const applyConfig = (config, keys = []) => {
+    const { prebuiltProxies, prebuiltGroups, prebuiltProviders } = buildProxiesGroupsProviders(config.proxies, config["proxy-providers"]);
 
     const ruleProviders  = {};
     const rules          = [];
@@ -817,7 +819,7 @@ const apply = (config, keys = []) => {
     const laterCallbacks = [];
 
     for (const key of keys) {
-        const unit = units[key];
+        const unit = Units[key];
         if (unit["rule-providers"]) Object.assign(ruleProviders, unit["rule-providers"]);
         if (unit.rules)             rules.push(...unit.rules);
         if (unit["sub-rules"])      Object.assign(subRules, unit["sub-rules"]);
@@ -827,8 +829,8 @@ const apply = (config, keys = []) => {
     };
 
     proxyGroups = proxyGroups.map((g) => {
-        const base = CREATE_PROXY_GROUP({ ...g, type: "select", hidden: false });
-        if (!IS_NOT_EMPTY(base.proxies)) {
+        const base = buildGroup({ ...g, type: "select", hidden: false });
+        if (!isNotEmpty(base.proxies)) {
             base.proxies = prebuiltProxies.selectFirst;
         } else if (typeof base.proxies === "string") {
             base.proxies = prebuiltProxies[base.proxies];
@@ -849,13 +851,13 @@ const apply = (config, keys = []) => {
 
 /* ========== Entry Point ========== */
 const main = (config) => {
-    apply(config, [
-        "baseOptions",
-        "geo",
-        "externalController",
-        "hosts",
-        "dns",
-        //"adblockDns",
+    applyConfig(config, [
+        "configBase",
+        "configGeo",
+        "configExternalController",
+        "configHosts",
+        "configDns",
+        //"configAdblockDns",
         //"tailscale",
         "hoyo",
         "sbcz",
@@ -887,4 +889,4 @@ const main = (config) => {
 };
 
 const IS_NODE = typeof process !== "undefined" && !!process.versions?.node;
-if (IS_NODE) module.exports = { main, apply, units };
+if (IS_NODE) module.exports = { main, applyConfig, Units };
