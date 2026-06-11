@@ -109,16 +109,10 @@ const _filter = {
     ALL:     "",
 };
 
-const _regexCache = new Map();
-const REGEX = (includeTerm, excludeTerm = _filter.EXCLUDE) => {
-    const key = `${includeTerm}\0${excludeTerm}`;
-    if (_regexCache.has(key)) return _regexCache.get(key);
-    const result = includeTerm
+const REGEX = (includeTerm, excludeTerm = _filter.EXCLUDE) =>
+    includeTerm
         ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
         : `^((?!.*${excludeTerm}).)*$`;
-    _regexCache.set(key, result);
-    return result;
-};
 
 const IS_NOT_EMPTY = (value) => {
     if (value == null)             return false;
