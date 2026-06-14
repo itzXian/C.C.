@@ -77,13 +77,12 @@ const configDns = {
     "fake-ip-range":       "198.18.0.1/16",
     "fake-ip-filter-mode": "rule",
     "fake-ip-filter": [
-        "RULE-SET,tailscale,fake-ip",
-        "RULE-SET,fakeIpFilter,real-ip",
-        "GEOSITE,private,real-ip",
-        "GEOSITE,cn,real-ip",
-        "GEOSITE,connectivity-check,real-ip",
-        "GEOSITE,category-ntp,real-ip",
-        "MATCH,fake-ip",
+        "RULE-SET, fakeIpFilter,       real-ip",
+        "GEOSITE,  private,            real-ip",
+        "GEOSITE,  cn,                 real-ip",
+        "GEOSITE,  connectivity-check, real-ip",
+        "GEOSITE,  category-ntp,       real-ip",
+        "MATCH,                        fake-ip",
     ],
     "nameserver-policy": {
         "GEOSITE:private":     _directDns,
@@ -505,7 +504,7 @@ const Units = {
                 "GEOSITE,       CN,                 CN",
                 "GEOIP,         private,            CN,              no-resolve",
                 "GEOIP,         CN,                 CN,              no-resolve",
-                "MATCH,BROWSER",
+                "MATCH,                             BROWSER",
             ],
         },
         "proxy-groups": [
@@ -532,7 +531,7 @@ const Units = {
                 "GEOSITE,       CN,                 CN",
                 "GEOIP,         private,            CN,              no-resolve",
                 "GEOIP,         CN,                 CN,              no-resolve",
-                "MATCH,DOWNLOADER",
+                "MATCH,                             DOWNLOADER",
             ],
         },
         "proxy-groups": [
@@ -753,7 +752,7 @@ const Units = {
     },
     final: {
         "rules": [
-            "MATCH,FINAL",
+            "MATCH,                             FINAL",
         ],
         "proxy-groups": [
             {
@@ -779,7 +778,13 @@ const Units = {
     tailscale: {
         "rule-providers": {
             tailscale: buildRuleSet([
-                "DOMAIN-REGEX,.*\\.tail[\\w]*\\.ts\\.net",
+                "*.ts.net",
+                "*.*.ts.net",
+                "100.*.*.*",
+            ], { behavior: "domain" }),
+            tailscale_classical: buildRuleSet([
+                "DOMAIN-REGEX,.*\\.ts\\.net",
+                "DOMAIN-REGEX,.*\\..*\\.ts\\.net",
                 "IP-CIDR,100.0.0.0/8",
             ]),
         },
@@ -795,7 +800,20 @@ const Units = {
                 icon: Icon.favicon("https://tailscale.com"),
             },
         ],
-        overrideLater: (config) => { Object.assign(config["proxy-providers"], {
+        override: (config) => {
+            try {
+                const fakeIpFilterMode = config["dns"]["fake-ip-filter-mode"];
+                const fakeIpFilter     = config["dns"]["fake-ip-filter"];
+                if (fakeIpFilterMode === "rule") {
+                    fakeIpFilter.unshift("RULE-SET,tailscale,fake-ip");
+                } else if (fakeIpFilterMode === "blacklist") {
+                    fakeIpFilter.unshift("RULE-SET,tailscale");
+                };
+            } catch (error) {
+                // if config["dns"]["fake-ip-mode"] is "whitelist" or undefined, do nothing.
+            };
+        },
+        overrideLater: (config) => Object.assign(config["proxy-providers"], {
             tailscale: {
                 type: "inline",
                 "health-check": {
@@ -815,7 +833,7 @@ const Units = {
                     },
                 ],
             },
-        })},
+        }),
     },
 
 };
