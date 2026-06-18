@@ -1,0 +1,22 @@
+provider-base-config: &provider
+  type: http
+  proxy: DIRECT
+  interval: 86400
+  health-check:
+    enable: true
+    url: https://cp.cloudflare.com
+    interval: 1800
+    timeout: 3000
+    expected-status: 200/204/302
+
+proxy-providers:
+  🟥:
+    <<: *provider
+    url: "https://example.com"
+    override:
+      additional-prefix: "🟥 "
+  🟢:
+    <<: *provider
+    url: "https://example.com"
+    override:
+      additional-prefix: "🟢 "
