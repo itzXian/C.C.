@@ -117,7 +117,7 @@ const buildRegex = (includeTerm, excludeTerm = Filter.exclude) =>
         ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
         : `^((?!.*${excludeTerm}).)*$`;
 
-const isNotEmpty = (value) => {
+const hasValue = (value) => {
     if (value == null)             return false;
     if (typeof value === "string") return value.trim() !== "";
     if (Array.isArray(value))      return value.length > 0;
@@ -179,11 +179,10 @@ const buildExitProvider = (providers) =>
 
 const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     const providerKeys = Object.keys(providers);
-    const hasProviders = isNotEmpty(providers);
-    const hasProxies   = isNotEmpty(proxies);
+    const hasProviders = hasValue(providers);
 
     let relayGroups = [
-        { name: "AUTO HKSG", type: "url-test",     filter: buildRegex(["hk", "sg"].map((e) => Filter[e]).join("|")) },
+        { name: "AUTO HKSG", type: "url-test",     filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
         { name: "AUTO HK",   type: "url-test",     filter: buildRegex(Filter.hk) },
         { name: "AUTO JP",   type: "url-test",     filter: buildRegex(Filter.jp) },
         { name: "AUTO SG",   type: "url-test",     filter: buildRegex(Filter.sg) },
@@ -193,29 +192,28 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
         { name: "AUTO ALL",  type: "url-test",     filter: buildRegex(Filter.all) },
         { name: "LB HK",     type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin" },
         { name: "LB SG",     type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin" },
-    ].map((e) => buildGroup({
+    ].map(e => buildGroup({
         ...e,
         name:    `${prefix}${e.name}`,
-        proxies: hasProxies
-            ? proxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter))
+        proxies: hasValue(proxies)
+            ? proxies.map(p => p.name).filter(n => n.match(e.filter))
             : [],
         use:     providerKeys,
     }));
     if (!hasProviders)
-        relayGroups = relayGroups.filter((g) => isNotEmpty(g.proxies));
+        relayGroups = relayGroups.filter(g => hasValue(g.proxies));
 
     const relaySelectorGroup = [{
         name:    `${prefix}RELAY`,
         type:    "select",
         filter:  buildRegex(Filter.all),
-        proxies: relayGroups.map((g) => g.name),
+        proxies: relayGroups.map(g => g.name),
         use:     providerKeys,
         hidden:  false,
         icon:    prefix ? "" : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
-    const exitProxies      = hasProviders ? [] : deepClone(proxies);
-    const hasExitProxies   = isNotEmpty(exitProxies);
+    const exitProxies      = hasValue(proxies) ? deepClone(proxies) : [];
     const exitProviders    = hasProviders
         ? buildExitProvider(providers)
         : buildExitProvider({ "provider-exit": { type: "inline", payload: exitProxies } });
@@ -224,20 +222,22 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     let exitGroups = [
         { name: "AUTO JP",  type: "url-test", filter: buildRegex(Filter.jp) },
         { name: "AUTO !JP", type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
-    ].map((e) => buildGroup({
+    ].map(e => buildGroup({
         ...e,
         name:    `→${prefix}${e.name}`,
-        proxies: hasExitProxies ? exitProxies.map((proxy) => proxy.name).filter((name) => name.match(e.filter)) : [],
+        proxies: hasValue(exitProxies)
+            ? exitProxies.map(p => p.name).filter(n => n.match(e.filter))
+            : [],
         use:     exitProviderKeys,
     }));
-    if (hasExitProxies)
-        exitGroups = exitGroups.filter((g) => isNotEmpty(g.proxies));
+    if (!hasProviders)
+        exitGroups = exitGroups.filter(g => hasValue(g.proxies));
 
     const exitSelectorGroup = [{
         name:    `${prefix}EXIT`,
         type:    "select",
         filter:  buildRegex(Filter.all),
-        proxies: exitGroups.map((g) => g.name),
+        proxies: exitGroups.map(g => g.name),
         use:     exitProviderKeys,
         hidden:  false,
         icon:    prefix ? "" : Icon.wiki("commons/f/f2/Send_icon.svg"),
@@ -249,8 +249,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
 const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const base = buildGroupsWithProvider(proxies, providers);
 
-    const hasProviders = isNotEmpty(providers);
-    if (hasProviders) {
+    if (hasValue(providers)) {
         const tempRelaySelector = [];
         const tempExitSelector  = [];
         for (const [key, value] of Object.entries(providers)) {
@@ -269,7 +268,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         ...base.relaySelectorGroup,
         ...base.exitGroups,
         ...base.relayGroups,
-    ].map((g) => g.name);
+    ].map(g => g.name);
     const prebuiltProxies = {
         selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
         rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
@@ -283,7 +282,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             "include-all": true,
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
-    ].map((e) => buildGroup({ ...e, type: "select", hidden: false }));
+    ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
     const prebuiltGroups = [
         ...base.exitSelectorGroup,
         ...base.relaySelectorGroup,
@@ -857,9 +856,9 @@ const applyConfig = (config, keys = []) => {
     const base = buildProxiesGroupsProviders(config.proxies, config["proxy-providers"]);
 
     units["proxy-providers"] = base.prebuiltProviders;
-    units["proxy-groups"] = units["proxy-groups"].map((g) => {
+    units["proxy-groups"] = units["proxy-groups"].map(g => {
         const group = buildGroup({ ...g, type: "select", hidden: false });
-        if (!isNotEmpty(group.proxies)) {
+        if (!hasValue(group.proxies)) {
             group.proxies = base.prebuiltProxies.selectFirst;
         } else if (typeof group.proxies === "string") {
             group.proxies = base.prebuiltProxies[group.proxies];
