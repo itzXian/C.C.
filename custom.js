@@ -96,6 +96,8 @@ const configDns = {
     "proxy-server-nameserver": _directDns,
 };
 
+const configExitProvider = {};
+
 /* ========== Proxy Groups Configuration ========== */
 const Filter = {
     hk:      "香港|HK|Hong|🇭🇰",
@@ -263,12 +265,17 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         base.relaySelectorGroup[0].proxies.unshift(...tempRelaySelector);
     };
 
-    const proxyGroupNames = [
-        ...base.exitSelectorGroup,
-        ...base.relaySelectorGroup,
-        ...base.exitGroups,
-        ...base.relayGroups,
-    ].map(g => g.name);
+    const proxyGroupNames = configExitProvider?.enable
+        ? [
+            ...base.exitSelectorGroup,
+            ...base.relaySelectorGroup,
+            ...base.exitGroups,
+            ...base.relayGroups,
+        ].map(g => g.name)
+        : [
+            ...base.relaySelectorGroup,
+            ...base.relayGroups,
+        ].map(g => g.name);
     const prebuiltProxies = {
         selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
         rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
@@ -283,14 +290,22 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
-    const prebuiltGroups = [
-        ...base.exitSelectorGroup,
-        ...base.relaySelectorGroup,
-        ...base.exitGroups,
-        ...base.relayGroups,
-        ...selectorGroup,
-    ];
-    const prebuiltProviders = Object.assign({}, providers, base.exitProviders);
+    const prebuiltGroups = configExitProvider?.enable
+        ? [
+            ...base.exitSelectorGroup,
+            ...base.relaySelectorGroup,
+            ...base.exitGroups,
+            ...base.relayGroups,
+            ...selectorGroup,
+        ]
+        : [
+            ...base.relaySelectorGroup,
+            ...base.relayGroups,
+            ...selectorGroup,
+        ];
+    const prebuiltProviders = configExitProvider?.enable
+        ? Object.assign({}, providers, base.exitProviders)
+        : Object.assign({}, providers);
 
     return { prebuiltProxies, prebuiltGroups, prebuiltProviders };
 };
@@ -313,6 +328,7 @@ const Units = {
     configExternalController: { override: (config) => Object.assign(config, configExternalController) },
     configHosts:              { override: (config) => Object.assign(config, { hosts: configHosts }) },
     configAdblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
+    configExitProvider:       { override: () => configExitProvider.enable = true },
     configDns: {
         "rule-providers": {
             fakeIpFilter: buildRuleSet([
