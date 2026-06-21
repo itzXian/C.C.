@@ -265,23 +265,15 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         base.relaySelectorGroup[0].proxies.unshift(...tempRelaySelector);
     };
 
-    const proxyGroupNames = configExitProvider?.enable
-        ? [
-            ...base.exitSelectorGroup,
-            ...base.relaySelectorGroup,
-            ...base.exitGroups,
-            ...base.relayGroups,
-        ].map(g => g.name)
-        : [
-            ...base.relaySelectorGroup,
-            ...base.relayGroups,
-        ].map(g => g.name);
+    const orderedGroups = configExitProvider?.enable
+        ? [...base.exitSelectorGroup, ...base.relaySelectorGroup, ...base.exitGroups, ...base.relayGroups]
+        : [...base.relaySelectorGroup, ...base.relayGroups];
+    const proxyGroupNames = orderedGroups.map(g => g.name);
     const prebuiltProxies = {
         selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
         rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
         directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
     };
-
     const selectorGroup = [
         {
             name: "SELECTOR",
@@ -290,19 +282,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
-    const prebuiltGroups = configExitProvider?.enable
-        ? [
-            ...base.exitSelectorGroup,
-            ...base.relaySelectorGroup,
-            ...base.exitGroups,
-            ...base.relayGroups,
-            ...selectorGroup,
-        ]
-        : [
-            ...base.relaySelectorGroup,
-            ...base.relayGroups,
-            ...selectorGroup,
-        ];
+    const prebuiltGroups   = [...orderedGroups, ...selectorGroup];
     const prebuiltProviders = configExitProvider?.enable
         ? Object.assign({}, providers, base.exitProviders)
         : Object.assign({}, providers);
@@ -321,6 +301,14 @@ const buildRuleSet = (rules = [], options = {}) => ({
     payload:  rules,
     ...options,
 });
+const buildCommonSubRules = (target) => [
+    `GEOSITE,       geolocation-!cn,    ${target}`,
+    "GEOSITE,       private,            CN",
+    "GEOSITE,       CN,                 CN",
+    "GEOIP,         private,            CN,              no-resolve",
+    "GEOIP,         CN,                 CN,              no-resolve",
+    `MATCH,                             ${target}`,
+];
 
 const Units = {
     configBase:               { override: (config) => Object.assign(config, configBase) },
@@ -511,14 +499,7 @@ const Units = {
             "SUB-RULE,(RULE-SET,browser),sub_browser",
         ],
         "sub-rules": {
-            sub_browser: [
-                "GEOSITE,       geolocation-!cn,    BROWSER",
-                "GEOSITE,       private,            CN",
-                "GEOSITE,       CN,                 CN",
-                "GEOIP,         private,            CN,              no-resolve",
-                "GEOIP,         CN,                 CN,              no-resolve",
-                "MATCH,                             BROWSER",
-            ],
+            sub_browser: buildCommonSubRules("BROWSER"),
         },
         "proxy-groups": [
             {
@@ -538,14 +519,7 @@ const Units = {
             "SUB-RULE,(RULE-SET,downloader),sub_downloader",
         ],
         "sub-rules": {
-            sub_downloader: [
-                "GEOSITE,       geolocation-!cn,    DOWNLOADER",
-                "GEOSITE,       private,            CN",
-                "GEOSITE,       CN,                 CN",
-                "GEOIP,         private,            CN,              no-resolve",
-                "GEOIP,         CN,                 CN,              no-resolve",
-                "MATCH,                             DOWNLOADER",
-            ],
+            sub_downloader: buildCommonSubRules("DOWNLOADER"),
         },
         "proxy-groups": [
             {
