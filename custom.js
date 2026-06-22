@@ -203,7 +203,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
         name:    `${prefix}RELAY`,
         type:    "select",
         filter:  buildRegex(Filter.all),
-        proxies: relayGroups.map(g => g.name),
+        proxies: [...relayGroups.map(g => g.name), ...proxyNames],
         use:     providerKeys,
         hidden:  false,
         icon:    prefix ? "" : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
@@ -258,7 +258,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
 
     const orderedGroups = configExitProvider?.enable
         ? [...base.exitSelectorGroup, ...base.relaySelectorGroup, ...base.exitGroups, ...base.relayGroups]
-        : [...base.relaySelectorGroup, ...base.relayGroups];
+        : [...base.relayGroups];
     const proxyGroupNames = orderedGroups.map(g => g.name);
     const prebuiltProxies = {
         selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
