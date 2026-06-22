@@ -127,11 +127,6 @@ const hasValue = (value) => {
     return true;
 };
 
-const deepClone = (obj) =>
-    typeof structuredClone === "function"
-        ? structuredClone(obj)
-        : JSON.parse(JSON.stringify(obj));
-
 const mergeInto = (target, source) => {
     for (const key of Object.keys(source)) {
         if (Array.isArray(target[key])) {
@@ -140,8 +135,8 @@ const mergeInto = (target, source) => {
             Object.assign(target[key], source[key]);
         } else {
             target[key] = source[key];
-        };
-    };
+        }
+    }
 };
 
 /* ========== Icon Support ========== */
@@ -171,7 +166,7 @@ const buildExitProvider = (providers) =>
             return [exitProviderKey, {
                 ...value,
                 override: {
-                    ...(value.override ?? {}),
+                    ...(value?.override ?? {}),
                     "dialer-proxy":      "RELAY",
                     "additional-prefix": exitProviderKey,
                 },
@@ -182,6 +177,7 @@ const buildExitProvider = (providers) =>
 const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     const providerKeys = Object.keys(providers);
     const hasProviders = hasValue(providers);
+    const proxyNames = hasValue(proxies) ? proxies.map(p => p.name) : [];
 
     let relayGroups = [
         { name: "AUTO HKSG", type: "url-test",     filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
@@ -197,9 +193,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     ].map(e => buildGroup({
         ...e,
         name:    `${prefix}${e.name}`,
-        proxies: hasValue(proxies)
-            ? proxies.map(p => p.name).filter(n => n.match(e.filter))
-            : [],
+        proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     providerKeys,
     }));
     if (!hasProviders)
@@ -215,10 +209,9 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
         icon:    prefix ? "" : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
-    const exitProxies      = hasValue(proxies) ? deepClone(proxies) : [];
     const exitProviders    = hasProviders
         ? buildExitProvider(providers)
-        : buildExitProvider({ "provider-exit": { type: "inline", payload: exitProxies } });
+        : buildExitProvider({ "provider-exit": { type: "inline", payload: proxies } });
     const exitProviderKeys = Object.keys(exitProviders);
 
     let exitGroups = [
@@ -227,9 +220,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     ].map(e => buildGroup({
         ...e,
         name:    `→${prefix}${e.name}`,
-        proxies: hasValue(exitProxies)
-            ? exitProxies.map(p => p.name).filter(n => n.match(e.filter))
-            : [],
+        proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     exitProviderKeys,
     }));
     if (!hasProviders)
@@ -260,10 +251,10 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             tempExitSelector .push(temp.exitSelectorGroup [0].name);
             tempRelaySelector.push(temp.relaySelectorGroup[0].name);
 
-        };
+        }
         base.exitSelectorGroup [0].proxies.unshift(...tempExitSelector);
         base.relaySelectorGroup[0].proxies.unshift(...tempRelaySelector);
-    };
+    }
 
     const orderedGroups = configExitProvider?.enable
         ? [...base.exitSelectorGroup, ...base.relaySelectorGroup, ...base.exitGroups, ...base.relayGroups]
@@ -282,12 +273,12 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
-    const prebuiltGroups   = [...orderedGroups, ...selectorGroup];
-    const prebuiltProviders = configExitProvider?.enable
-        ? Object.assign({}, providers, base.exitProviders)
-        : Object.assign({}, providers);
 
-    return { prebuiltProxies, prebuiltGroups, prebuiltProviders };
+    return {
+        prebuiltProxies,
+        prebuiltGroups: [...orderedGroups, ...selectorGroup],
+        prebuiltProviders: { ...providers, ...(configExitProvider?.enable ? base.exitProviders : {}) }
+    };
 };
 
 /* ========== Rule-Providers Configuration ========== */
@@ -789,14 +780,14 @@ const Units = {
             },
         ],
         override: (config) => {
-            const fakeIpFilterMode = config?.dns?.["fake-ip-filter-mode"];
             const fakeIpFilter     = config?.dns?.["fake-ip-filter"];
             if (!Array.isArray(fakeIpFilter)) return; // dns absent or fake-ip-filter not set
+            const fakeIpFilterMode = config?.dns?.["fake-ip-filter-mode"];
             if (fakeIpFilterMode === "rule") {
                 fakeIpFilter.unshift("RULE-SET,tailscale,fake-ip");
             } else if (fakeIpFilterMode === "blacklist") {
                 fakeIpFilter.unshift("RULE-SET,tailscale");
-            };
+            }
         },
         overrideLater: (config) => Object.assign(config["proxy-providers"], {
             tailscale: {
@@ -837,11 +828,11 @@ const applyConfig = (config, keys = []) => {
         if (!unit) {
             console.warn(`[applyConfig] Unknown key: "${key}"`);
             continue;
-        };
+        }
         mergeInto(units, unit);
-    };
+    }
 
-    units.override.forEach(fn => fn(config))
+    units.override.forEach(fn => fn(config));
 
     const base = buildProxiesGroupsProviders(config.proxies, config["proxy-providers"]);
 
@@ -858,9 +849,10 @@ const applyConfig = (config, keys = []) => {
     units["proxy-groups"].unshift(...base.prebuiltGroups);
 
     for (const key of Object.keys(units)) {
-        if (key === "override" || key === "overrideLater") continue;
-        config[key] = units[key];
-    };
+        if (key !== "override" && key !== "overrideLater") {
+            config[key] = units[key];
+        }
+    }
 
     units.overrideLater.forEach(fn => fn(config))
 };
