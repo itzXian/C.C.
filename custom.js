@@ -505,6 +505,7 @@ const Units = {
             downloader: buildRuleSet([
                 "PROCESS-NAME,idm.internet.download.manager",
                 "PROCESS-NAME,com.gianlu.aria2app",
+                "PROCESS-NAME,aria2c",
             ]),
         },
         "rules": [
