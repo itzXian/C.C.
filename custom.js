@@ -85,8 +85,6 @@ const configDns = {
         "MATCH,                        fake-ip",
     ],
     "nameserver-policy": {
-        "GEOSITE:private":     _directDns,
-        "GEOSITE:cn":          _directDns,
         "GEOSITE:hoyoverse":   _directDns,
         "+.twimg.com":         _proxyDns,
         "+.pximg.net":         _proxyDns,
@@ -94,6 +92,7 @@ const configDns = {
     },
     nameserver:                _proxyDns,
     "proxy-server-nameserver": _directDns,
+    "direct-nameserver":       _directDns,
 };
 
 const configExitProvider = {};
