@@ -216,6 +216,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
 
     let exitGroups = [
         { name: "AUTO JP",  type: "url-test", filter: buildRegex(Filter.jp) },
+        { name: "AUTO JP (ALL)",  type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "", },
         { name: "AUTO !JP", type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
     ].map(e => buildGroup({
         ...e,
@@ -504,6 +505,7 @@ const Units = {
         "rule-providers": {
             downloader: buildRuleSet([
                 "PROCESS-NAME,idm.internet.download.manager",
+                "PROCESS-NAME,com.gianlu.aria2app",
             ]),
         },
         "rules": [
