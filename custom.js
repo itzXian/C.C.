@@ -149,7 +149,7 @@ const Icon = {
 const buildGroup = (overrides) => ({
     name:              overrides.name, // keep the name first, for easier viewing
     hidden:            true,
-    url:               "https://cp.cloudflare.com",
+    url:               "https://www.google.com/generate_204",
     "expected-status": "200/204/302",
     timeout:           5000,
     interval:          1800,
