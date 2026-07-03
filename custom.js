@@ -513,6 +513,10 @@ const Units = {
                 icon: Icon.wiki("commons/0/08/Internet-icon.svg"),
             },
         ],
+        override: (config) => {
+            const nPolicy = config?.dns?.["nameserver-policy"];
+            Object.assign(nPolicy, { "RULE-SET:browser": _proxyDns });
+        },
     },
     downloader: {
         "rule-providers": {
@@ -535,6 +539,10 @@ const Units = {
                 icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
             },
         ],
+        override: (config) => {
+            const nPolicy = config?.dns?.["nameserver-policy"];
+            Object.assign(nPolicy, { "RULE-SET:downloader": _proxyDns });
+        },
     },
     ehentai: {
         "rules": [
@@ -553,6 +561,10 @@ const Units = {
                 icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
             },
         ],
+        override: (config) => {
+            const nPolicy = config?.dns?.["nameserver-policy"];
+            Object.assign(nPolicy, { "RULE-SET:downloader": _proxyDns });
+        },
     },
     github: {
         "rules": [
@@ -886,10 +898,10 @@ const main = (config) => {
         //"tailscale",
         "hoyo",
         "sbcz",
-        "ad",
         "browser",
         "downloader",
         "ehentai",
+        "ad",
         "pixiv",
         "ai",
         "steam_cn",
