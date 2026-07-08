@@ -65,26 +65,30 @@ const configHosts = {
     "dl.l.google.com":       "142.250.31.136",
 };
 
-const _directDns  = ["223.5.5.5:853", "119.29.29.29", "114.114.114.114"];
-const _proxyDns   = ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"];
-const _adblockDns = ["dns.adguard-dns.com"];
+const _directDns    = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
+const _proxyDns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query"];
+const _adblockDns   = ["https://dns.adguard-dns.com/dns-query"];
 const configDns = {
     enable:                true,
     "prefer-h3":           true,
     ipv6:                  false,
-    "default-nameserver":  _directDns,
+    "default-nameserver":  [
+        "https://223.5.5.5/dns-query",
+        "https://1.12.12.12/dns-query",
+        "https://120.53.53.53/dns-query"
+    ],
     "enhanced-mode":       "fake-ip",
     "fake-ip-range":       "198.18.0.1/16",
     "fake-ip-filter-mode": "rule",
     "fake-ip-filter": [
         "RULE-SET, fakeIpFilter,       real-ip",
         "GEOSITE,  private,            real-ip",
-        "GEOSITE,  cn,                 real-ip",
         "GEOSITE,  connectivity-check, real-ip",
         "GEOSITE,  category-ntp,       real-ip",
         "MATCH,                        fake-ip",
     ],
     "nameserver-policy": {
+        "GEOSITE:cn":          _directDns,
         "GEOSITE:hoyoverse":   _directDns,
         "+.twimg.com":         _proxyDns,
         "+.pximg.net":         _proxyDns,
