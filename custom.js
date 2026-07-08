@@ -782,7 +782,7 @@ const Units = {
             {
                 name: "CN",
                 proxies: "directFirst",
-                url: "http://connect.rom.miui.com/generate_204",
+                url: "https://connect.rom.miui.com/generate_204",
                 icon: Icon.wiki("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
             },
         ],
