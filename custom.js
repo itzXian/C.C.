@@ -179,6 +179,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     const proxyNames = hasValue(proxies) ? proxies.map(p => p.name) : [];
 
     let relayGroups = [
+        { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing" },
         {
             name: "FALLBACK HKSG",
             type: "fallback",
@@ -186,16 +187,16 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             proxies: [`${prefix}AUTO HK`, `${prefix}AUTO SG`],
             use: [],
         },
-        { name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
+        //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
         { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk) },
         { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp) },
         { name: "AUTO SG",   type: "url-test", filter: buildRegex(Filter.sg) },
         { name: "AUTO AU",   type: "url-test", filter: buildRegex(Filter.au) },
         { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us) },
-        { name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+        //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
         { name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
-        { name: "LB HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin" },
-        { name: "LB SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin" },
+        { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin" },
+        { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin" },
     ].map(e => buildGroup({
         proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     providerKeys,
@@ -221,6 +222,9 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
     const exitProviderKeys = Object.keys(exitProviders);
 
     let exitGroups = [
+        { name: "LBCH JP (ALL)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter": "", strategy: "consistent-hashing" },
+        { name: "LBCH JP",       type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing" },
+        { name: "LBCH HKSG",     type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing" },
         {
             name: "FALLBACK JP",
             type: "fallback",
@@ -228,9 +232,9 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             proxies: [`→${prefix}AUTO JP`, `→${prefix}AUTO JP (ALL)`],
             use: [],
         },
-        { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp) },
         { name: "AUTO JP (ALL)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "" },
-        { name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+        { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp) },
+        //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
     ].map(e => buildGroup({
         proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     exitProviderKeys,
