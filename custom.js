@@ -572,6 +572,7 @@ const Units = {
     },
     github: {
         "rules": [
+            "GEOSITE,       npmjs,              FINAL",
             "GEOSITE,       github,             GITHUB",
         ],
         "proxy-groups": [
