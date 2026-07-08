@@ -95,6 +95,19 @@ const configDns = {
     "direct-nameserver":       _directDns,
 };
 
+const configTun = {
+    enable:                  true,
+    stack:                   "system",
+    "auto-route":            true,
+    "auto-redirect":         true,
+    "auto-detect-interfact": true,
+    "dns-hijack": [
+        "any:53",
+        "tcp://any:53"
+    ],
+    "strict-route":          true,
+};
+
 const configExitProvider = {};
 
 /* ========== Proxy Groups Configuration ========== */
@@ -348,6 +361,9 @@ const Units = {
             ], { behavior: "domain" }),
         },
         override: (config) => Object.assign(config, { dns: configDns }),
+    },
+    configTun: {
+        override: (config) => Object.assign(config, { tun: configTun }),
     },
     hoyo: {
         "rule-providers": {
@@ -898,6 +914,7 @@ const main = (config) => {
         "configExternalController",
         "configHosts",
         "configDns",
+        "configTun",
         //"configAdblockDns",
         //"configExitProvider",
         //"tailscale",
