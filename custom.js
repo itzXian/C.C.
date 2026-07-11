@@ -26,23 +26,23 @@ const configBase = {
     },
 };
 
-const _cdn = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
+const cdn = "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release";
 const configGeo = {
     "geox-url": {
-        geoip:   `${_cdn}/geoip.dat`,
-        geosite: `${_cdn}/geosite.dat`,
-        mmdb:    `${_cdn}/geoip.metadb`,
-        asn:     `${_cdn}/GeoLite2-ASN.mmdb`,
+        geoip:   `${cdn}/geoip.dat`,
+        geosite: `${cdn}/geosite.dat`,
+        mmdb:    `${cdn}/geoip.metadb`,
+        asn:     `${cdn}/GeoLite2-ASN.mmdb`,
     },
     "geo-auto-update":     true,
     "geo-update-interval": 24,
 };
 
-const _port   = Math.floor(Math.random() * 9999) + 10000;
-const _secret = Math.random().toString(36).slice(2);
+const port   = Math.floor(Math.random() * 9999) + 10000;
+const secret = Math.random().toString(36).slice(2);
 const configExternalController = {
-    "external-controller": `0.0.0.0:${_port}`,
-    "secret":              _secret,
+    "external-controller": `0.0.0.0:${port}`,
+    "secret":              secret,
     "external-ui":         "ui",
     "external-ui-url":     "https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip",
 };
@@ -52,22 +52,11 @@ const configHosts = {
     "127.0.0.1.sslip.io":    "127.0.0.1",
     "127.atlas.skk.moe":     "127.0.0.1",
     "cdn.jsdelivr.net":      "cdn.jsdelivr.net.cdn.cloudflare.net",
-    "mtalk.google.com":      "172.253.63.188",
-    "alt1-mtalk.google.com": "192.178.131.188",
-    "alt2-mtalk.google.com": "209.85.144.188",
-    "alt3-mtalk.google.com": "108.177.11.188",
-    "alt4-mtalk.google.com": "192.178.218.188",
-    "alt5-mtalk.google.com": "64.233.178.188",
-    "alt6-mtalk.google.com": "192.178.213.188",
-    "alt7-mtalk.google.com": "172.253.116.188",
-    "alt8-mtalk.google.com": "192.178.223.188",
-    "dl.google.com":         "142.250.31.93",
-    "dl.l.google.com":       "142.250.31.136",
 };
 
-const _directDns    = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
-const _proxyDns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query"];
-const _adblockDns   = ["https://dns.adguard-dns.com/dns-query"];
+const directDns    = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
+const proxyDns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query"];
+const adblockDns   = ["https://dns.adguard-dns.com/dns-query"];
 const configDns = {
     enable:                true,
     "prefer-h3":           true,
@@ -87,16 +76,10 @@ const configDns = {
         "GEOSITE,  category-ntp,       real-ip",
         "MATCH,                        fake-ip",
     ],
-    "nameserver-policy": {
-        "GEOSITE:cn":          _directDns,
-        "GEOSITE:hoyoverse":   _directDns,
-        "+.twimg.com":         _proxyDns,
-        "+.pximg.net":         _proxyDns,
-        "cdn.discordapp.com":  _proxyDns,
-    },
-    nameserver:                _proxyDns,
-    "proxy-server-nameserver": _directDns,
-    "direct-nameserver":       _directDns,
+    "nameserver-policy":       {},
+    nameserver:                proxyDns,
+    "proxy-server-nameserver": directDns,
+    "direct-nameserver":       directDns,
 };
 
 const configTun = {
@@ -330,12 +313,14 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
 //     https://wiki.metacubex.one/config/rule-providers/
 //     https://wiki.metacubex.one/config/rule-providers/content/
 //     https://wiki.metacubex.one/handbook/syntax/#_8
+
 const buildRuleSet = (rules = [], options = {}) => ({
     type:     "inline",
     behavior: "classical",
     payload:  rules,
     ...options,
 });
+
 const buildCommonSubRules = (target) => [
     `GEOSITE,       geolocation-!cn,    ${target}`,
     "GEOSITE,       private,            CN",
@@ -345,12 +330,18 @@ const buildCommonSubRules = (target) => [
     `MATCH,                             ${target}`,
 ];
 
+const addNameserverPolicy = (config, obj) => {
+    if (config?.dns) {
+        config.dns["nameserver-policy"] = { ...config.dns["nameserver-policy"], ...obj };
+    }
+};
+
 const Units = {
     configBase:               { override: (config) => Object.assign(config, configBase) },
     configGeo:                { override: (config) => Object.assign(config, configGeo) },
     configExternalController: { override: (config) => Object.assign(config, configExternalController) },
     configHosts:              { override: (config) => Object.assign(config, { hosts: configHosts }) },
-    configAdblockDns:         { override: (config) => config.dns.nameserver = _adblockDns },
+    configAdblockDns:         { override: (config) => config.dns.nameserver = adblockDns },
     configExitProvider:       { override: () => configExitProvider.enable = true },
     configDns: {
         "rule-providers": {
@@ -432,6 +423,7 @@ const Units = {
                 icon: Icon.favicon("https://hoyoverse.com"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "GEOSITE:hoyoverse": directDns }),
     },
     sbcz: {
         "rule-providers": {
@@ -546,10 +538,7 @@ const Units = {
                 icon: Icon.wiki("commons/0/08/Internet-icon.svg"),
             },
         ],
-        override: (config) => {
-            const nPolicy = config?.dns?.["nameserver-policy"];
-            Object.assign(nPolicy, { "RULE-SET:browser": _proxyDns });
-        },
+        override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxyDns }),
     },
     downloader: {
         "rule-providers": {
@@ -572,10 +561,7 @@ const Units = {
                 icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
             },
         ],
-        override: (config) => {
-            const nPolicy = config?.dns?.["nameserver-policy"];
-            Object.assign(nPolicy, { "RULE-SET:downloader": _proxyDns });
-        },
+        override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxyDns }),
     },
     ehentai: {
         "rules": [
@@ -594,10 +580,7 @@ const Units = {
                 icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
             },
         ],
-        override: (config) => {
-            const nPolicy = config?.dns?.["nameserver-policy"];
-            Object.assign(nPolicy, { "RULE-SET:downloader": _proxyDns });
-        },
+        override: (config) => addNameserverPolicy(config, { "RULE-SET:ehentai": proxyDns }),
     },
     github: {
         "rules": [
@@ -657,6 +640,7 @@ const Units = {
                 icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "+.pximg.net": proxyDns }),
     },
     ai: {
         "rules": [
@@ -691,6 +675,22 @@ const Units = {
                 icon: Icon.favicon("https://firebase.google.com"),
             },
         ],
+        override: (config) => {
+            const hosts = {
+                "mtalk.google.com":      "172.253.63.188",
+                "alt1-mtalk.google.com": "192.178.131.188",
+                "alt2-mtalk.google.com": "209.85.144.188",
+                "alt3-mtalk.google.com": "108.177.11.188",
+                "alt4-mtalk.google.com": "192.178.218.188",
+                "alt5-mtalk.google.com": "64.233.178.188",
+                "alt6-mtalk.google.com": "192.178.213.188",
+                "alt7-mtalk.google.com": "172.253.116.188",
+                "alt8-mtalk.google.com": "192.178.223.188",
+                "dl.google.com":         "142.250.31.93",
+                "dl.l.google.com":       "142.250.31.136",
+            };
+            config.hosts = { ...config.hosts, ...hosts };
+        },
     },
     google: {
         "rules": [
@@ -715,6 +715,7 @@ const Units = {
                 icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "+.twimg.com": proxyDns }),
     },
     telegram: {
         "rules": [
@@ -738,6 +739,7 @@ const Units = {
                 icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "cdn.discordapp.com": proxyDns }),
     },
     apple: {
         "rules": [
@@ -795,6 +797,7 @@ const Units = {
                 icon: Icon.wiki("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "GEOSITE:cn": directDns }),
     },
     final: {
         "rules": [
@@ -842,13 +845,25 @@ const Units = {
             },
         ],
         override: (config) => {
-            const fakeIpFilter     = config?.dns?.["fake-ip-filter"];
-            if (!Array.isArray(fakeIpFilter)) return; // dns absent or fake-ip-filter not set
-            const fakeIpFilterMode = config?.dns?.["fake-ip-filter-mode"];
+            if (!config?.dns) return; // dns not set
+            config.dns["fake-ip-filter"] = config.dns["fake-ip-filter"] || [];
+            const fakeIpFilter     = config.dns["fake-ip-filter"];
+            const fakeIpFilterMode = config.dns?.["fake-ip-filter-mode"];
             if (fakeIpFilterMode === "rule") {
                 fakeIpFilter.unshift("RULE-SET,tailscale,fake-ip");
-            } else if (fakeIpFilterMode === "blacklist") {
+            } else if (fakeIpFilterMode === "whitelist") {
                 fakeIpFilter.unshift("RULE-SET,tailscale");
+            } else {
+                console.log(`################
+dns: {
+    "fake-ip-filter-mode": "blacklist",
+    "fake-ip-filter": [
+        "RULE-SET,private"
+    ]
+}
+
+may cause tailscale does not work
+################`);
             }
         },
         overrideLater: (config) => Object.assign(config["proxy-providers"], {
