@@ -580,7 +580,7 @@ const Units = {
                 icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
             },
         ],
-        override: (config) => addNameserverPolicy(config, { "RULE-SET:ehentai": proxyDns }),
+        override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxyDns }),
     },
     github: {
         "rules": [
@@ -866,7 +866,7 @@ may cause tailscale does not work
 ################`);
             }
         },
-        overrideLater: (config) => Object.assign(config["proxy-providers"], {
+        overrideFinal: (config) => Object.assign(config["proxy-providers"], {
             tailscale: {
                 type: "inline",
                 "health-check": {
@@ -897,16 +897,15 @@ const applyConfig = (config, keys = []) => {
         "sub-rules":      {},
         "proxy-groups":   [],
         override:         [],
-        overrideLater:    [],
+        overrideFinal:    [],
     };
 
     for (const key of keys) {
-        const unit = Units[key];
-        if (!unit) {
+        if (!Units[key]) {
             console.warn(`[applyConfig] Unknown key: "${key}"`);
             continue;
         }
-        mergeInto(units, unit);
+        mergeInto(units, Units[key]);
     }
 
     units.override.forEach(fn => fn(config));
@@ -926,12 +925,12 @@ const applyConfig = (config, keys = []) => {
     units["proxy-groups"].unshift(...base.prebuiltGroups);
 
     for (const key of Object.keys(units)) {
-        if (key !== "override" && key !== "overrideLater") {
+        if (key !== "override" && key !== "overrideFinal") {
             config[key] = units[key];
         }
     }
 
-    units.overrideLater.forEach(fn => fn(config))
+    units.overrideFinal.forEach(fn => fn(config))
 };
 
 /* ========== Entry Point ========== */
