@@ -59,6 +59,8 @@ const proxyDns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query
 const adblockDns   = ["https://dns.adguard-dns.com/dns-query"];
 const configDns = {
     enable:                true,
+    "use-hosts":           true,
+    "use-system-hosts":    true,
     "prefer-h3":           true,
     ipv6:                  false,
     "default-nameserver":  [
@@ -665,7 +667,14 @@ const Units = {
         ],
     },
     google_fcm: {
+        "rule-providers": {
+            google_fcm: buildRuleSet([
+                "+.mobile-gtalk.l.google.com",
+                "+.mobile-gtalk4.l.google.com",
+            ], { behavior: "domain" }),
+        },
         "rules": [
+            "RULE-SET,      google_fcm,         GOOGLE_FCM",
             "GEOSITE,       googlefcm,          GOOGLE_FCM",
         ],
         "proxy-groups": [
@@ -677,7 +686,7 @@ const Units = {
         ],
         override: (config) => {
             const hosts = {
-                "mtalk.google.com":      "172.253.63.188",
+                "mtalk.google.com": "172.253.63.188",
                 "alt1-mtalk.google.com": "192.178.131.188",
                 "alt2-mtalk.google.com": "209.85.144.188",
                 "alt3-mtalk.google.com": "108.177.11.188",
@@ -686,8 +695,23 @@ const Units = {
                 "alt6-mtalk.google.com": "192.178.213.188",
                 "alt7-mtalk.google.com": "172.253.116.188",
                 "alt8-mtalk.google.com": "192.178.223.188",
-                "dl.google.com":         "142.250.31.93",
-                "dl.l.google.com":       "142.250.31.136",
+                "dl.google.com": "142.250.31.93",
+                "dl.l.google.com": "142.250.31.136",
+                "mobile-gtalk.l.google.com": [
+                    "142.251.170.188",
+                    "142.251.157.188",
+                    "142.251.179.188",
+                    //"192.178.155.188",
+                    //"172.253.63.1888",
+                ],
+                "alt1.mobile-gtalk.l.google.com": "173.194.43.188",
+                "alt3.mobile-gtalk.l.google.com": "142.250.101.188",
+                "alt5.mobile-gtalk.l.google.com": "172.253.145.188",
+                "alt7.mobile-gtalk.l.google.com": "172.253.135.188",
+                "alt2.mobile-gtalk4.l.google.com": "172.217.78.188",
+                "alt4.mobile-gtalk4.l.google.com": "192.178.231.188",
+                "alt6.mobile-gtalk4.l.google.com": "172.253.145.188",
+                "alt8.mobile-gtalk4.l.google.com": "142.251.96.188",
             };
             config.hosts = { ...config.hosts, ...hosts };
         },
