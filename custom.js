@@ -324,6 +324,8 @@ const buildRuleSet = (rules = [], options = {}) => ({
 });
 
 const buildCommonSubRules = (target) => [
+    "RULE-SET,      non_jp,             PASS",
+    "RULE-SET,      jp,                 PASS",
     `GEOSITE,       geolocation-!cn,    ${target}`,
     "GEOSITE,       private,            CN",
     "GEOSITE,       CN,                 CN",
@@ -778,9 +780,14 @@ const Units = {
         ],
     },
     non_jp: {
+        "rule-providers": {
+            non_jp: buildRuleSet([
+                "+.hinative.com",
+                "+.game8.jp",
+            ], { behavior: "domain" }),
+        },
         "rules": [
-            "DOMAIN-SUFFIX, hinative.com,       NON_JP",
-            "DOMAIN-SUFFIX, game8.jp,           NON_JP",
+            "RULE-SET,      non_jp,             NON_JP",
         ],
         "proxy-groups": [
             {
@@ -790,8 +797,14 @@ const Units = {
         ],
     },
     jp: {
+        "rule-providers": {
+            jp: buildRuleSet([
+                ".jp",
+                "+.syosetu.com",
+            ], { behavior: "domain" }),
+        },
         "rules": [
-            "DOMAIN-REGEX,  .*\\.jp,            JP",
+            "RULE-SET,      jp,            JP",
             "GEOIP,         JP,                 JP,              no-resolve",
         ],
         "proxy-groups": [
