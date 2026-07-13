@@ -4,6 +4,42 @@
 //     https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
 
 /* ========== Base-Options Configuration ========== */
+const options = [
+    "configBase",
+    "configGeo",
+    "configExternalController",
+    "configHosts",
+    "configDns",
+    "configTun",
+    //"configAdblockDns",
+    //"configExitProvider",
+    //"tailscale",
+    "hoyo",
+    "sbcz",
+    "browser",
+    "downloader",
+    "ehentai",
+    "ad",
+    "pixiv",
+    "ai",
+    "steam_cn",
+    "steam",
+    "github",
+    "microsoft",
+    "youtube",
+    "google_fcm",
+    "google",
+    "apple",
+    "twitter",
+    "telegram",
+    "discord",
+    "tiktok",
+    "non_jp",
+    "jp",
+    "non_cn",
+    "cn",
+    "final",
+];
 
 const configBase = {
     "mixed-port":          7890,
@@ -972,42 +1008,7 @@ const applyConfig = (config, keys = []) => {
 
 /* ========== Entry Point ========== */
 const main = (config) => {
-    applyConfig(config, [
-        "configBase",
-        "configGeo",
-        "configExternalController",
-        "configHosts",
-        "configDns",
-        "configTun",
-        //"configAdblockDns",
-        //"configExitProvider",
-        //"tailscale",
-        "hoyo",
-        "sbcz",
-        "browser",
-        "downloader",
-        "ehentai",
-        "ad",
-        "pixiv",
-        "ai",
-        "steam_cn",
-        "steam",
-        "github",
-        "microsoft",
-        "youtube",
-        "google_fcm",
-        "google",
-        "apple",
-        "twitter",
-        "telegram",
-        "discord",
-        "tiktok",
-        "non_jp",
-        "jp",
-        "non_cn",
-        "cn",
-        "final",
-    ]);
+    applyConfig(config, options);
     return config;
 };
 
