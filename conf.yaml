@@ -5,9 +5,9 @@ provider-base-config: &provider
   health-check:
     enable: true
     url: https://www.google.com/generate_204
-    interval: 1800
-    timeout: 3000
     expected-status: 200/204/302
+    timeout: 3000
+    interval: 1800
 
 proxy-providers:
   🟥:
