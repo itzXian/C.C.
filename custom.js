@@ -846,6 +846,7 @@ const Units = {
             non_jp: buildRuleSet([
                 "+.hinative.com",
                 "+.game8.jp",
+                "+.kotobank.jp",
             ], { behavior: "domain" }),
         },
         "rules": [
@@ -861,7 +862,7 @@ const Units = {
     jp: {
         "rule-providers": {
             jp: buildRuleSet([
-                ".jp",
+                //".jp",
                 "+.syosetu.com",
             ], { behavior: "domain" }),
         },
