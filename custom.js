@@ -633,12 +633,12 @@ const Units = {
     },
     ehentai: {
         "rules": [
-            "DOMAIN-SUFFIX, hath.network,       HENTAI@HOME",
+            "DOMAIN-SUFFIX, hath.network,       HATH_NETWORK",
             "GEOSITE,       ehentai,            EHENTAI",
         ],
         "proxy-groups": [
             {
-                name: "HENTAI@HOME",
+                name: "HATH_NETWORK",
                 "include-all": true,
                 icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
             },
@@ -700,9 +700,14 @@ const Units = {
     },
     pixiv: {
         "rules": [
+            "DOMAIN-SUFFIX, pximg.net,          PXIMG",
             "GEOSITE,       pixiv,              PIXIV",
         ],
         "proxy-groups": [
+            {
+                name: "PXIMG",
+                icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
+            },
             {
                 name: "PIXIV",
                 icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
@@ -723,14 +728,20 @@ const Units = {
     },
     youtube: {
         "rules": [
+            "DOMAIN-SUFFIX, googlevideo.com,    GOOGLE_VIDEO",
             "GEOSITE,       youTube,            YOUTUBE",
         ],
         "proxy-groups": [
+            {
+                name: "GOOGLE_VIDEO",
+                icon: Icon.favicon("https://youtube.com"),
+            },
             {
                 name: "YOUTUBE",
                 icon: Icon.favicon("https://youtube.com"),
             },
         ],
+        override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxyDns }),
     },
     google_fcm: {
         "rule-providers": {
@@ -796,10 +807,15 @@ const Units = {
     },
     twitter: {
         "rules": [
-            "GEOIP,         twitter,            TWITTER,         no-resolve",
+            "DOMAIN-SUFFIX, twimg.com,          TWIMG",
             "GEOSITE,       twitter,            TWITTER",
+            "GEOIP,         twitter,            TWITTER,         no-resolve",
         ],
         "proxy-groups": [
+            {
+                name: "TWIMG",
+                icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
+            },
             {
                 name: "TWITTER",
                 icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
@@ -809,10 +825,15 @@ const Units = {
     },
     telegram: {
         "rules": [
+            "IP-CIDR,       91.108.56.200/32,   TG_RESOURCES,    no-resolve",
             "GEOIP,         telegram,           TELEGRAM,        no-resolve",
             "GEOSITE,       telegram,           TELEGRAM",
         ],
         "proxy-groups": [
+            {
+                name: "TG_RESOURCES",
+                icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
+            },
             {
                 name: "TELEGRAM",
                 icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
@@ -821,9 +842,14 @@ const Units = {
     },
     discord: {
         "rules": [
+            "DOMAIN,        cdn.discordapp.com, DISCORD_CDN",
             "GEOSITE,       discord,            DISCORD",
         ],
         "proxy-groups": [
+            {
+                name: "DISCORD_CDN",
+                icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
+            },
             {
                 name: "DISCORD",
                 icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
@@ -869,7 +895,7 @@ const Units = {
             ], { behavior: "domain" }),
         },
         "rules": [
-            "RULE-SET,      jp,            JP",
+            "RULE-SET,      jp,                 JP",
             "GEOIP,         JP,                 JP,              no-resolve",
         ],
         "proxy-groups": [
