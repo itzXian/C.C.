@@ -226,7 +226,7 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             proxies: [`${prefix}AUTO HK`, `${prefix}AUTO SG`],
             use: [],
         },
-        //{ name: "LBCH HKSG", type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing", timeout: 500 },
+        { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing", timeout: 500 },
         //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
         { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp) },
         { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk) },
@@ -276,7 +276,6 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             proxies: [`${prefix}AUTO HK`, `${prefix}AUTO SG`],
             use: [],
         },
-/*
         {
             name: "LBCH JP",
             type: "load-balance",
@@ -299,7 +298,6 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             strategy: "consistent-hashing",
             timeout: 500,
         },
-*/
         {
             name: "AUTO JP (1X)",
             type: "url-test",
