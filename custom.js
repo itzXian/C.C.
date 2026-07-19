@@ -224,7 +224,6 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             type: "fallback",
             filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
             proxies: [`${prefix}AUTO HK`, `${prefix}AUTO SG`],
-            use: [],
         },
         { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing", timeout: 500 },
         //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
@@ -238,10 +237,10 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
         { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
         { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
     ].map(e => buildGroup({
-        proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     providerKeys,
         ...e,
         name:    `${prefix}${e.name}`,
+        proxies: e?.proxies || [].concat(proxyNames.filter(n => n.match(e.filter))),
     }));
     if (!hasProviders)
         relayGroups = relayGroups.filter(g => hasValue(g.proxies));
@@ -267,14 +266,12 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
             type: "fallback",
             filter: buildRegex(Filter.jp),
             proxies: [`→${prefix}AUTO JP (1X)`, `→${prefix}AUTO JP`],
-            use: [],
         },
         {
             name: "FALLBACK HKSG",
             type: "fallback",
             filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
             proxies: [`${prefix}AUTO HK`, `${prefix}AUTO SG`],
-            use: [],
         },
         {
             name: "LBCH JP",
@@ -309,10 +306,10 @@ const buildGroupsWithProvider = (proxies = [], providers = {}, prefix = "") => {
         { name: "AUTO SG",       type: "url-test", filter: buildRegex(Filter.sg) },
         //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
     ].map(e => buildGroup({
-        proxies: proxyNames.filter(n => n.match(e.filter)),
         use:     exitProviderKeys,
         ...e,
         name:    `→${prefix}${e.name}`,
+        proxies: e?.proxies || [].concat(proxyNames.filter(n => n.match(e.filter))),
     }));
     if (!hasProviders)
         exitGroups = exitGroups.filter(g => hasValue(g.proxies));
