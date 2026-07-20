@@ -14,10 +14,10 @@ const options = [
     //"configAdblockDns",
     //"configExitProvider",
     //"tailscale",
-    "hoyo",
-    "sbcz",
     "browser",
     "downloader",
+    "hoyo",
+    "sbcz",
     "ehentai",
     "ad",
     "pixiv",
@@ -434,44 +434,32 @@ const Units = {
     },
     hoyo: {
         "rule-providers": {
-            hoyo_gi_cn: buildRuleSet([
-                "DOMAIN,dispatchosglobal.yuanshen.com",
-                "DOMAIN,oseurodispatch.yuanshen.com",
-                "DOMAIN,osusadispatch.yuanshen.com",
-                "DOMAIN,osuspider.yuanshen.com",
+            hoyo_proxy: buildRuleSet([
+                "DOMAIN,dispatchosglobal.yuanshen.com", // GI
+                "DOMAIN,oseurodispatch.yuanshen.com",   // GI
+                "DOMAIN,osusadispatch.yuanshen.com",    // GI
+                "DOMAIN,osuspider.yuanshen.com",        // GI
+                "DOMAIN,autopatchhk.yuanshen.com",      // GI
+                "DOMAIN,osasiadispatch.yuanshen.com",   // GI
+                "AND,((DST-PORT,8999),(NETWORK,tcp))",  // GI
             ]),
-            hoyo_etc: buildRuleSet([
+            hoyo_direct: buildRuleSet([
+                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
                 "DOMAIN,minor-api-os.hoyoverse.com",
                 //"DOMAIN,asia-ugc-api.hoyoverse.com",
                 //"DOMAIN,asia-ugc-upload.hoyoverse.com",
                 //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
-                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com",      // GI UGC
-                "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
-            ]),
-            hoyo_proxy: buildRuleSet([
-                "DOMAIN-SUFFIX,hoyoverse.com",
-                "DOMAIN-SUFFIX,hoyolab.com",
-                "DOMAIN,autopatchhk.yuanshen.com",     // GI
-                "DOMAIN,osasiadispatch.yuanshen.com",  // GI
-                "AND,((DST-PORT,8999),(NETWORK,tcp))", // GI
-            ]),
-            hoyo_direct: buildRuleSet([
-                "DOMAIN-SUFFIX,yuanshen.com",
-                "DOMAIN-SUFFIX,mihoyo.com",
-                "AND,((DST-PORT,22101-22102),(NETWORK,udp))", // GI
-                "AND,((DST-PORT,23301/23801),(NETWORK,udp))", // HSR
-                "AND,((DST-PORT,20501),(NETWORK,udp))",       // ZZZ
-            ]),
-            hoyo_final: buildRuleSet([
-                "PROCESS-NAME-REGEX,.*GenshinImpact.*",         // GI
+                "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
+                "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
+                "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
+                "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
             ]),
         },
         "rules": [
-            "RULE-SET,      hoyo_gi_cn,         HOYO_DIRECT",
-            "RULE-SET,      hoyo_etc,           HOYO_DIRECT",
-            "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
             "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
-            "RULE-SET,      hoyo_final,         HOYO_PROXY",
+            "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
+            "GEOSITE,       mihoyo-cn,          HOYO_DIRECT",
+            "GEOSITE,       mihoyo,             HOYO_PROXY",
         ],
         "proxy-groups": [
             {
