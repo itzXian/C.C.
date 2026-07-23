@@ -470,8 +470,8 @@ Units.hoyo = {
             "AND,((DST-PORT,8999),(NETWORK,tcp))",  // GI
         ]),
         hoyo_direct: buildRuleSet([
-            "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com",
-            "DOMAIN,minor-api-os.hoyoverse.com",
+            "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com", // don't know why but this reduces ping...?
+            //"DOMAIN,minor-api-os.hoyoverse.com",
             //"DOMAIN,asia-ugc-api.hoyoverse.com",
             //"DOMAIN,asia-ugc-upload.hoyoverse.com",
             //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
@@ -500,7 +500,12 @@ Units.hoyo = {
             icon: Icon.favicon("https://hoyoverse.com"),
         },
     ],
-    override: (config) => addNameserverPolicy(config, { "GEOSITE:hoyoverse": direct_dns }),
+    override: (config) => addNameserverPolicy(config, {
+        "RULE-SET:hoyo_direct": direct_dns,
+        "RULE-SET:hoyo_proxy": proxy_dns,
+        "GEOSITE:mihoyo-cn": direct_dns,
+        "GEOSITE:mihoyo": proxy_dns,
+    }),
 };
 
 Units.sbcz = {
