@@ -105,24 +105,6 @@ const buildGroup = (overrides) => ({
     ...overrides,
 });
 
-const buildExitProvider = (providers) => {
-    const exitProviders = {};
-    for (const [key, value] of Object.entries(providers)) {
-        if (value?.custom ?? "".includes("RELAY")) continue;
-        const exitProviderKey = `→${key}`;
-        const override = {
-            ...(value?.override ?? {}),
-            "dialer-proxy": "RELAY",
-            "additional-prefix": exitProviderKey,
-        };
-        exitProviders[exitProviderKey] = {
-            ...value,
-            override,
-        };
-    }
-    return exitProviders;
-};
-
 const relay_groups = [
         {
             name: "FALLBACK HKSG",
@@ -189,13 +171,13 @@ const exit_groups = [
         //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
 ].map(g => buildGroup(g));
 
-const buildGroupsWithProvider = (proxies = [], groups = [], providers = [], prefix = "", selector = "") => {
-    const hasProviders = hasValue(providers);
+const buildGroupsWithProvider = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
+    const hasProviders = hasValue(providerKeys);
     const proxyNames = hasValue(proxies) ? proxies.map(p => p.name) : [];
 
     const resultGroups = groups
     .map(g => ({
-        use:     providers,
+        use:     providerKeys,
         ...g,
         name:    `${prefix}${g.name}`,
         proxies: g?.proxies
@@ -209,7 +191,7 @@ const buildGroupsWithProvider = (proxies = [], groups = [], providers = [], pref
         type:    "select",
         filter:  buildRegex(Filter.all),
         proxies: [...resultGroups.map(g => g.name), ...proxyNames],
-        use:     providers,
+        use:     providerKeys,
         hidden:  false,
         icon:    selector.match(/.*EXIT.*/)
             ? Icon.wiki("commons/f/f2/Send_icon.svg")
@@ -219,39 +201,50 @@ const buildGroupsWithProvider = (proxies = [], groups = [], providers = [], pref
     return { resultGroups, resultSelectorGroup };
 };
 
+const buildGroupSection = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
+    const section = buildGroupsWithProvider(proxies, groups, providerKeys, prefix, selector);
+    if (providerKeys.length) {
+        const tempSelectorNames = providerKeys.map(key => {
+            const temp = buildGroupsWithProvider("", groups, [key], key, selector);
+            mergeInto(section, temp);
+            return temp.resultSelectorGroup[0].name;
+        });
+        section.resultSelectorGroup[0].proxies.unshift(...tempSelectorNames);
+    }
+    return section;
+};
+
+const buildExitProvider = (providers) => {
+    const exitProviders = {};
+    for (const [key, value] of Object.entries(providers)) {
+        if (value?.custom ?? "".includes("RELAY")) continue;
+        const exitProviderKey = `→${key}`;
+        const override = {
+            ...(value?.override ?? {}),
+            "dialer-proxy": "RELAY",
+            "additional-prefix": exitProviderKey,
+        };
+        exitProviders[exitProviderKey] = {
+            ...value,
+            override,
+        };
+    }
+    return exitProviders;
+};
+
 const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const hasProviders = hasValue(providers);
 
-    const base = buildGroupsWithProvider(proxies, relay_groups, Object.keys(providers), "", "RELAY");
-    if (hasProviders) {
-        const tempSelector = [];
-        for (const key of Object.keys(providers)) {
-            const temp = buildGroupsWithProvider("", relay_groups, [key], key, "RELAY");
-            mergeInto(base, temp);
-            tempSelector.push(temp.resultSelectorGroup[0].name);
+    const relay = buildGroupSection(proxies, relay_groups, Object.keys(providers), "", "RELAY");
 
-        }
-        base.resultSelectorGroup [0].proxies.unshift(...tempSelector);
-    }
-
-    const exitProviders    = hasProviders
+    const exitProviders = hasProviders
         ? buildExitProvider(providers)
         : buildExitProvider({ "provider-exit": { type: "inline", payload: proxies } });
-    const exit = buildGroupsWithProvider(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
-    if (hasProviders) {
-        const tempSelector = [];
-        for (const key of Object.keys(exitProviders)) {
-            const temp = buildGroupsWithProvider("", exit_groups, [key], key, "EXIT");
-            mergeInto(exit, temp);
-            tempSelector.push(temp.resultSelectorGroup[0].name);
-
-        }
-        exit.resultSelectorGroup [0].proxies.unshift(...tempSelector);
-    }
+    const exit = buildGroupSection(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
 
     const orderedGroups = config_exit_provider?.enable
-        ? [...exit.resultSelectorGroup, ...base.resultSelectorGroup, ...exit.resultGroups, ...base.resultGroups]
-        : [...base.resultGroups];
+        ? [...exit.resultSelectorGroup, ...relay.resultSelectorGroup, ...exit.resultGroups, ...relay.resultGroups]
+        : [...relay.resultGroups];
     const proxyGroupNames = orderedGroups.map(g => g.name);
     const prebuiltProxies = {
         selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
