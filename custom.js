@@ -1036,10 +1036,11 @@ Units.tailscale = {
         tailscale: buildRuleSet([
             "*.ts.net",
             "*.*.ts.net",
-            "100.*.*.*",
         ], { behavior: "domain" }),
     },
     "rules": [
+        // https://tailscale.com/docs/reference/ip-pool
+        "IP-CIDR,       100.64.0.0/10,      TAILSCALE,       no-resolve",
         "RULE-SET,      tailscale,          TAILSCALE",
     ],
     "proxy-groups": [
