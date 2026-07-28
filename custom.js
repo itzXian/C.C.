@@ -214,10 +214,18 @@ const buildGroupSection = (proxies = [], groups = [], providerKeys = [], prefix 
     return section;
 };
 
-const buildExitProvider = (providers) => {
+const excludeProviders = (providers = {}, filter = "") => {
+    const resultProviders = {};
+    for (const [key, value] of Object.entries(providers)) {
+        if ((value?.custom ?? "").includes(filter)) continue;
+        resultProviders[key] = { ...value };
+    }
+    return resultProviders;
+};
+
+const buildExitProviders = (providers) => {
     const exitProviders = {};
     for (const [key, value] of Object.entries(providers)) {
-        if (value?.custom ?? "".includes("RELAY")) continue;
         const exitProviderKey = `→${key}`;
         const override = {
             ...(value?.override ?? {}),
@@ -235,11 +243,14 @@ const buildExitProvider = (providers) => {
 const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const hasProviders = hasValue(providers);
 
-    const relay = buildGroupSection(proxies, relay_groups, Object.keys(providers), "", "RELAY");
+    const relayProviders = hasProviders
+        ? excludeProviders(providers, "EXIT")
+        : {};
+    const relay = buildGroupSection(proxies, relay_groups, Object.keys(relayProviders), "", "RELAY");
 
     const exitProviders = hasProviders
-        ? buildExitProvider(providers)
-        : buildExitProvider({ "provider-exit": { type: "inline", payload: proxies } });
+        ? buildExitProviders(excludeProviders(providers, "RELAY"))
+        : buildExitProviders({ "provider-exit": { type: "inline", payload: proxies } });
     const exit = buildGroupSection(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
 
     const orderedGroups = config_exit_provider?.enable
@@ -263,7 +274,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     return {
         prebuiltProxies,
         prebuiltGroups: [...orderedGroups, ...selectorGroup],
-        prebuiltProviders: { ...providers, ...(config_exit_provider?.enable ? exitProviders : {}) }
+        prebuiltProviders: { ...relayProviders, ...(config_exit_provider?.enable ? exitProviders : {}) }
     };
 };
 
