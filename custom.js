@@ -124,6 +124,7 @@ const relay_groups = [
         { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
         { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
 ].map(g => buildGroup(g));
+
 const exit_groups = [
         {
             name: "FALLBACK JP",
@@ -324,7 +325,7 @@ const addNameserverPolicy = (config, obj) => {
 
 const Units = {
 /*
-    example: {
+    unit1: {
         "rule-providers": {},
         rules:            [],
         "sub-rules":      {},
@@ -332,6 +333,8 @@ const Units = {
         override:         (args) => fn(args),
         overrideFinal:    (args) => fn(args),
     },
+    unit2: { ... },
+    unit3: { ... },
 */
 };
 const config_base = {
