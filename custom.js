@@ -1071,8 +1071,8 @@ Units.tailscale = {
     overrideFinal: (config) => Object.assign(config["proxy-providers"], {tailscale: tailscale_proxy_providers}),
 };
 
-const applyConfig = (config, keys = []) => {
-    const units = {
+const applyConfig = (config, options = []) => {
+    const mergedUnit = {
         "rule-providers": {},
         rules:            [],
         "sub-rules":      {},
@@ -1081,20 +1081,20 @@ const applyConfig = (config, keys = []) => {
         overrideFinal:    [],
     };
 
-    for (const key of keys) {
-        if (!Units[key]) {
-            console.warn(`[applyConfig] Unknown key: "${key}"`);
+    for (const option of options) {
+        if (!Units[option]) {
+            console.warn(`[applyConfig] Unknown option: "${option}"`);
             continue;
         }
-        mergeInto(units, Units[key]);
+        mergeInto(mergedUnit, Units[option]);
     }
 
-    units.override.forEach(fn => fn(config));
+    mergedUnit.override.forEach(fn => fn(config));
 
     const base = buildProxiesGroupsProviders(config.proxies, config["proxy-providers"]);
 
-    units["proxy-providers"] = base.prebuiltProviders;
-    units["proxy-groups"] = units["proxy-groups"].map(g => {
+    mergedUnit["proxy-providers"] = base.prebuiltProviders;
+    mergedUnit["proxy-groups"] = mergedUnit["proxy-groups"].map(g => {
         const group = buildGroup({ ...g, type: "select", hidden: false });
         if (!hasValue(group.proxies)) {
             group.proxies = base.prebuiltProxies.selectFirst;
@@ -1103,15 +1103,15 @@ const applyConfig = (config, keys = []) => {
         }
         return group;
     });
-    units["proxy-groups"].unshift(...base.prebuiltGroups);
+    mergedUnit["proxy-groups"].unshift(...base.prebuiltGroups);
 
-    for (const key of Object.keys(units)) {
+    for (const key of Object.keys(mergedUnit)) {
         if (key !== "override" && key !== "overrideFinal") {
-            config[key] = units[key];
+            config[key] = mergedUnit[key];
         }
     }
 
-    units.overrideFinal.forEach(fn => fn(config))
+    mergedUnit.overrideFinal.forEach(fn => fn(config))
 };
 
 /* ========== Entry Point ========== */
