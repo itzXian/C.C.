@@ -59,10 +59,10 @@ const Filter = {
     all:     "",
 };
 
-const buildRegex = (includeTerm, excludeTerm = Filter.exclude) =>
-    includeTerm
-        ? `^(?=.*(${includeTerm}))(?!.*${excludeTerm}).*$`
-        : `^((?!.*${excludeTerm}).)*$`;
+const buildRegex = (include, exclude = Filter.exclude) =>
+    include
+        ? `^(?=.*(${include}))(?!.*${exclude}).*$`
+        : `^((?!.*${exclude}).)*$`;
 
 const hasValue = (value) => {
     if (value == null)             return false;
