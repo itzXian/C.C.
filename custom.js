@@ -171,11 +171,12 @@ const exit_groups = [
         //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
 ].map(g => buildGroup(g));
 
-const buildGroupsWithProvider = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
+const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
     const hasProviders = hasValue(providerKeys);
     const proxyNames = hasValue(proxies) ? proxies.map(p => p.name) : [];
 
-    const resultGroups = groups
+    const result = {};
+    result.groups = groups
     .map(g => ({
         use:     providerKeys,
         ...g,
@@ -186,11 +187,11 @@ const buildGroupsWithProvider = (proxies = [], groups = [], providerKeys = [], p
     }))
     .filter(g => (hasProviders || hasValue(g.proxies)));
 
-    const resultSelectorGroup = [{
+    result.selectors = [{
         name:    `${prefix}${selector}`,
         type:    "select",
         filter:  buildRegex(Filter.all),
-        proxies: [...resultGroups.map(g => g.name), ...proxyNames],
+        proxies: [...result.groups.map(g => g.name), ...proxyNames],
         use:     providerKeys,
         hidden:  false,
         icon:    selector.match(/.*EXIT.*/)
@@ -198,20 +199,20 @@ const buildGroupsWithProvider = (proxies = [], groups = [], providerKeys = [], p
             : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
-    return { resultGroups, resultSelectorGroup };
+    return result;
 };
 
-const buildGroupSection = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
-    const section = buildGroupsWithProvider(proxies, groups, providerKeys, prefix, selector);
+const buildGroupsWithProvidersWrapper = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
+    const result = buildGroupsWithProviders(proxies, groups, providerKeys, prefix, selector);
     if (providerKeys.length) {
         const tempSelectorNames = providerKeys.map(key => {
-            const temp = buildGroupsWithProvider("", groups, [key], key, selector);
-            mergeInto(section, temp);
-            return temp.resultSelectorGroup[0].name;
+            const temp = buildGroupsWithProviders("", groups, [key], key, selector);
+            mergeInto(result, temp);
+            return temp.selectors[0].name;
         });
-        section.resultSelectorGroup[0].proxies.unshift(...tempSelectorNames);
+        result.selectors[0].proxies.unshift(...tempSelectorNames);
     }
-    return section;
+    return result;
 };
 
 const excludeProviders = (providers = {}, filter = "") => {
@@ -246,26 +247,26 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const relayProviders = hasProviders
         ? excludeProviders(providers, "EXIT")
         : {};
-    const relay = buildGroupSection(proxies, relay_groups, Object.keys(relayProviders), "", "RELAY");
+    const relay = buildGroupsWithProvidersWrapper(proxies, relay_groups, Object.keys(relayProviders), "", "RELAY");
 
     const exitProviders = hasProviders
         ? buildExitProviders(excludeProviders(providers, "RELAY"))
         : buildExitProviders({ "provider-exit": { type: "inline", payload: proxies } });
-    const exit = buildGroupSection(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
+    const exit = buildGroupsWithProvidersWrapper(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
 
-    const orderedGroups = config_exit_provider?.enable
-        ? [...exit.resultSelectorGroup, ...relay.resultSelectorGroup, ...exit.resultGroups, ...relay.resultGroups]
-        : [...relay.resultGroups];
-    const proxyGroupNames = orderedGroups.map(g => g.name);
+    const groups = config_exit_provider?.enable
+        ? [...exit.selectors, ...relay.selectors, ...exit.groups, ...relay.groups]
+        : [...relay.groups];
+    const groupNames = groups.map(g => g.name);
     const prebuiltProxies = {
-        selectFirst: ["SELECTOR", ...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
+        selectFirst: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
         rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
         directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
     };
-    const selectorGroup = [
+    const selectors = [
         {
             name: "SELECTOR",
-            proxies: [...proxyGroupNames, "PASS", "DIRECT", "REJECT"],
+            proxies: [...groupNames, "PASS", "DIRECT", "REJECT"],
             "include-all": true,
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
@@ -273,7 +274,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
 
     return {
         prebuiltProxies,
-        prebuiltGroups: [...orderedGroups, ...selectorGroup],
+        prebuiltGroups: [...groups, ...selectors],
         prebuiltProviders: { ...relayProviders, ...(config_exit_provider?.enable ? exitProviders : {}) }
     };
 };
