@@ -690,11 +690,11 @@ Units.ehentai = {
 
 Units.ehentai_media = {
     "rules": [
-        "DOMAIN-SUFFIX, hath.network,       HATH_NETWORK",
+        "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA",
     ],
     "proxy-groups": [
         {
-            name: "HATH_NETWORK",
+            name: "EHENTAI_MEDIA",
             proxies: "relayFirst",
             "include-all": true,
             icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
@@ -921,17 +921,11 @@ Units.telegram = {
 
 Units.telegram_media = {
     "rules": [
-        "IP-CIDR,       91.108.56.200/32,   TG_IMG,    no-resolve",
-        "IP-CIDR,       91.108.56.200/32,   TG_VID,    no-resolve",
+        "IP-CIDR,       91.108.56.200/32,   TELEGRAMG_MEDIA,    no-resolve",
     ],
     "proxy-groups": [
         {
-            name: "TG_IMG",
-            proxies: "relayFirst",
-            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
-        },
-        {
-            name: "TG_VID",
+            name: "TELEGRAMG_MEDIA",
             proxies: "relayFirst",
             icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
         },
