@@ -20,20 +20,26 @@ const options = [
     "downloader",
     "hoyo",
     "sbcz",
+    "ehentai_media",
     "ehentai",
     "ad",
+    "pixiv_media",
     "pixiv",
     "ai",
     "steam_cn",
     "steam",
     "github",
     "microsoft",
+    "youtube_media",
     "youtube",
     "google_fcm",
     "google",
     "apple",
+    "twitter_media",
     "twitter",
+    "telegram_media",
     "telegram",
+    "discord_meida",
     "discord",
     "tiktok",
     "non_jp",
@@ -655,15 +661,9 @@ Units.downloader = {
 
 Units.ehentai = {
     "rules": [
-        "DOMAIN-SUFFIX, hath.network,       HATH_NETWORK",
         "GEOSITE,       ehentai,            EHENTAI",
     ],
     "proxy-groups": [
-        {
-            name: "HATH_NETWORK",
-            "include-all": true,
-            icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
-        },
         {
             name: "EHENTAI",
             "include-all": true,
@@ -671,6 +671,19 @@ Units.ehentai = {
         },
     ],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
+};
+
+Units.ehentai_media = {
+    "rules": [
+        "DOMAIN-SUFFIX, hath.network,       HATH_NETWORK",
+    ],
+    "proxy-groups": [
+        {
+            name: "HATH_NETWORK",
+            "include-all": true,
+            icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
+        },
+    ],
 };
 
 Units.github = {
@@ -727,16 +740,23 @@ Units.steam = {
 
 Units.pixiv = {
     "rules": [
-        "DOMAIN-SUFFIX, pximg.net,          PXIMG",
         "GEOSITE,       pixiv,              PIXIV",
     ],
     "proxy-groups": [
         {
-            name: "PXIMG",
+            name: "PIXIV",
             icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
         },
+    ],
+};
+
+Units.pixiv_media = {
+    "rules": [
+        "DOMAIN-SUFFIX, pximg.net,          PIXIV_MEDIA",
+    ],
+    "proxy-groups": [
         {
-            name: "PIXIV",
+            name: "PIXIV_MEDIA",
             icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
         },
     ],
@@ -757,16 +777,23 @@ Units.ai = {
 
 Units.youtube = {
     "rules": [
-        "DOMAIN-SUFFIX, googlevideo.com,    GOOGLE_VIDEO",
+        "GEOSITE,       youTube,            YOUTUBE",
+    ],
+    "proxy-groups": [
+        {
+            name: "YOUTUBE",
+            icon: Icon.favicon("https://youtube.com"),
+        },
+    ],
+};
+
+Units.youtube_media = {
+    "rules": [
         "GEOSITE,       youTube,            YOUTUBE",
     ],
     "proxy-groups": [
         {
             name: "GOOGLE_VIDEO",
-            icon: Icon.favicon("https://youtube.com"),
-        },
-        {
-            name: "YOUTUBE",
             icon: Icon.favicon("https://youtube.com"),
         },
     ],
@@ -824,8 +851,8 @@ Units.google_fcm = {
 
 Units.google = {
     "rules": [
-        "GEOIP,         google,             GOOGLE,          no-resolve",
         "GEOSITE,       google,             GOOGLE",
+        "GEOIP,         google,             GOOGLE,          no-resolve",
     ],
     "proxy-groups": [
         {
@@ -837,17 +864,24 @@ Units.google = {
 
 Units.twitter = {
     "rules": [
-        "DOMAIN-SUFFIX, twimg.com,          TWIMG",
         "GEOSITE,       twitter,            TWITTER",
         "GEOIP,         twitter,            TWITTER,         no-resolve",
     ],
     "proxy-groups": [
         {
-            name: "TWIMG",
+            name: "TWITTER",
             icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
         },
+    ],
+};
+
+Units.twitter_media = {
+    "rules": [
+        "DOMAIN-SUFFIX, twimg.com,          TWITTER_MEDIA",
+    ],
+    "proxy-groups": [
         {
-            name: "TWITTER",
+            name: "TWITTER_MEDIA",
             icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
         },
     ],
@@ -856,15 +890,10 @@ Units.twitter = {
 
 Units.telegram = {
     "rules": [
-        "IP-CIDR,       91.108.56.200/32,   TG_RESOURCES,    no-resolve",
-        "GEOIP,         telegram,           TELEGRAM,        no-resolve",
         "GEOSITE,       telegram,           TELEGRAM",
+        "GEOIP,         telegram,           TELEGRAM,        no-resolve",
     ],
     "proxy-groups": [
-        {
-            name: "TG_RESOURCES",
-            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
-        },
         {
             name: "TELEGRAM",
             icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
@@ -872,22 +901,46 @@ Units.telegram = {
     ],
 };
 
-Units.discord = {
+Units.telegram_media = {
     "rules": [
-        "DOMAIN,        cdn.discordapp.com, DISCORD_CDN",
-        "GEOSITE,       discord,            DISCORD",
+        "IP-CIDR,       91.108.56.200/32,   TG_IMG,    no-resolve",
+        "IP-CIDR,       91.108.56.200/32,   TG_VID,    no-resolve",
     ],
     "proxy-groups": [
         {
-            name: "DISCORD_CDN",
-            icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
+            name: "TG_IMG",
+            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
         },
+        {
+            name: "TG_VID",
+            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
+        },
+    ],
+};
+
+Units.discord = {
+    "rules": [
+        "GEOSITE,       discord,            DISCORD",
+    ],
+    "proxy-groups": [
         {
             name: "DISCORD",
             icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
         },
     ],
     override: (config) => addNameserverPolicy(config, { "cdn.discordapp.com": proxy_dns }),
+};
+
+Units.discord_meida = {
+    "rules": [
+        "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA",
+    ],
+    "proxy-groups": [
+        {
+            name: "DISCORD_MEDIA",
+            icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
+        },
+    ],
 };
 
 Units.apple = {
