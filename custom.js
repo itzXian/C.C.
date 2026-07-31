@@ -513,6 +513,7 @@ Units.hoyo = {
     "proxy-groups": [
         {
             name: "HOYO_PROXY",
+            proxies: "relayFirst",
             url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
             icon: Icon.favicon("https://hoyoverse.com"),
         },
