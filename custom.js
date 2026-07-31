@@ -211,7 +211,7 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
 
 const buildGroupsWithProvidersWrapper = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
     const result = buildGroupsWithProviders(proxies, groups, providerKeys, prefix, selector);
-    if (providerKeys.length) {
+    if (hasValue(providerKeys)) {
         const tempSelectorNames = providerKeys.map(key => {
             const temp = buildGroupsWithProviders("", groups, [key], key, selector);
             mergeInto(result, temp);
@@ -254,22 +254,25 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const relayProviders = hasProviders
         ? excludeProviders(providers, "EXIT")
         : {};
-    const relay = buildGroupsWithProvidersWrapper(proxies, relay_groups, Object.keys(relayProviders), "", "RELAY");
+    const relayProviderKeys = Object.keys(relayProviders);
+    const relay = relayProviderKeys.length > 1
+        ? buildGroupsWithProvidersWrapper(proxies, relay_groups, relayProviderKeys, "", "RELAY")
+        : buildGroupsWithProviders       (proxies, relay_groups, relayProviderKeys, "", "RELAY")
 
     const exitProviders = hasProviders
         ? buildExitProviders(excludeProviders(providers, "RELAY"))
         : buildExitProviders({ "provider-exit": { type: "inline", payload: proxies } });
-    const exit = buildGroupsWithProvidersWrapper(proxies, exit_groups, Object.keys(exitProviders), "→", "EXIT");
+    const exitProviderKeys = Object.keys(exitProviders);
+    const exit = exitProviderKeys.length > 1
+        ? buildGroupsWithProvidersWrapper(proxies, exit_groups, exitProviderKeys, "→", "EXIT")
+        : buildGroupsWithProviders       (proxies, exit_groups, exitProviderKeys, "→", "EXIT")
 
     const groups = config_exit_provider?.enable
         ? [...exit.selectors, ...relay.selectors, ...exit.groups, ...relay.groups]
         : [...relay.groups];
-    const groupNames = groups.map(g => g.name);
-    const prebuiltProxies = {
-        selectFirst: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
-        rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
-        directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
-    };
+    const buildGroupNames = (groups) => groups.map(g => g.name);
+    const groupNames = buildGroupNames(groups);
+
     const selectors = [
         {
             name: "SELECTOR",
@@ -278,6 +281,16 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
+
+    const prebuiltProxies = {
+        selectFirst: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
+        rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
+        directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
+        relayFirst:  (config_exit_provider?.enable
+            ? buildGroupNames([...relay.selectors, ...selectors, ...exit.selectors, ...relay.groups, ...exit.groups])
+            : buildGroupNames([...relay.groups, ...selectors])
+        ).concat(["PASS", "DIRECT", "REJECT"]),
+    };
 
     return {
         prebuiltProxies,
@@ -652,6 +665,7 @@ Units.downloader = {
     "proxy-groups": [
         {
             name: "DOWNLOADER",
+            proxies: "relayFirst",
             "include-all": true,
             icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
         },
@@ -680,6 +694,7 @@ Units.ehentai_media = {
     "proxy-groups": [
         {
             name: "HATH_NETWORK",
+            proxies: "relayFirst",
             "include-all": true,
             icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
         },
@@ -694,6 +709,7 @@ Units.github = {
     "proxy-groups": [
         {
             name: "GITHUB",
+            proxies: "relayFirst",
             "include-all": true,
             icon: Icon.wiki("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
         },
@@ -794,6 +810,7 @@ Units.youtube_media = {
     "proxy-groups": [
         {
             name: "GOOGLE_VIDEO",
+            proxies: "relayFirst",
             icon: Icon.favicon("https://youtube.com"),
         },
     ],
@@ -909,10 +926,12 @@ Units.telegram_media = {
     "proxy-groups": [
         {
             name: "TG_IMG",
+            proxies: "relayFirst",
             icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
         },
         {
             name: "TG_VID",
+            proxies: "relayFirst",
             icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
         },
     ],
@@ -938,6 +957,7 @@ Units.discord_meida = {
     "proxy-groups": [
         {
             name: "DISCORD_MEDIA",
+            proxies: "relayFirst",
             icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
         },
     ],
@@ -970,6 +990,7 @@ Units.non_jp = {
     "proxy-groups": [
         {
             name: "NON_JP",
+            proxies: "relayFirst",
             icon: Icon.wiki("commons/4/45/Wikimania2019_flower_icon.svg"),
         },
     ],
