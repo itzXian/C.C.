@@ -272,6 +272,18 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         : [...relay.groups];
     const buildGroupNames = (groups) => groups.map(g => g.name);
     const groupNames = buildGroupNames(groups);
+    const buildPeferGroups = (groups, filter) => {
+        const highPriority = [];
+        const lowPriority  = [];
+        groups.map(g => {
+            if (g.match(filter)) {
+                highPriority.push(g);
+            } else {
+                lowPriority.push(g);
+            }
+        });
+        return [...highPriority, ...lowPriority];
+    }
 
     const selectors = [
         {
@@ -290,6 +302,8 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             ? buildGroupNames([...relay.selectors, ...selectors, ...exit.selectors, ...relay.groups, ...exit.groups])
             : buildGroupNames([...relay.groups, ...selectors])
         ).concat(["PASS", "DIRECT", "REJECT"]),
+        hksgFirst:   buildPeferGroups(groupNames, /(HK|SG)/),
+        lbrrFirst:   buildPeferGroups(groupNames, /(LBRR)/),
     };
 
     return {
@@ -642,6 +656,7 @@ Units.browser = {
     "proxy-groups": [
         {
             name: "BROWSER",
+            proxies: "hksgFirst",
             "include-all": true,
             icon: Icon.wiki("commons/0/08/Internet-icon.svg"),
         },
@@ -666,7 +681,7 @@ Units.downloader = {
     "proxy-groups": [
         {
             name: "DOWNLOADER",
-            proxies: "relayFirst",
+            proxies: "lbrrFirst",
             "include-all": true,
             icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
         },
