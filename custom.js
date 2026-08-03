@@ -325,15 +325,8 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const buildGroupNames = (groups) => groups.map(g => g.name);
     const groupNames = buildGroupNames(groups);
     const buildPeferGroups = (groups, filter) => {
-        const highPriority = [];
-        const lowPriority  = [];
-        groups.map(g => {
-            if (g.match(filter)) {
-                highPriority.push(g);
-            } else {
-                lowPriority.push(g);
-            }
-        });
+        const highPriority = groups.filter(g => g.match(filter));
+        const lowPriority  = groups.filter(g => !g.match(filter));
         return [...highPriority, ...lowPriority];
     }
 
