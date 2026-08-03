@@ -112,71 +112,122 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-        {
-            name: "FALLBACK HKSG",
-            type: "fallback",
-            filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-            proxies: ["AUTO HK", "AUTO SG"],
-        },
-        { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")), strategy: "consistent-hashing", timeout: 500 },
-        //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
-        { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp) },
-        { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk) },
-        { name: "AUTO SG",   type: "url-test", filter: buildRegex(Filter.sg) },
-        { name: "AUTO AU",   type: "url-test", filter: buildRegex(Filter.au) },
-        { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us) },
-        //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
-        { name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
-        { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
-        { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
-].map(g => buildGroup(g));
+    {
+        name: "FALLBACK HKSG",
+        type: "fallback",
+        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
+        proxies: ["AUTO HK", "AUTO SG"],
+    },
+    {
+        name: "FALLBACK JP",
+        type: "url-test",
+        filter: buildRegex(Filter.jp),
+        proxies: ["AUTO JP"],
+    },
+    {
+        name: "FALLBACK US",
+        type: "fallback",
+        filter: buildRegex(Filter.us),
+        proxies: ["AUTO US"],
+    },
+    {
+        name: "LBCH HKSG",
+        type: "load-balance",
+        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+    {
+        name: "LBCH JP",
+        type: "load-balance",
+        filter: buildRegex(Filter.jp),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+    {
+        name: "LBCH US",
+        type: "load-balance",
+        filter: buildRegex(Filter.us),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
+    { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
+    { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
+    { name: "AUTO SG",   type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
+    //{ name: "AUTO AU",   type: "url-test", filter: buildRegex(Filter.au) },
+    { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us), hidden: true },
+    //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+    //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
+    { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
+    { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
+];
 
 const exit_groups = [
-        {
-            name: "FALLBACK JP",
-            type: "fallback",
-            filter: buildRegex(Filter.jp),
-            proxies: ["AUTO JP (1X)", "AUTO JP"],
-        },
-        {
-            name: "FALLBACK HKSG",
-            type: "fallback",
-            filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-            proxies: ["AUTO HK", "AUTO SG"],
-        },
-        {
-            name: "LBCH JP",
-            type: "load-balance",
-            filter: buildRegex(Filter.jp),
-            strategy: "consistent-hashing",
-            timeout: 500,
-        },
-        {
-            name: "LBCH JP (1X)",
-            type: "load-balance",
-            filter: buildRegex(Filter.jp),
-            "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
-            strategy: "consistent-hashing",
-            timeout: 500,
-        },
-        {
-            name: "LBCH HKSG",
-            type: "load-balance",
-            filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-            strategy: "consistent-hashing",
-            timeout: 500,
-        },
-        {
-            name: "AUTO JP (1X)",
-            type: "url-test",
-            filter: buildRegex(Filter.jp),
-            "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
-        },
-        { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp) },
-        { name: "AUTO HK",       type: "url-test", filter: buildRegex(Filter.hk) },
-        { name: "AUTO SG",       type: "url-test", filter: buildRegex(Filter.sg) },
-        //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
-].map(g => buildGroup(g));
+    {
+        name: "FALLBACK JP",
+        type: "fallback",
+        filter: buildRegex(Filter.jp),
+        proxies: ["AUTO JP"],
+    },
+    {
+    name: "FALLBACK HKSG",
+    type: "fallback",
+    filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
+        proxies: ["AUTO HK", "AUTO SG"],
+    },
+    {
+        name: "FALLBACK US",
+        type: "fallback",
+        filter: buildRegex(Filter.us),
+        proxies: ["AUTO US"],
+    },
+    {
+        name: "LBCH JP",
+        type: "load-balance",
+        filter: buildRegex(Filter.jp),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+/*
+    {
+        name: "LBCH JP (1X)",
+        type: "load-balance",
+        filter: buildRegex(Filter.jp),
+        "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+*/
+    {
+        name: "LBCH HKSG",
+        type: "load-balance",
+        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+    {
+        name: "LBCH US",
+        type: "load-balance",
+        filter: buildRegex(Filter.us),
+        strategy: "consistent-hashing",
+        timeout: 500,
+    },
+/*
+    {
+        name: "AUTO JP (1X)",
+        type: "url-test",
+        filter: buildRegex(Filter.jp),
+        "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
+        hidden: true,
+    },
+*/
+    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
+    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
+    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
+    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true },
+    //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+];
 
 const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
     const hasProviders = hasValue(providerKeys);
@@ -198,7 +249,7 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
         name:    `${prefix}${selector}`,
         type:    "select",
         filter:  buildRegex(Filter.all),
-        proxies: [...result.groups.map(g => g.name), ...proxyNames],
+        proxies: [...result.groups.filter(g => !g?.hidden).map(g => g.name ), ...proxyNames],
         use:     providerKeys,
         hidden:  false,
         icon:    selector.match(/.*EXIT.*/)
@@ -206,6 +257,7 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
             : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
+    result.groups = result.groups.map(g => buildGroup(g));
     return result;
 };
 
@@ -302,7 +354,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             ? buildGroupNames([...relay.selectors, ...selectors, ...exit.selectors, ...relay.groups, ...exit.groups])
             : buildGroupNames([...relay.groups, ...selectors])
         ).concat(["PASS", "DIRECT", "REJECT"]),
-        hksgFirst:   buildPeferGroups(groupNames, /(HK|SG)/),
+        hksgFirst:   buildPeferGroups(groupNames, /(HKSG)/),
         lbrrFirst:   buildPeferGroups(groupNames, /(LBRR)/),
     };
 
