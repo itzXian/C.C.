@@ -895,11 +895,11 @@ Units.telegram = {
 
 Units.telegram_media = {
     "rules": [
-        "IP-CIDR,       91.108.56.200/32,   TELEGRAMG_MEDIA,    no-resolve",
+        "IP-CIDR,       91.108.56.200/32,   TELEGRAM_MEDIA,    no-resolve",
     ],
     "proxy-groups": [
         {
-            name: "TELEGRAMG_MEDIA",
+            name: "TELEGRAM_MEDIA",
             proxies: "relayFirst",
             icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
         },
