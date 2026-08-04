@@ -49,6 +49,27 @@ const options = [
     "final",
 ];
 
+/* ========== Help Functions ========== */
+const hasValue = (value) => {
+    if (value == null)             return false;
+    if (typeof value === "string") return value.trim() !== "";
+    if (Array.isArray(value))      return value.length > 0;
+    if (typeof value === "object") return Object.keys(value).length > 0;
+    return true;
+};
+
+const mergeInto = (target, source) => {
+    for (const key of Object.keys(source)) {
+        if (Array.isArray(target[key])) {
+            target[key] = target[key].concat(source[key]);
+        } else if (typeof target[key] === "object") {
+            Object.assign(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+};
+
 /* ========== Build Proxy Groups ========== */
 const Filter = {
     hk:      "香港|HK|Hong|🇭🇰",
@@ -69,26 +90,6 @@ const buildRegex = (include, exclude = Filter.exclude) =>
     include
         ? `^(?=.*(${include}))(?!.*${exclude}).*$`
         : `^((?!.*${exclude}).)*$`;
-
-const hasValue = (value) => {
-    if (value == null)             return false;
-    if (typeof value === "string") return value.trim() !== "";
-    if (Array.isArray(value))      return value.length > 0;
-    if (typeof value === "object") return Object.keys(value).length > 0;
-    return true;
-};
-
-const mergeInto = (target, source) => {
-    for (const key of Object.keys(source)) {
-        if (Array.isArray(target[key])) {
-            target[key] = target[key].concat(source[key]);
-        } else if (typeof target[key] === "object") {
-            Object.assign(target[key], source[key]);
-        } else {
-            target[key] = source[key];
-        }
-    }
-};
 
 const Icon = {
     github:  (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`,
@@ -315,7 +316,7 @@ const addNameserverPolicy = (config, obj) => {
 };
 
 const Units = {
-/*
+    /*
     unit1: {
         "rule-providers": {},
         rules:            [],
@@ -326,8 +327,9 @@ const Units = {
     },
     unit2: { ... },
     unit3: { ... },
-*/
+    */
 };
+
 const config_base = {
     "mixed-port":          7890,
     "allow-lan":           true,
