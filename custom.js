@@ -99,7 +99,7 @@ const Icon = {
 };
 
 const buildGroup = (overrides) => ({
-    name:              overrides.name, // keep the name first, for easier viewing
+    name:              overrides.name,
     hidden:            true,
     url:               "https://www.google.com/generate_204",
     "expected-status": "200/204/302",
@@ -1109,7 +1109,7 @@ Units.tailscale = {
         },
     ],
     override: (config) => tailscale_override(config),
-    overrideFinal: (config) => Object.assign(config["proxy-providers"], {tailscale: tailscale_proxy_providers}),
+    overrideFinal: (config) => Object.assign(config["proxy-providers"], { tailscale: tailscale_proxy_providers }),
 };
 
 const applyConfig = (config, options = []) => {
