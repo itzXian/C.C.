@@ -120,7 +120,7 @@ const relay_groups = [
     },
     {
         name: "FALLBACK JP",
-        type: "url-test",
+        type: "fallback",
         filter: buildRegex(Filter.jp),
         proxies: ["AUTO JP"],
     },
@@ -151,13 +151,12 @@ const relay_groups = [
         strategy: "consistent-hashing",
         timeout: 500,
     },
-    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
     { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
     { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
     { name: "AUTO SG",   type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
-    //{ name: "AUTO AU",   type: "url-test", filter: buildRegex(Filter.au) },
     { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us), hidden: true },
     //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
+    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
     //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
     { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
     { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
@@ -171,9 +170,9 @@ const exit_groups = [
         proxies: ["AUTO JP"],
     },
     {
-    name: "FALLBACK HKSG",
-    type: "fallback",
-    filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
+        name: "FALLBACK HKSG",
+        type: "fallback",
+        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
         proxies: ["AUTO HK", "AUTO SG"],
     },
     {
@@ -226,7 +225,6 @@ const exit_groups = [
     { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
     { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
     { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true },
-    //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
 ];
 
 const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
