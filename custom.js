@@ -112,115 +112,32 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-    {
-        name: "FALLBACK HKSG",
-        type: "fallback",
-        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-        proxies: ["AUTO HK", "AUTO SG"],
-    },
-    {
-        name: "FALLBACK JP",
-        type: "fallback",
-        filter: buildRegex(Filter.jp),
-        proxies: ["AUTO JP"],
-    },
-    {
-        name: "FALLBACK US",
-        type: "fallback",
-        filter: buildRegex(Filter.us),
-        proxies: ["AUTO US"],
-    },
-    {
-        name: "LBCH HKSG",
-        type: "load-balance",
-        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-    {
-        name: "LBCH JP",
-        type: "load-balance",
-        filter: buildRegex(Filter.jp),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-    {
-        name: "LBCH US",
-        type: "load-balance",
-        filter: buildRegex(Filter.us),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-    { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
-    { name: "AUTO HK",   type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
-    { name: "AUTO SG",   type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
-    { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us), hidden: true },
+    { name: "FLBK HKSG", type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), proxies: ["AUTO HK", "AUTO SG"] },
+    { name: "FLBK JP",   type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
+    { name: "FLBK US",   type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
+    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500 },
+    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
+    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
+    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
+    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true },
     //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
-    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")) },
+    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`) },
     //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
     { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
     { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
 ];
 
 const exit_groups = [
-    {
-        name: "FALLBACK JP",
-        type: "fallback",
-        filter: buildRegex(Filter.jp),
-        proxies: ["AUTO JP"],
-    },
-    {
-        name: "FALLBACK HKSG",
-        type: "fallback",
-        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-        proxies: ["AUTO HK", "AUTO SG"],
-    },
-    {
-        name: "FALLBACK US",
-        type: "fallback",
-        filter: buildRegex(Filter.us),
-        proxies: ["AUTO US"],
-    },
-    {
-        name: "LBCH JP",
-        type: "load-balance",
-        filter: buildRegex(Filter.jp),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-/*
-    {
-        name: "LBCH JP (1X)",
-        type: "load-balance",
-        filter: buildRegex(Filter.jp),
-        "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-*/
-    {
-        name: "LBCH HKSG",
-        type: "load-balance",
-        filter: buildRegex(["hk", "sg"].map(e => Filter[e]).join("|")),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-    {
-        name: "LBCH US",
-        type: "load-balance",
-        filter: buildRegex(Filter.us),
-        strategy: "consistent-hashing",
-        timeout: 500,
-    },
-/*
-    {
-        name: "AUTO JP (1X)",
-        type: "url-test",
-        filter: buildRegex(Filter.jp),
-        "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
-        hidden: true,
-    },
-*/
+    { name: "FLBK JP",   type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
+    { name: "FLBK HKSG", type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), proxies: ["AUTO HK", "AUTO SG"] },
+    { name: "FLBK US",   type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
+    //{ name: "LBCH JP (1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500 },
+    //{ name: "AUTO JP (1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", hidden: true },
     { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
     { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true },
     { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true },
@@ -255,7 +172,6 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
             : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
-    result.groups = result.groups.map(g => buildGroup(g));
     return result;
 };
 
@@ -320,7 +236,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const groups = config_exit_provider?.enable
         ? [...exit.selectors, ...relay.selectors, ...exit.groups, ...relay.groups]
         : [...relay.groups];
-    const buildGroupNames = (groups) => groups.map(g => g.name);
+    const buildGroupNames = (groups) => groups.filter(g => !g?.hidden).map(g => g.name);
     const groupNames = buildGroupNames(groups);
     const buildPeferGroups = (groups, filter) => {
         const highPriority = groups.filter(g => g.match(filter));
@@ -332,7 +248,6 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         {
             name: "SELECTOR",
             proxies: [...groupNames, "PASS", "DIRECT", "REJECT"],
-            "include-all": true,
             icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
@@ -351,7 +266,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
 
     return {
         prebuiltProxies,
-        prebuiltGroups: [...groups, ...selectors],
+        prebuiltGroups: [...groups.map(g => buildGroup(g)), ...selectors],
         prebuiltProviders: { ...relayProviders, ...(config_exit_provider?.enable ? exitProviders : {}) }
     };
 };
@@ -754,7 +669,6 @@ Units.ehentai_media = {
         {
             name: "EHENTAI_MEDIA",
             proxies: "relayFirst",
-            "include-all": true,
             icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
         },
     ],
@@ -1099,7 +1013,6 @@ Units.final = {
     "proxy-groups": [
         {
             name: "FINAL",
-            "include-all": true,
             icon: Icon.github("final"),
         },
     ],
@@ -1113,7 +1026,6 @@ Units.tiktok = {
     "proxy-groups": [
         {
             name: "TIKTOK",
-            "include-all": true,
             icon: Icon.github("tiktok"),
         },
     ],
