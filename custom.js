@@ -15,6 +15,7 @@ const options = [
     "configTun",
     //"configAdblockDns",
     //"configExitProvider",
+    "addIcon",
     //"tailscale",
     "browser",
     "downloader",
@@ -91,13 +92,6 @@ const buildRegex = (include, exclude = Filter.exclude) =>
         ? `^(?=.*(${include}))(?!.*${exclude}).*$`
         : `^((?!.*${exclude}).)*$`;
 
-const Icon = {
-    github:  (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`,
-    wiki:    (path) => `https://upload.wikimedia.org/wikipedia/${path}`,
-    gplay:   (hash) => `https://play-lh.googleusercontent.com/${hash}`,
-    favicon: (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`,
-};
-
 const buildGroup = (overrides) => ({
     name:              overrides.name,
     hidden:            true,
@@ -168,9 +162,6 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
         proxies: [...result.groups.filter(g => !g?.hidden).map(g => g.name ), ...proxyNames],
         use:     providerKeys,
         hidden:  false,
-        icon:    selector.match(/.*EXIT.*/)
-            ? Icon.wiki("commons/f/f2/Send_icon.svg")
-            : Icon.wiki("commons/3/3a/Noto_Emoji_v2.034_1f517.svg"),
     }];
 
     return result;
@@ -201,7 +192,7 @@ const excludeProviders = (providers = {}, filter = "") => {
 const buildExitProviders = (providers) => {
     const exitProviders = {};
     for (const [key, value] of Object.entries(providers)) {
-        const exitProviderKey = `→${key}`;
+        const exitProviderKey = `_${key}`;
         const override = {
             ...(value?.override ?? {}),
             "dialer-proxy": "RELAY",
@@ -231,8 +222,8 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         : buildExitProviders({ "provider-exit": { type: "inline", payload: proxies } });
     const exitProviderKeys = Object.keys(exitProviders);
     const exit = exitProviderKeys.length > 1
-        ? buildGroupsWithProvidersWrapper(proxies, exit_groups, exitProviderKeys, "→", "EXIT")
-        : buildGroupsWithProviders       (proxies, exit_groups, exitProviderKeys, "→", "EXIT")
+        ? buildGroupsWithProvidersWrapper(proxies, exit_groups, exitProviderKeys, "_", "EXIT")
+        : buildGroupsWithProviders       (proxies, exit_groups, exitProviderKeys, "_", "EXIT")
 
     const groups = config_exit_provider?.enable
         ? [...exit.selectors, ...relay.selectors, ...exit.groups, ...relay.groups]
@@ -249,7 +240,6 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         {
             name: "SELECTOR",
             proxies: [...groupNames, "PASS", "DIRECT", "REJECT"],
-            icon: Icon.wiki("commons/c/c0/Noto_Emoji_v2.034_1f537.svg"),
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
 
@@ -485,18 +475,8 @@ Units.hoyo = {
         "GEOSITE,       mihoyo,             HOYO_PROXY",
     ],
     "proxy-groups": [
-        {
-            name: "HOYO_PROXY",
-            proxies: "relayFirst",
-            url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
-            icon: Icon.favicon("https://hoyoverse.com"),
-        },
-        {
-            name: "HOYO_DIRECT",
-            proxies: ["DIRECT", "HOYO_PROXY"],
-            url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123",
-            icon: Icon.favicon("https://hoyoverse.com"),
-        },
+        { name: "HOYO_PROXY", proxies: "relayFirst", url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
     ],
     override: (config) => addNameserverPolicy(config, {
         "RULE-SET:hoyo_direct": direct_dns,
@@ -519,13 +499,7 @@ Units.sbcz = {
         "RULE-SET,      sbcz,               DIRECT",
     ],
     /*
-    "proxy-groups": [
-        {
-            name: "SBCZ",
-            proxies: "directFirst",
-           icon: Icon.gplay("rzvj2FaKgGNlLOjMPl0DVXX5uL9ash2u_2JZu_eAmYcleMrw4Hgecla1dF8XRw5rgfY"),
-        },
-    ],
+    "proxy-groups": [{ name: "SBCZ", proxies: "directFirst" }],
     */
 };
 
@@ -587,17 +561,8 @@ Units.ad = {
         "GEOSITE,       category-ads-all,   AD",
     ],
     "proxy-groups": [
-        {
-            name: "MIUI_AD",
-            proxies: "rejectFirst",
-            icon: Icon.favicon("https://www.mi.com/"),
-        },
-        {
-            name: "AD",
-            proxies: "rejectFirst",
-            icon: Icon.wiki("commons/1/1c/Codex_icon_Block_red.svg"),
-        },
-
+        { name: "MIUI_AD", proxies: "rejectFirst" },
+        { name: "AD", proxies: "rejectFirst" },
     ],
 };
 Units.browser = {
@@ -607,20 +572,9 @@ Units.browser = {
             "PROCESS-NAME,org.torproject.torbrowser",
         ]),
     },
-    "rules": [
-        "SUB-RULE,(RULE-SET,browser),sub_browser",
-    ],
-    "sub-rules": {
-        sub_browser: buildCommonSubRules("BROWSER"),
-    },
-    "proxy-groups": [
-        {
-            name: "BROWSER",
-            proxies: "hksgFirst",
-            "include-all": true,
-            icon: Icon.wiki("commons/0/08/Internet-icon.svg"),
-        },
-    ],
+    "rules": [ "SUB-RULE,(RULE-SET,browser),sub_browser", ],
+    "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
+    "proxy-groups": [{ name: "BROWSER", proxies: "hksgFirst", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
 };
 
@@ -632,48 +586,21 @@ Units.downloader = {
             "PROCESS-NAME,aria2c",
         ]),
     },
-    "rules": [
-        "SUB-RULE,(RULE-SET,downloader),sub_downloader",
-    ],
-    "sub-rules": {
-        sub_downloader: buildCommonSubRules("DOWNLOADER"),
-    },
-    "proxy-groups": [
-        {
-            name: "DOWNLOADER",
-            proxies: "lbrrFirst",
-            "include-all": true,
-            icon: Icon.wiki("commons/0/08/Paomedia_small-n-flat_cloud-down.svg"),
-        },
-    ],
+    "rules": [ "SUB-RULE,(RULE-SET,downloader),sub_downloader", ],
+    "sub-rules": { sub_downloader: buildCommonSubRules("DOWNLOADER") },
+    "proxy-groups": [{ name: "DOWNLOADER", proxies: "lbrrFirst", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxy_dns }),
 };
 
 Units.ehentai = {
-    "rules": [
-        "GEOSITE,       ehentai,            EHENTAI",
-    ],
-    "proxy-groups": [
-        {
-            name: "EHENTAI",
-            "include-all": true,
-            icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
-        },
-    ],
+    "rules": [ "GEOSITE,       ehentai,            EHENTAI", ],
+    "proxy-groups": [{ name: "EHENTAI", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
 Units.ehentai_media = {
-    "rules": [
-        "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA",
-    ],
-    "proxy-groups": [
-        {
-            name: "EHENTAI_MEDIA",
-            proxies: "relayFirst",
-            icon: Icon.wiki("commons/b/b5/Noto_Emoji_KitKat_1f43c.svg"),
-        },
-    ],
+    "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "relayFirst" }],
 };
 
 Units.github = {
@@ -681,26 +608,12 @@ Units.github = {
         "GEOSITE,       npmjs,              FINAL",
         "GEOSITE,       github,             GITHUB",
     ],
-    "proxy-groups": [
-        {
-            name: "GITHUB",
-            proxies: "relayFirst",
-            "include-all": true,
-            icon: Icon.wiki("commons/c/c6/Font_Awesome_5_brands_github-square.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "GITHUB", proxies: "relayFirst", "include-all": true }],
 };
 
 Units.microsoft = {
-    "rules": [
-        "GEOSITE,       microsoft,          MICROSOFT",
-    ],
-    "proxy-groups": [
-        {
-            name: "MICROSOFT",
-            icon: Icon.wiki("commons/2/25/Microsoft_icon.svg"),
-        },
-    ],
+    "rules": [ "GEOSITE,       microsoft,          MICROSOFT", ],
+    "proxy-groups": [{ name: "MICROSOFT" }],
 };
 
 Units.steam_cn = {
@@ -708,87 +621,38 @@ Units.steam_cn = {
         "GEOSITE,       steam@cn,           STEAM_CN",
         "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
     ],
-    "proxy-groups": [
-        {
-            name: "STEAM_CN",
-            proxies: "directFirst",
-            icon: Icon.wiki("commons/8/83/Steam_icon_logo.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "STEAM_CN", proxies: "directFirst" }],
 };
 
 Units.steam = {
-    "rules": [
-        "GEOSITE,       steam,              STEAM",
-    ],
-    "proxy-groups": [
-        {
-            name: "STEAM",
-            icon: Icon.wiki("commons/8/83/Steam_icon_logo.svg"),
-        },
-    ],
+    "rules": [ "GEOSITE,       steam,              STEAM", ],
+    "proxy-groups": [{ name: "STEAM" }],
 };
 
 Units.pixiv = {
-    "rules": [
-        "GEOSITE,       pixiv,              PIXIV",
-    ],
-    "proxy-groups": [
-        {
-            name: "PIXIV",
-            icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
-        },
-    ],
+    "rules": [ "GEOSITE,       pixiv,              PIXIV", ],
+    "proxy-groups": [{ name: "PIXIV" }],
 };
 
 Units.pixiv_media = {
-    "rules": [
-        "DOMAIN-SUFFIX, pximg.net,          PIXIV_MEDIA",
-    ],
-    "proxy-groups": [
-        {
-            name: "PIXIV_MEDIA",
-            icon: Icon.gplay("UADIlh0kSQkh59fl-s3RgLFILa_EY5RqA4sMOtKD-fX0z0fDVUR7_a7ysylufmhH-K-XfhSVVdpspD8K0jtu"),
-        },
-    ],
+    "rules": [ "DOMAIN-SUFFIX, pximg.net,          PIXIV_MEDIA", ],
+    "proxy-groups": [{ name: "PIXIV_MEDIA" }],
     override: (config) => addNameserverPolicy(config, { "+.pximg.net": proxy_dns }),
 };
 
 Units.ai = {
-    "rules": [
-        "GEOSITE,       category-ai-!cn,    AI",
-    ],
-    "proxy-groups": [
-        {
-            name: "AI",
-            icon: Icon.gplay("lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A"),
-        },
-    ],
+    "rules": [ "GEOSITE,       category-ai-!cn,    AI", ],
+    "proxy-groups": [{ name: "AI" }],
 };
 
 Units.youtube = {
-    "rules": [
-        "GEOSITE,       youTube,            YOUTUBE",
-    ],
-    "proxy-groups": [
-        {
-            name: "YOUTUBE",
-            icon: Icon.favicon("https://youtube.com"),
-        },
-    ],
+    "rules": [ "GEOSITE,       youTube,            YOUTUBE", ],
+    "proxy-groups": [{ name: "YOUTUBE" }],
 };
 
 Units.youtube_media = {
-    "rules": [
-        "GEOSITE,       youTube,            YOUTUBE",
-    ],
-    "proxy-groups": [
-        {
-            name: "GOOGLE_VIDEO",
-            proxies: "relayFirst",
-            icon: Icon.favicon("https://youtube.com"),
-        },
-    ],
+    "rules": [ "GEOSITE,       youTube,            YOUTUBE", ],
+    "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "relayFirst" }],
     override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxy_dns }),
 };
 
@@ -831,13 +695,7 @@ Units.google_fcm = {
         "RULE-SET,      google_fcm,         GOOGLE_FCM",
         "GEOSITE,       googlefcm,          GOOGLE_FCM",
     ],
-    "proxy-groups": [
-        {
-            name: "GOOGLE_FCM",
-            proxies: "directFirst",
-            icon: Icon.favicon("https://firebase.google.com"),
-        },
-    ],
+    "proxy-groups": [{ name: "GOOGLE_FCM", proxies: "directFirst" }],
     override: (config) => { config.hosts = { ...config.hosts, ...google_fcm_hosts }; },
 };
 
@@ -846,12 +704,7 @@ Units.google = {
         "GEOSITE,       google,             GOOGLE",
         "GEOIP,         google,             GOOGLE,          no-resolve",
     ],
-    "proxy-groups": [
-        {
-            name: "GOOGLE",
-            icon: Icon.wiki("commons/c/c1/Google_%22G%22_logo.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "GOOGLE" }],
 };
 
 Units.twitter = {
@@ -859,24 +712,12 @@ Units.twitter = {
         "GEOSITE,       twitter,            TWITTER",
         "GEOIP,         twitter,            TWITTER,         no-resolve",
     ],
-    "proxy-groups": [
-        {
-            name: "TWITTER",
-            icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "TWITTER" }],
 };
 
 Units.twitter_media = {
-    "rules": [
-        "DOMAIN-SUFFIX, twimg.com,          TWITTER_MEDIA",
-    ],
-    "proxy-groups": [
-        {
-            name: "TWITTER_MEDIA",
-            icon: Icon.wiki("commons/6/6f/Logo_of_Twitter.svg"),
-        },
-    ],
+    "rules": [ "DOMAIN-SUFFIX, twimg.com,          TWITTER_MEDIA", ],
+    "proxy-groups": [{ name: "TWITTER_MEDIA" }],
     override: (config) => addNameserverPolicy(config, { "+.twimg.com": proxy_dns }),
 };
 
@@ -885,51 +726,25 @@ Units.telegram = {
         "GEOSITE,       telegram,           TELEGRAM",
         "GEOIP,         telegram,           TELEGRAM,        no-resolve",
     ],
-    "proxy-groups": [
-        {
-            name: "TELEGRAM",
-            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "TELEGRAM" }],
 };
 
 Units.telegram_media = {
     "rules": [
         "IP-CIDR,       91.108.56.200/32,   TELEGRAM_MEDIA,    no-resolve",
     ],
-    "proxy-groups": [
-        {
-            name: "TELEGRAM_MEDIA",
-            proxies: "relayFirst",
-            icon: Icon.wiki("commons/8/82/Telegram_logo.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "TELEGRAM_MEDIA", proxies: "relayFirst" }],
 };
 
 Units.discord = {
-    "rules": [
-        "GEOSITE,       discord,            DISCORD",
-    ],
-    "proxy-groups": [
-        {
-            name: "DISCORD",
-            icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
-        },
-    ],
+    "rules": [ "GEOSITE,       discord,            DISCORD", ],
+    "proxy-groups": [{ name: "DISCORD" }],
     override: (config) => addNameserverPolicy(config, { "cdn.discordapp.com": proxy_dns }),
 };
 
 Units.discord_meida = {
-    "rules": [
-        "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA",
-    ],
-    "proxy-groups": [
-        {
-            name: "DISCORD_MEDIA",
-            proxies: "relayFirst",
-            icon: Icon.wiki("fr/4/4f/Discord_Logo_sans_texte.svg"),
-        },
-    ],
+    "rules": [ "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA", ],
+    "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "relayFirst" }],
 };
 
 Units.apple = {
@@ -937,12 +752,7 @@ Units.apple = {
         "GEOSITE,       apple,              APPLE",
         "GEOSITE,       apple-intelligence, APPLE",
     ],
-    "proxy-groups": [
-        {
-            name: "APPLE",
-            icon: Icon.wiki("commons/8/84/Apple_Computer_Logo_rainbow.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "APPLE" }],
 };
 
 Units.non_jp = {
@@ -953,16 +763,8 @@ Units.non_jp = {
             "+.kotobank.jp",
         ], { behavior: "domain" }),
     },
-    "rules": [
-        "RULE-SET,      non_jp,             NON_JP",
-    ],
-    "proxy-groups": [
-        {
-            name: "NON_JP",
-            proxies: "relayFirst",
-            icon: Icon.wiki("commons/4/45/Wikimania2019_flower_icon.svg"),
-        },
-    ],
+    "rules": [ "RULE-SET,      non_jp,             NON_JP", ],
+    "proxy-groups": [{ name: "NON_JP", proxies: "relayFirst" }],
 };
 
 Units.jp = {
@@ -976,18 +778,11 @@ Units.jp = {
         "RULE-SET,      jp,                 JP",
         "GEOIP,         JP,                 JP,              no-resolve",
     ],
-    "proxy-groups": [
-        {
-            name: "JP",
-            icon: Icon.wiki("commons/5/54/Noto_Emoji_v2.034_1f338.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "JP" }],
 };
 
 Units.non_cn = {
-    "rules": [
-        "GEOSITE,       geolocation-!cn,    FINAL",
-    ],
+    "rules": [ "GEOSITE,       geolocation-!cn,    FINAL", ],
 };
 
 Units.cn = {
@@ -997,27 +792,13 @@ Units.cn = {
         "GEOIP,         private,            CN",
         "GEOIP,         CN,                 CN",
     ],
-    "proxy-groups": [
-        {
-            name: "CN",
-            proxies: "directFirst",
-            url: "https://connect.rom.miui.com/generate_204",
-            icon: Icon.wiki("commons/8/8b/Noto_Emoji_v2.034_2b50.svg"),
-        },
-    ],
+    "proxy-groups": [{ name: "CN", proxies: "directFirst", url: "https://connect.rom.miui.com/generate_204" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:cn": direct_dns }),
 };
 
 Units.final = {
-    "rules": [
-        "MATCH,                             FINAL",
-    ],
-    "proxy-groups": [
-        {
-            name: "FINAL",
-            icon: Icon.github("final"),
-        },
-    ],
+    "rules": [ "MATCH,                             FINAL", ],
+    "proxy-groups": [{ name: "FINAL" }],
 };
 
 Units.tiktok = {
@@ -1025,12 +806,7 @@ Units.tiktok = {
         "GEOSITE,       tiktok,             TIKTOK",
         "GEOSITE,       bytedance@!cn,      TIKTOK",
     ],
-    "proxy-groups": [
-        {
-            name: "TIKTOK",
-            icon: Icon.github("tiktok"),
-        },
-    ],
+    "proxy-groups": [{ name: "TIKTOK" }],
 };
 
 const tailscale_proxy_providers = {
@@ -1099,23 +875,99 @@ Units.tailscale = {
         "IP-CIDR,       100.64.0.0/10,      TAILSCALE,       no-resolve",
         "RULE-SET,      tailscale,          TAILSCALE",
     ],
-    "proxy-groups": [
-        {
-            name: "TAILSCALE",
-            url: "https://hello.ts.net",
-            proxies: "empty",
-            use: ["tailscale"],
-            icon: Icon.favicon("https://tailscale.com"),
-        },
-    ],
+    "proxy-groups": [{ name: "TAILSCALE", url: "https://hello.ts.net", proxies: "empty", use: ["tailscale"] }],
     override: (config) => tailscale_override(config),
     overrideFinal: (config) => Object.assign(config["proxy-providers"], { tailscale: tailscale_proxy_providers }),
 };
 
+const Icon = {
+    github:  (name) => `https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/icon/color/${name}.png`,
+    favicon: (url)  => `https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=256`,
+    get(name) { return this.ios?.[name] || this.old?.[name] },
+};
+Icon.old = {
+    _EXIT: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Send_icon.svg",
+    RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
+    SELECTOR: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Noto_Emoji_v2.034_1f3af.svg",
+    TAILSCALE: Icon.favicon("https://tailscale.com"),
+    BROWSER: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+    DOWNLOADER: "https://upload.wikimedia.org/wikipedia/commons/0/08/Paomedia_small-n-flat_cloud-down.svg",
+    HOYO_PROXY: Icon.favicon("https://hoyoverse.com"),
+    HOYO_DIRECT: Icon.favicon("https://hoyoverse.com"),
+    SBCZ: Icon.favicon("https://snowbreak.amazingseasun.com"),
+    EHENTAI: Icon.favicon("https://e-hentai.org"),
+    EHENTAI_MEDIA: Icon.favicon("https://e-hentai.org"),
+    AD: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
+    MIUI_AD: Icon.favicon("https://www.mi.com/"),
+    PIXIV: Icon.favicon("https://www.pixiv.net"),
+    PIXIV_MEDIA: Icon.favicon("https://www.pixiv.net"),
+    AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
+    STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+    STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
+    GITHUB: "https://upload.wikimedia.org/wikipedia/commons/c/c6/Font_Awesome_5_brands_github-square.svg",
+    MICROSOFT: "https://upload.wikimedia.org/wikipedia/commons/2/25/Microsoft_icon.svg",
+    YOUTUBE: "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg",
+    GOOGLE_VIDEO: "https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg",
+    GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
+    GOOGLE_FCM: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
+    APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
+    TWITTER:   "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+    TWITTER_MEDIA:   "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+    TELEGRAM:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+    TELEGRAM_MEDIA:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+    DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
+    DISCORD_MEDIA: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
+    TIKTOK: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tiktok_icon.svg",
+    NON_JP: "https://upload.wikimedia.org/wikipedia/commons/4/45/Wikimania2019_flower_icon.svg",
+    JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+    CN: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
+    FINAL: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Emoji_u1f52f.svg",
+};
+Icon.ios = {
+    //EXIT: "",
+    //RELAY: "",
+    //SELECTOR: "",
+    TAILSCALE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/00/3e/bf/003ebf6e-1348-c7e2-ce3a-3d8109f67d51/Placeholder.mill/400x400bb-75.webp",
+    BROWSER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
+    DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
+    HOYO_PROXY: Icon.favicon("https://www.hoyoverse.com"),
+    HOYO_DIRECT: Icon.favicon("https://www.hoyoverse.com"),
+    SBCZ: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/10/5f/0e/105f0e8f-7942-0fde-c2e0-79345827aa58/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
+    //EHENTAI: "",
+    //EHENTAI_MEDIA: "",
+    AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/81/8f/6a818fb6-1521-2a89-60cd-07239c6230ad/Placeholder.mill/400x400ia-75.webp",
+    MIUI_AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/36/83/3b/36833b79-3066-63e4-ea2b-797b09843d18/Placeholder.mill/400x400ia-75.webp",
+    PIXIV: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
+    PIXIV_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
+    AI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/85/eb/b3/85ebb3df-5d4c-7216-ea4f-919fe9987cad/Placeholder.mill/400x400bb-75.webp",
+    STEAM: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
+    STEAM_CN: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
+    GITHUB: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/d0/5f/bb/d05fbb11-a1e2-795d-af2f-5e48b13949bb/Placeholder.mill/400x400ia-75.webp",
+    MICROSOFT: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/a3/b2/f9/a3b2f994-953b-3d78-52ec-392a4ada4114/Placeholder.mill/400x400ia-75.webp",
+    YOUTUBE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a6/09/6b/a6096b82-e4ed-4213-e7d9-1a7882b6146e/Placeholder.mill/400x400ia-75.webp",
+    GOOGLE_VIDEO: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a6/09/6b/a6096b82-e4ed-4213-e7d9-1a7882b6146e/Placeholder.mill/400x400ia-75.webp",
+    GOOGLE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
+    GOOGLE_FCM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
+    //APPLE: "",
+    TWITTER:   "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
+    TWITTER_MEDIA:   "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
+    TELEGRAM:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
+    TELEGRAM_MEDIA:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
+    DISCORD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
+    DISCORD_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
+    TIKTOK: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/19/43/1b/19431ba4-7ac5-7e31-e6f3-ea5dcd4e419c/Placeholder.mill/400x400ia-75.webp",
+    //NON_JP: "",
+    //JP: "",
+    //CN: "",
+    //FINAL: "",
+};
+Units.addIcon = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = Icon.get(g.name)) };
+
+
 const applyConfig = (config, options = []) => {
-    const mergedUnit = {
-        "rule-providers": {},
-        rules:            [],
+    const merged = {
+        "rule-providers": {/* unit1["rule-providers"], unit2["rule-providers"]... */},
+        rules:            [/* unit1.rules, unit2.rules...*/],
         "sub-rules":      {},
         "proxy-groups":   [],
         override:         [],
@@ -1123,19 +975,18 @@ const applyConfig = (config, options = []) => {
     };
 
     for (const option of options) {
-        if (!Units[option]) {
+        if (Units[option]) {
+            mergeInto(merged, Units[option]);
+        } else {
             console.warn(`[applyConfig] Unknown option: "${option}"`);
-            continue;
         }
-        mergeInto(mergedUnit, Units[option]);
     }
 
-    mergedUnit.override.forEach(fn => fn(config));
+    merged.override.forEach(fn => fn(config));
 
     const base = buildProxiesGroupsProviders(config.proxies, config["proxy-providers"]);
-
-    mergedUnit["proxy-providers"] = base.prebuiltProviders;
-    mergedUnit["proxy-groups"] = mergedUnit["proxy-groups"].map(g => {
+    merged["proxy-providers"] = base.prebuiltProviders;
+    merged["proxy-groups"] = merged["proxy-groups"].map(g => {
         const group = buildGroup({ ...g, type: "select", hidden: false });
         if (!hasValue(group.proxies)) {
             group.proxies = base.prebuiltProxies.selectFirst;
@@ -1144,15 +995,10 @@ const applyConfig = (config, options = []) => {
         }
         return group;
     });
-    mergedUnit["proxy-groups"].unshift(...base.prebuiltGroups);
+    merged["proxy-groups"].unshift(...base.prebuiltGroups);
 
-    for (const key of Object.keys(mergedUnit)) {
-        if (key !== "override" && key !== "overrideFinal") {
-            config[key] = mergedUnit[key];
-        }
-    }
-
-    mergedUnit.overrideFinal.forEach(fn => fn(config))
+    Object.keys(merged).forEach(key => { if (!key.includes("override")) config[key] = merged[key] });
+    merged.overrideFinal.forEach(fn => fn(config))
 };
 
 /* ========== Entry Point ========== */
