@@ -598,7 +598,7 @@ Units.ehentai = {
 
 Units.ehentai_media = {
     "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
-    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "directFirst" }],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "relayFirst" }],
 };
 
 Units.github = {
