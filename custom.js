@@ -35,6 +35,7 @@ const options = [
     "google_fcm",
     "google",
     "apple",
+    "twitter_media",
     "twitter",
     "telegram_media",
     "telegram",
@@ -709,6 +710,14 @@ Units.twitter = {
     override: (config) => addNameserverPolicy(config, { "+.twimg.com": proxy_dns }),
 };
 
+Units.twitter_media = {
+    "rules": [
+        "DOMAIN,        video.twimg.com,    TWITTER_MEDIA",
+        "DOMAIN,        pbs.twimg.com,      TWITTER_MEDIA",
+    ],
+    "proxy-groups": [{ name: "TWITTER_MEDIA", proxies: "relayFirst" }],
+}
+
 Units.telegram = {
     "rules": [
         "GEOSITE,       telegram,           TELEGRAM",
@@ -898,9 +907,10 @@ Icons.old = {
     GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
     GOOGLE_FCM: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
     APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
-    TWITTER:   "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
-    TELEGRAM:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
-    TELEGRAM_MEDIA:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+    TWITTER: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+    TWITTER_MEDIA: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
+    TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
+    TELEGRAM_MEDIA: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
     DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
     DISCORD_MEDIA: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
     TIKTOK: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tiktok_icon.svg",
@@ -916,8 +926,8 @@ Icons.ios = {
     TAILSCALE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/00/3e/bf/003ebf6e-1348-c7e2-ce3a-3d8109f67d51/Placeholder.mill/400x400bb-75.webp",
     BROWSER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
     DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
-    HOYO_PROXY: Icons.favicon("https://www.hoyoverse.com"),
-    HOYO_DIRECT: Icons.favicon("https://www.hoyoverse.com"),
+    //HOYO_PROXY: "",
+    //HOYO_DIRECT: "",
     SBCZ: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/10/5f/0e/105f0e8f-7942-0fde-c2e0-79345827aa58/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     //EHENTAI: "",
     //EHENTAI_MEDIA: "",
@@ -934,9 +944,10 @@ Icons.ios = {
     GOOGLE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     GOOGLE_FCM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     //APPLE: "",
-    TWITTER:   "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
-    TELEGRAM:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
-    TELEGRAM_MEDIA:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
+    TWITTER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
+    TWITTER_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
+    TELEGRAM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
+    TELEGRAM_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
     DISCORD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
     DISCORD_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
     TIKTOK: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/19/43/1b/19431ba4-7ac5-7e31-e6f3-ea5dcd4e419c/Placeholder.mill/400x400ia-75.webp",
@@ -945,7 +956,7 @@ Icons.ios = {
     //CN: "",
     //FINAL: "",
 };
-Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = Icons.get(g.name)) };
+Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = g.icon ?? Icons.get(g.name)) };
 
 
 const applyConfig = (config, options = []) => {
