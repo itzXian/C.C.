@@ -600,7 +600,7 @@ Units.ehentai = {
 
 Units.ehentai_media = {
     "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
-    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "directFirst" }],
 };
 
 Units.github = {
@@ -632,11 +632,6 @@ Units.steam = {
 Units.pixiv = {
     "rules": [ "GEOSITE,       pixiv,              PIXIV", ],
     "proxy-groups": [{ name: "PIXIV" }],
-};
-
-Units.pixiv_media = {
-    "rules": [ "DOMAIN-SUFFIX, pximg.net,          PIXIV_MEDIA", ],
-    "proxy-groups": [{ name: "PIXIV_MEDIA" }],
     override: (config) => addNameserverPolicy(config, { "+.pximg.net": proxy_dns }),
 };
 
@@ -713,11 +708,6 @@ Units.twitter = {
         "GEOIP,         twitter,            TWITTER,         no-resolve",
     ],
     "proxy-groups": [{ name: "TWITTER" }],
-};
-
-Units.twitter_media = {
-    "rules": [ "DOMAIN-SUFFIX, twimg.com,          TWITTER_MEDIA", ],
-    "proxy-groups": [{ name: "TWITTER_MEDIA" }],
     override: (config) => addNameserverPolicy(config, { "+.twimg.com": proxy_dns }),
 };
 
@@ -900,7 +890,6 @@ Icon.old = {
     AD: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
     MIUI_AD: Icon.favicon("https://www.mi.com/"),
     PIXIV: Icon.favicon("https://www.pixiv.net"),
-    PIXIV_MEDIA: Icon.favicon("https://www.pixiv.net"),
     AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
     STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
     STEAM_CN: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
@@ -912,7 +901,6 @@ Icon.old = {
     GOOGLE_FCM: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
     APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
     TWITTER:   "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
-    TWITTER_MEDIA:   "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
     TELEGRAM:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
     TELEGRAM_MEDIA:  "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
     DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
@@ -938,7 +926,6 @@ Icon.ios = {
     AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/81/8f/6a818fb6-1521-2a89-60cd-07239c6230ad/Placeholder.mill/400x400ia-75.webp",
     MIUI_AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/36/83/3b/36833b79-3066-63e4-ea2b-797b09843d18/Placeholder.mill/400x400ia-75.webp",
     PIXIV: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
-    PIXIV_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
     AI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/85/eb/b3/85ebb3df-5d4c-7216-ea4f-919fe9987cad/Placeholder.mill/400x400bb-75.webp",
     STEAM: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     STEAM_CN: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
@@ -950,7 +937,6 @@ Icon.ios = {
     GOOGLE_FCM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     //APPLE: "",
     TWITTER:   "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
-    TWITTER_MEDIA:   "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
     TELEGRAM:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
     TELEGRAM_MEDIA:  "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
     DISCORD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
