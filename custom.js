@@ -857,7 +857,7 @@ Units.tailscale = {
         "IP-CIDR,       100.64.0.0/10,      TAILSCALE,       no-resolve",
         "RULE-SET,      tailscale,          TAILSCALE",
     ],
-    "proxy-groups": [{ name: "TAILSCALE", url: "https://hello.ts.net", proxies: "empty", use: ["tailscale"] }],
+    "proxy-groups": [{ name: "TAILSCALE", url: "https://hello.ts.net", proxies: [], use: ["tailscale"] }],
     override: (config) => tailscale_override(config),
     overrideFinal: (config) => Object.assign(config["proxy-providers"], { tailscale: tailscale_proxy_providers }),
 };
