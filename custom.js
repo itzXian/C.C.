@@ -227,13 +227,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     const groups = config_exit_provider?.enable
         ? [...exit.selectors, ...relay.selectors, ...exit.groups, ...relay.groups]
         : [...relay.groups];
-    const buildGroupNames = (groups) => groups.filter(g => !g?.hidden).map(g => g.name);
-    const groupNames = buildGroupNames(groups);
-    const buildPeferGroups = (groups, filter) => {
-        const highPriority = groups.filter(g => g.match(filter));
-        const lowPriority  = groups.filter(g => !g.match(filter));
-        return [...highPriority, ...lowPriority];
-    }
+    const groupNames = groups.filter(g => !g?.hidden).map(g => g.name);
 
     const selectors = [
         {
@@ -242,20 +236,11 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         },
     ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
 
-    const prebuiltProxies = {
-        selectFirst: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
-        rejectFirst: ["REJECT", "SELECTOR", "PASS", "DIRECT"],
-        directFirst: ["DIRECT", "SELECTOR", "PASS", "REJECT"],
-        relayFirst:  (config_exit_provider?.enable
-            ? buildGroupNames([...relay.selectors, ...selectors, ...exit.selectors, ...relay.groups, ...exit.groups])
-            : buildGroupNames([...relay.groups, ...selectors])
-        ).concat(["PASS", "DIRECT", "REJECT"]),
-        hksgFirst:   buildPeferGroups(groupNames, /(HKSG)/),
-        lbrrFirst:   buildPeferGroups(groupNames, /(LBRR)/),
-    };
-
     return {
-        prebuiltProxies,
+        prebuiltProxies: {
+            default: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
+            perfer(filter) { return  this.default.find(g => g.match(filter)) || "" },
+        },
         prebuiltGroups: [...groups.map(g => buildGroup(g)), ...selectors],
         prebuiltProviders: { ...relayProviders, ...(config_exit_provider?.enable ? exitProviders : {}) }
     };
@@ -474,7 +459,7 @@ Units.hoyo = {
         "GEOSITE,       mihoyo,             HOYO_PROXY",
     ],
     "proxy-groups": [
-        { name: "HOYO_PROXY", proxies: "relayFirst", url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_PROXY", proxies: "RELAY", url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
     ],
     override: (config) => addNameserverPolicy(config, {
@@ -498,7 +483,7 @@ Units.sbcz = {
         "RULE-SET,      sbcz,               DIRECT",
     ],
     /*
-    "proxy-groups": [{ name: "SBCZ", proxies: "directFirst" }],
+    "proxy-groups": [{ name: "SBCZ", proxies: "DIRECT" }],
     */
 };
 
@@ -560,8 +545,8 @@ Units.ad = {
         "GEOSITE,       category-ads-all,   AD",
     ],
     "proxy-groups": [
-        { name: "MIUI_AD", proxies: "rejectFirst" },
-        { name: "AD", proxies: "rejectFirst" },
+        { name: "MIUI_AD", proxies: "REJECT" },
+        { name: "AD", proxies: "REJECT" },
     ],
 };
 Units.browser = {
@@ -573,7 +558,7 @@ Units.browser = {
     },
     "rules": [ "SUB-RULE,(RULE-SET,browser),sub_browser", ],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
-    "proxy-groups": [{ name: "BROWSER", proxies: "hksgFirst", "include-all": true }],
+    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
 };
 
@@ -587,7 +572,7 @@ Units.downloader = {
     },
     "rules": [ "SUB-RULE,(RULE-SET,downloader),sub_downloader", ],
     "sub-rules": { sub_downloader: buildCommonSubRules("DOWNLOADER") },
-    "proxy-groups": [{ name: "DOWNLOADER", proxies: "lbrrFirst", "include-all": true }],
+    "proxy-groups": [{ name: "DOWNLOADER", proxies: "LBRR", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxy_dns }),
 };
 
@@ -599,7 +584,7 @@ Units.ehentai = {
 
 Units.ehentai_media = {
     "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
-    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "RELAY" }],
 };
 
 Units.github = {
@@ -607,7 +592,7 @@ Units.github = {
         "GEOSITE,       npmjs,              FINAL",
         "GEOSITE,       github,             GITHUB",
     ],
-    "proxy-groups": [{ name: "GITHUB", proxies: "relayFirst", "include-all": true }],
+    "proxy-groups": [{ name: "GITHUB", proxies: "RELAY", "include-all": true }],
 };
 
 Units.microsoft = {
@@ -620,7 +605,7 @@ Units.steam_cn = {
         "GEOSITE,       steam@cn,           STEAM_CN",
         "DOMAIN-SUFFIX, steamserver.net,    STEAM_CN",
     ],
-    "proxy-groups": [{ name: "STEAM_CN", proxies: "directFirst" }],
+    "proxy-groups": [{ name: "STEAM_CN", proxies: "DIRECT" }],
 };
 
 Units.steam = {
@@ -646,7 +631,7 @@ Units.youtube = {
 
 Units.youtube_media = {
     "rules": [ "GEOSITE,       youTube,            YOUTUBE", ],
-    "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "RELAY" }],
     override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxy_dns }),
 };
 
@@ -689,7 +674,7 @@ Units.google_fcm = {
         "RULE-SET,      google_fcm,         GOOGLE_FCM",
         "GEOSITE,       googlefcm,          GOOGLE_FCM",
     ],
-    "proxy-groups": [{ name: "GOOGLE_FCM", proxies: "directFirst" }],
+    "proxy-groups": [{ name: "GOOGLE_FCM", proxies: "DIRECT" }],
     override: (config) => { config.hosts = { ...config.hosts, ...google_fcm_hosts }; },
 };
 
@@ -715,7 +700,7 @@ Units.twitter_media = {
         "DOMAIN,        video.twimg.com,    TWITTER_MEDIA",
         "DOMAIN,        pbs.twimg.com,      TWITTER_MEDIA",
     ],
-    "proxy-groups": [{ name: "TWITTER_MEDIA", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "TWITTER_MEDIA", proxies: "RELAY" }],
 }
 
 Units.telegram = {
@@ -730,7 +715,7 @@ Units.telegram_media = {
     "rules": [
         "IP-CIDR,       91.108.56.200/32,   TELEGRAM_MEDIA,    no-resolve",
     ],
-    "proxy-groups": [{ name: "TELEGRAM_MEDIA", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "TELEGRAM_MEDIA", proxies: "RELAY" }],
 };
 
 Units.discord = {
@@ -741,7 +726,7 @@ Units.discord = {
 
 Units.discord_meida = {
     "rules": [ "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA", ],
-    "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "RELAY" }],
 };
 
 Units.apple = {
@@ -761,7 +746,7 @@ Units.non_jp = {
         ], { behavior: "domain" }),
     },
     "rules": [ "RULE-SET,      non_jp,             NON_JP", ],
-    "proxy-groups": [{ name: "NON_JP", proxies: "relayFirst" }],
+    "proxy-groups": [{ name: "NON_JP", proxies: "RELAY" }],
 };
 
 Units.jp = {
@@ -789,7 +774,7 @@ Units.cn = {
         "GEOIP,         private,            CN",
         "GEOIP,         CN,                 CN",
     ],
-    "proxy-groups": [{ name: "CN", proxies: "directFirst", url: "https://connect.rom.miui.com/generate_204" }],
+    "proxy-groups": [{ name: "CN", proxies: "DIRECT", url: "https://connect.rom.miui.com/generate_204" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:cn": direct_dns }),
 };
 
@@ -983,10 +968,9 @@ const applyConfig = (config, options = []) => {
     merged["proxy-providers"] = base.prebuiltProviders;
     merged["proxy-groups"] = merged["proxy-groups"].map(g => {
         const group = buildGroup({ ...g, type: "select", hidden: false });
-        if (!hasValue(group.proxies)) {
-            group.proxies = base.prebuiltProxies.selectFirst;
-        } else if (typeof group.proxies === "string") {
-            group.proxies = base.prebuiltProxies[group.proxies];
+        if (!Array.isArray(group.proxies)) {
+            group["default-selected"] = base.prebuiltProxies.perfer(group.proxies);
+            group.proxies = base.prebuiltProxies.default;
         }
         return group;
     });
