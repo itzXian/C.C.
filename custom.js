@@ -568,6 +568,7 @@ Units.downloader = {
             "PROCESS-NAME,idm.internet.download.manager",
             "PROCESS-NAME,com.gianlu.aria2app",
             "PROCESS-NAME,aria2c",
+            "PROCESS-NAME-REGEX,.*qbittorrent.*",
         ]),
     },
     "rules": [ "SUB-RULE,(RULE-SET,downloader),sub_downloader", ],
