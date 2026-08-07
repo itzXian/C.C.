@@ -1,13 +1,13 @@
 provider-base-config: &provider
   type: http
   proxy: DIRECT
-  interval: 86400
+  interval: 86400 # s, 86400/60/60/24=1d
   health-check:
     enable: true
     url: https://www.google.com/generate_204
     expected-status: 200/204/302
-    timeout: 3000
-    interval: 1800
+    timeout: 3000  # ms, 3000/1000=3s
+    interval: 1800 # s, 1800/60=30m
 
 proxy-providers:
   🟥:
