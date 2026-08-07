@@ -154,14 +154,13 @@ const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], 
     }))
     .filter(g => (hasProviders || hasValue(g.proxies)));
 
-    result.selectors = [{
-        name:    `${prefix}${selector}`,
-        type:    "select",
-        filter:  buildRegex(Filter.all),
-        proxies: [...result.groups.filter(g => !g?.hidden).map(g => g.name ), ...proxyNames],
-        use:     providerKeys,
-        hidden:  false,
-    }];
+    result.selectors = [
+        {
+            name:    `${prefix}${selector}`,
+            proxies: [...result.groups.filter(g => !g?.hidden).map(g => g.name ), ...proxyNames],
+            use:     providerKeys,
+        },
+    ].map(g => buildGroup({ ...g, type: "select", hidden: false }));
 
     return result;
 };
@@ -234,7 +233,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
             name: "SELECTOR",
             proxies: [...groupNames, "PASS", "DIRECT", "REJECT"],
         },
-    ].map(e => buildGroup({ ...e, type: "select", hidden: false }));
+    ].map(g => buildGroup({ ...g, type: "select", hidden: false }));
 
     return {
         prebuiltProxies: {
