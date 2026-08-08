@@ -97,7 +97,7 @@ const buildGroup = (overrides) => ({
     url:                "https://www.google.com/generate_204",
     interval:           1800, // s,  1800/60=30m
     "expected-status":  "200/204/302",
-    timeout:            3000, // ms, 3000/1000=3s
+    timeout:            1500, // ms, 1500/1000=1.5s
     "max-failed-times": 3,
     //"exclude-filter":   "0.[0-9][倍xX✕✖⨉]",
     //"exclude-filter":   "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",

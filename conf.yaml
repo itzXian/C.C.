@@ -6,7 +6,7 @@ provider-base-config: &provider
     enable: true
     url: https://www.google.com/generate_204
     expected-status: 200/204/302
-    timeout: 3000  # ms, 3000/1000=3s
+    timeout: 1500  # ms, 1500/1000=1.5s
     interval: 1800 # s, 1800/60=30m
 
 proxy-providers:
