@@ -576,13 +576,13 @@ Units.downloader = {
 
 Units.ehentai = {
     "rules": [ "GEOSITE,       ehentai,            EHENTAI", ],
-    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)" }],
+    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)", url: "https://e-hentai.org" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
 Units.ehentai_media = {
     "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
-    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "LBRR" }],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "LBRR", url: "http://hath.network" }],
 };
 
 Units.github = {
@@ -590,7 +590,7 @@ Units.github = {
         "GEOSITE,       npmjs,              FINAL",
         "GEOSITE,       github,             GITHUB",
     ],
-    "proxy-groups": [{ name: "GITHUB", proxies: "RELAY", "include-all": true }],
+    "proxy-groups": [{ name: "GITHUB", proxies: "RELAY", "include-all": true, url: "https://avatars.githubusercontent.com/0" }],
 };
 
 Units.microsoft = {
