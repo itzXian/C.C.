@@ -103,7 +103,7 @@ const buildGroup = (overrides) => ({
     interval:           1800, // s
     "expected-status":  "200/204/302",
     timeout:            999,  // ms
-    "max-failed-times": 3,
+    "max-failed-times": 2,
     //"exclude-filter":   "0.[0-9][倍xX✕✖⨉]",
     //"exclude-filter":   "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
     //"exclude-filter":   "[2-9][倍xX✕✖⨉]",
