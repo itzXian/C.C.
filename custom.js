@@ -1,3 +1,4 @@
+"use strict";
 /*
 Version: 2.0
 Reference:
@@ -39,7 +40,7 @@ const options = [
     "twitter",
     "telegram_media",
     "telegram",
-    "discord_meida",
+    "discord_media",
     "discord",
     "tiktok",
     "non_jp",
@@ -86,10 +87,14 @@ const Filter = {
     all:     "",
 };
 
-const buildRegex = (include, exclude = Filter.exclude) =>
-    include
-        ? `^(?=.*(${include}))(?!.*${exclude}).*$`
-        : `^((?!.*${exclude}).)*$`;
+const regex_cache = new Map();
+const buildRegex = (include, exclude = Filter.exclude) => {
+    const key = `${include}|${exclude}`;
+    if (!regex_cache.has(key)) {
+        regex_cache.set(key, include ? `^(?=.*(${include}))(?!.*${exclude}).*$` : `^((?!.*${exclude}).)*$`);
+    }
+    return regex_cache.get(key);
+}
 
 const buildGroup = (overrides) => ({
     name:               overrides.name,
@@ -360,6 +365,24 @@ Units.configHosts = { override: (config) => Object.assign(config, { hosts: confi
 const config_exit_provider = {};
 Units.configExitProvider = { override: () => config_exit_provider.enable = true };
 
+const fake_ip_filter= [
+    "+.m2m", "+.bogon","injections.adguard.org", "local.adguard.org","+.internal","+.sslip.io","+.nip.io", "*.home.arpa",
+    "+.lan", "+.local", "*.lan", "*.localdomain", "*.example", "*.invalid", "*.localhost", "*.test", "*.local",
+    "time.*.com", "time.*.gov", "time.*.edu.cn", "time.*.apple.com", "time-ios.apple.com",
+    "time1.*.com", "time2.*.com", "time3.*.com", "time4.*.com", "time5.*.com", "time6.*.com", "time7.*.com",
+    "ntp.*.com", "ntp1.*.com", "ntp2.*.com", "ntp3.*.com", "ntp4.*.com", "ntp5.*.com", "ntp6.*.com", "ntp7.*.com",
+    "*.time.edu.cn", "*.ntp.org.cn", "+.pool.ntp.org", "*.pool.ntp.org",
+    "time1.cloud.tencent.com", "+.msftconnecttest.com", "+.msftncsi.com", "localhost.ptlogin2.qq.com", "localhost.sec.qq.com",
+    "+.srv.nintendo.net", "*.n.n.srv.nintendo.net", "+.cdn.nintendo.net",
+    "+.stun.playstation.net", "xbox.*.*.microsoft.com", "*.*.xboxlive.com", "xbox.*.microsoft.com", "xnotify.xboxlive.com",
+    "stun.*.*", "stun.*.*.*", "+.stun.*.*", "+.stun.*.*.*", "+.stun.*.*.*.*", "+.stun.*.*.*.*.*",
+    "heartbeat.belkin.com", "*.linksys.com", "*.linksyssmartwifi.com", "*.router.asus.com",
+    "mesu.apple.com", "swscan.apple.com", "swquery.apple.com", "swdownload.apple.com", "swcdn.apple.com", "swdist.apple.com", "+.push.apple.com",
+    "proxy.golang.org", "lens.l.google.com", "stun.l.google.com", "na.b.g-tun.com", "+.nflxvideo.net",
+    "*.square-enix.com", "*.finalfantasyxiv.com", "*.ffxiv.com", "*.ff14.sdo.com", "ff.dorado.sdo.com",
+    "+.cmbchina.com", "+.cmbimg.com", "+.sandai.net", "+.n0808.com", "+.uu.163.com", "ps.res.netease.com",
+    "+.wilds.monsterhunter.com", "+.playfabapi.com", "*.*.cloudapp.azure.com", "Mijia Cloud",
+];
 const direct_dns    = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
 const proxy_dns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query"];
 const adblock_dns   = ["https://dns.adguard-dns.com/dns-query"];
@@ -378,7 +401,7 @@ const config_dns = {
     "fake-ip-range":       "198.18.0.1/16",
     "fake-ip-filter-mode": "rule",
     "fake-ip-filter": [
-        "RULE-SET, fakeIpFilter,       real-ip",
+        "RULE-SET, fake_ip_filter,     real-ip",
         "GEOSITE,  private,            real-ip",
         "GEOSITE,  connectivity-check, real-ip",
         "GEOSITE,  category-ntp,       real-ip",
@@ -390,26 +413,7 @@ const config_dns = {
     "direct-nameserver":       direct_dns,
 };
 Units.configDns = {
-    "rule-providers": {
-        fakeIpFilter: buildRuleSet([
-            "+.m2m", "+.bogon","injections.adguard.org", "local.adguard.org","+.internal","+.sslip.io","+.nip.io", "*.home.arpa",
-            "+.lan", "+.local", "*.lan", "*.localdomain", "*.example", "*.invalid", "*.localhost", "*.test", "*.local",
-            "time.*.com", "time.*.gov", "time.*.edu.cn", "time.*.apple.com", "time-ios.apple.com",
-            "time1.*.com", "time2.*.com", "time3.*.com", "time4.*.com", "time5.*.com", "time6.*.com", "time7.*.com",
-            "ntp.*.com", "ntp1.*.com", "ntp2.*.com", "ntp3.*.com", "ntp4.*.com", "ntp5.*.com", "ntp6.*.com", "ntp7.*.com",
-            "*.time.edu.cn", "*.ntp.org.cn", "+.pool.ntp.org", "*.pool.ntp.org",
-            "time1.cloud.tencent.com", "+.msftconnecttest.com", "+.msftncsi.com", "localhost.ptlogin2.qq.com", "localhost.sec.qq.com",
-            "+.srv.nintendo.net", "*.n.n.srv.nintendo.net", "+.cdn.nintendo.net",
-            "+.stun.playstation.net", "xbox.*.*.microsoft.com", "*.*.xboxlive.com", "xbox.*.microsoft.com", "xnotify.xboxlive.com",
-            "stun.*.*", "stun.*.*.*", "+.stun.*.*", "+.stun.*.*.*", "+.stun.*.*.*.*", "+.stun.*.*.*.*.*",
-            "heartbeat.belkin.com", "*.linksys.com", "*.linksyssmartwifi.com", "*.router.asus.com",
-            "mesu.apple.com", "swscan.apple.com", "swquery.apple.com", "swdownload.apple.com", "swcdn.apple.com", "swdist.apple.com", "+.push.apple.com",
-            "proxy.golang.org", "lens.l.google.com", "stun.l.google.com", "na.b.g-tun.com", "+.nflxvideo.net",
-            "*.square-enix.com", "*.finalfantasyxiv.com", "*.ffxiv.com", "*.ff14.sdo.com", "ff.dorado.sdo.com",
-            "+.cmbchina.com", "+.cmbimg.com", "+.sandai.net", "+.n0808.com", "+.uu.163.com", "ps.res.netease.com",
-            "+.wilds.monsterhunter.com", "+.playfabapi.com", "*.*.cloudapp.azure.com", "Mijia Cloud",
-        ], { behavior: "domain" }),
-    },
+    "rule-providers": { fake_ip_filter: buildRuleSet(fake_ip_filter, { behavior: "domain" }) },
     override: (config) => Object.assign(config, { dns: config_dns }),
 };
 
@@ -421,10 +425,7 @@ const config_tun = {
     "auto-route":            true,
     "auto-redirect":         true,
     "auto-detect-interfact": true,
-    "dns-hijack": [
-        "any:53",
-        "tcp://any:53"
-    ],
+    "dns-hijack":            [ "any:53", "tcp://any:53" ],
     "strict-route":          true,
 };
 Units.configTun = { override: (config) => Object.assign(config, { tun: config_tun }) };
@@ -487,59 +488,58 @@ Units.sbcz = {
     */
 };
 
+const miui_ad = [
+    // Avlyun / sec.miui CSE
+    "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
+    "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
+    "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
+    // ByteDance
+    "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
+    "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
+    // Xunlei / Sandai
+    "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
+    "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
+    "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
+    "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
+    "guid-xldw-ssl.n0808.com",
+    // MIUI Browser
+    "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
+    "hot.browser.miui.com",      "security.browser.miui.com",
+    "r.browser.miui.com",        "hd.browser.miui.com",
+    "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
+    "qsb.browser.miui.com",      "global-search.browser.miui.com",
+    "qsb.browser.miui.srv",
+    // QuickApp
+    "statres.quickapp.cn",       "qr.quickapp.cn",
+    // Xiaomi / MIUI telemetry & ads
+    "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
+    "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
+    "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
+    "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "adinfo.ra1.xlmc.sec.miui.com",
+    "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
+    "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
+    "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
+    "test.ad.xiaomi.com",        "api.sec.miui.com",
+    // Other Xiaomi services
+    "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
+    "global.search.xiaomi.net",  "ccc.sys.miui.com",
+    "jupiter.sys.miui.com",      "metok.sys.miui.com",
+    // Tencent SDK / ads
+    "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
+    "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
+    "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
+    "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
+    "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
+    "cfg.imtt.qq.com",           "android.bugly.qq.com",
+    // Misc
+    "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
+    "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
+    "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
+    "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
+    "www.pangolin-dsp-toutiao.com",
+];
 Units.ad = {
-    "rule-providers": {
-        miui_ad: buildRuleSet([
-            // Avlyun / sec.miui CSE
-            "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
-            "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
-            "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
-            // ByteDance
-            "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
-            "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
-            // Xunlei / Sandai
-            "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
-            "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
-            "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
-            "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
-            "guid-xldw-ssl.n0808.com",
-            // MIUI Browser
-            "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
-            "hot.browser.miui.com",      "security.browser.miui.com",
-            "r.browser.miui.com",        "hd.browser.miui.com",
-            "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
-            "qsb.browser.miui.com",      "global-search.browser.miui.com",
-            "qsb.browser.miui.srv",
-            // QuickApp
-            "statres.quickapp.cn",       "qr.quickapp.cn",
-            // Xiaomi / MIUI telemetry & ads
-            "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
-            "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
-            "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
-            "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "adinfo.ra1.xlmc.sec.miui.com",
-            "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
-            "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
-            "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
-            "test.ad.xiaomi.com",        "api.sec.miui.com",
-            // Other Xiaomi services
-            "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
-            "global.search.xiaomi.net",  "ccc.sys.miui.com",
-            "jupiter.sys.miui.com",      "metok.sys.miui.com",
-            // Tencent SDK / ads
-            "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
-            "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
-            "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
-            "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
-            "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
-            "cfg.imtt.qq.com",           "android.bugly.qq.com",
-            // Misc
-            "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
-            "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
-            "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
-            "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
-            "www.pangolin-dsp-toutiao.com",
-        ], { behavior: "domain" }),
-    },
+    "rule-providers": { miui_ad: buildRuleSet(miui_ad, { behavior: "domain" }) },
     "rules": [
         "RULE-SET,      miui_ad,            MIUI_AD",
         "GEOSITE,       category-ads-all,   AD",
@@ -725,7 +725,7 @@ Units.discord = {
     override: (config) => addNameserverPolicy(config, { "cdn.discordapp.com": proxy_dns }),
 };
 
-Units.discord_meida = {
+Units.discord_media = {
     "rules": [ "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA", ],
     "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "RELAY" }],
 };
@@ -836,12 +836,12 @@ const tailscale_override_tips = `################
 const tailscale_override = (config) => {
     if (!config?.dns) return; // dns not set
     config.dns["fake-ip-filter"] = config.dns["fake-ip-filter"] || [];
-    const fakeIpFilter     = config.dns["fake-ip-filter"];
-    const fakeIpFilterMode = config.dns?.["fake-ip-filter-mode"];
-    if (fakeIpFilterMode === "rule") {
-        fakeIpFilter.unshift("RULE-SET,tailscale,fake-ip");
-    } else if (fakeIpFilterMode === "whitelist") {
-        fakeIpFilter.unshift("RULE-SET,tailscale");
+    const fake_ip_filter      = config.dns["fake-ip-filter"];
+    const fake_ip_filter_mode = config.dns?.["fake-ip-filter-mode"];
+    if (fake_ip_filter_mode === "rule") {
+        fake_ip_filter.unshift("RULE-SET,tailscale,fake-ip");
+    } else if (fake_ip_filter_mode === "whitelist") {
+        fake_ip_filter.unshift("RULE-SET,tailscale");
     } else {
         console.log(tailscale_override_tips);
     }
