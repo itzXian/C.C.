@@ -112,27 +112,24 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-    { name: "FLBK HKSG", type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), proxies: ["AUTO HK", "AUTO SG"] },
-    { name: "FLBK JP",   type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
-    { name: "FLBK US",   type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
-    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500 },
-    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true, lazy: false },
+    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e])), proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
+    { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
+    { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
+    { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
+    { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
+    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`) },
     { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true, lazy: false },
     { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true, lazy: false },
+    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true, lazy: false },
     { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true, lazy: false },
-    //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`) },
-    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`) },
-    //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all) },
-    { name: "LBRR HK",   type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
-    { name: "LBRR SG",   type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
+    //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`), hidden: true },
+    //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all), hidden: true },
 ];
 
 const exit_groups = [
-    { name: "FLBK JP",   type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
-    { name: "FLBK HKSG", type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), proxies: ["AUTO HK", "AUTO SG"] },
-    { name: "FLBK US",   type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
+    { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
+    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e])), proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
+    { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
     //{ name: "LBCH JP (1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
     { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
     { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500 },
@@ -558,7 +555,7 @@ Units.browser = {
     },
     "rules": [ "SUB-RULE,(RULE-SET,browser),sub_browser", ],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
-    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)", "include-all": true }],
+    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)" }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
 };
 
@@ -579,13 +576,13 @@ Units.downloader = {
 
 Units.ehentai = {
     "rules": [ "GEOSITE,       ehentai,            EHENTAI", ],
-    "proxy-groups": [{ name: "EHENTAI", "include-all": true }],
+    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
 Units.ehentai_media = {
     "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
-    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "RELAY" }],
+    "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "LBRR" }],
 };
 
 Units.github = {
@@ -747,7 +744,7 @@ Units.non_jp = {
         ], { behavior: "domain" }),
     },
     "rules": [ "RULE-SET,      non_jp,             NON_JP", ],
-    "proxy-groups": [{ name: "NON_JP", proxies: "RELAY" }],
+    "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)" }],
 };
 
 Units.jp = {
@@ -987,5 +984,5 @@ const main = (config) => {
     return config;
 };
 
-const IS_NODE = typeof process !== "undefined" && !!process.versions?.node;
-if (IS_NODE) module.exports = { main, applyConfig, Units };
+const isNode = typeof process !== "undefined" && !!process.versions?.node;
+if (isNode) module.exports = { main, applyConfig, Units };
