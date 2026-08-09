@@ -112,7 +112,7 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e])), proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
+    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e]).join("|")), proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
     { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
     { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
     { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
@@ -128,7 +128,7 @@ const relay_groups = [
 
 const exit_groups = [
     { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
-    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e])), proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
+    { name: "FLBK HKSGUSJP", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e]).join("|")), proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
     { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
     //{ name: "LBCH JP (1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
     { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
