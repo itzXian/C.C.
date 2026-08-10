@@ -17,6 +17,7 @@ const options = [
     //"configAdblockDns",
     //"configExitProvider",
     "addIcons",
+    //"shortProxyNames",
     //"tailscale",
     "browser",
     "downloader",
@@ -84,7 +85,6 @@ const Filter = {
     fr:      "法国|FR|France|🇫🇷",
     de:      "德国|DE|Germany|🇩🇪",
     exclude: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
-    all:     "",
 };
 
 const regex_cache = new Map();
@@ -122,8 +122,8 @@ const relay_groups = [
     { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true, lazy: false },
     { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true, lazy: false },
     { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true, lazy: false },
-    //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex(Filter.all, `${Filter.exclude}|${Filter.jp}`), hidden: true },
-    //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(Filter.all), hidden: true },
+    //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex("", `${Filter.exclude}|${Filter.jp}`), hidden: true },
+    //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(""), hidden: true },
 ];
 
 const exit_groups = [
@@ -941,6 +941,14 @@ Icons.ios = {
 };
 Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = g.icon ?? Icons.get(g.name)) };
 
+const replacement = [
+    { pattern: "[\\u4e00-\\u9fff ]*", target: "" },
+    { pattern: "[-|：:]", target: "" },
+    { pattern: "(AWS|BGP|CM|CT|CU|hy2|HY2|ip|IP)", target: "" },
+    { pattern: "(0\\.[0]*[0-9])[xX]*", target: " x $1" },
+    ...Object.entries(Filter).map(([k, v]) => ({ pattern: v, target: k.toUpperCase() })),
+];
+Units.shortProxyNames = { overrideFinal: (config) => Object.values(config["proxy-providers"]).forEach(v => v["override"]["proxy-name"] = replacement) };
 
 const applyConfig = (config, options = []) => {
     const merged = {
