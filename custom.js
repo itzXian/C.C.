@@ -1,6 +1,5 @@
 "use strict";
-/*
-Version: 2.0
+/* ========== Version: 2.0 ==========
 Reference:
 https://www.clashverge.dev/guide/script.html
 https://github.com/yyhhyyyyyy/selfproxy/blob/cb1470d2a321051573d3ecc902a692173b9dd787/Mihomo/Extension_Script/script.js
@@ -112,33 +111,34 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e]).join("|")), proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
-    { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
-    { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
+    { name: "FLBK HKSGJPUS", type: "fallback", use: [], proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
+    { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
+    { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
     { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
     { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
-    //{ name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`) },
-    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true, lazy: false },
-    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true, lazy: false },
-    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true, lazy: false },
-    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true, lazy: false },
+    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), lazy: false, hidden: true },
+    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), lazy: false, hidden: true },
+    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
+    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
     //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex("", `${Filter.exclude}|${Filter.jp}`), hidden: true },
     //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(""), hidden: true },
 ];
 
 const exit_groups = [
-    { name: "FLBK JP",       type: "fallback", filter: buildRegex(Filter.jp), proxies: ["AUTO JP"] },
-    { name: "FLBK HKSGUSJP", type: "fallback", filter: buildRegex(["hk", "sg", "jp", "us"].map(e => Filter[e]).join("|")), proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
-    { name: "FLBK US",       type: "fallback", filter: buildRegex(Filter.us), proxies: ["AUTO US"] },
-    //{ name: "LBCH JP (1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500 },
-    //{ name: "AUTO JP (1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", hidden: true },
-    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), hidden: true, lazy: false },
-    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), hidden: true, lazy: false },
-    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), hidden: true, lazy: false },
-    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), hidden: true, lazy: false },
+    { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
+    { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
+    { name: "FLBK HKSGUSJP", type: "fallback", use: [], proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
+    { name: "FLBK (LBCH HKSGUSJP)", type: "fallback", use: [], proxies: ["LBCH HK", "LBCH SG", "LBCH US", "LBCH JP"]},
+    //{ name: "LBCH JP_(1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
+    { name: "LBCH HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
+    { name: "LBCH SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
+    { name: "LBCH JP", type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500, lazy: false },
+    { name: "LBCH US", type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500, lazy: false },
+    //{ name: "AUTO JP_(1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", hidden: true },
+    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), lazy: false, hidden: true },
+    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), lazy: false, hidden: true },
+    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
+    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
 ];
 
 const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
@@ -241,15 +241,14 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
     return {
         prebuiltProxies: {
             default: ["SELECTOR", ...groupNames, "PASS", "DIRECT", "REJECT"],
-            perfer(filter) { return  this.default.find(g => g.match(filter)) || "" },
+            prefer(filter) { return  this.default.find(g => g.match(filter)) || "" },
         },
         prebuiltGroups: [...groups.map(g => buildGroup(g)), ...selectors],
         prebuiltProviders: { ...relayProviders, ...(config_exit_provider?.enable ? exitProviders : {}) }
     };
 };
 
-/* ========== DNS, TUN, Rule Providers, Rules, Proxy Groups, Etc ========== */
-/*
+/* ========== DNS, TUN, Rule Providers, Rules, Proxy Groups, Etc ==========
 Docs:
 https://wiki.metacubex.one/config/general
 https://wiki.metacubex.one/config/general#api
@@ -480,9 +479,7 @@ Units.sbcz = {
     "rules": [
         "RULE-SET,      sbcz,               DIRECT",
     ],
-    /*
-    "proxy-groups": [{ name: "SBCZ", proxies: "DIRECT" }],
-    */
+    //"proxy-groups": [{ name: "SBCZ", proxies: "DIRECT" }],
 };
 
 const miui_ad = [
@@ -806,7 +803,7 @@ const tailscale_proxy_providers = {
             "auth-key": "tskey-blabla",
             "state-dir": "./tailscale", // requie an unique dir name per tailscale node
         },
-    /***
+    /*
         {
             name:       "Tailscale as Exit Node",
             type:       "tailscale",
@@ -975,7 +972,7 @@ const applyConfig = (config, options = []) => {
     merged["proxy-groups"] = merged["proxy-groups"].map(g => {
         const group = buildGroup({ ...g, type: "select", hidden: false });
         if (!Array.isArray(group.proxies)) {
-            group["default-selected"] = base.prebuiltProxies.perfer(group.proxies);
+            group["default-selected"] = base.prebuiltProxies.prefer(group.proxies);
             group.proxies = base.prebuiltProxies.default;
         }
         return group;
