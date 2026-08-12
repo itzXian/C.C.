@@ -83,14 +83,16 @@ const Filter = {
     uk:      "英国|UK|United Kingdom|🇬🇧",
     fr:      "法国|FR|France|🇫🇷",
     de:      "德国|DE|Germany|🇩🇪",
-    exclude: "剩余|到期|主页|官网|游戏|关注|网站|地址|有效|网址|禁止|邮箱|发布|客服|订阅|节点|问题|联系",
+    exclude: "剩余|到期",
 };
 
 const regex_cache = new Map();
-const buildRegex = (include, exclude = Filter.exclude) => {
+const buildRegex = (include = "", exclude = "") => {
     const key = `${include}|${exclude}`;
     if (!regex_cache.has(key)) {
-        regex_cache.set(key, include ? `^(?=.*(${include}))(?!.*${exclude}).*$` : `^((?!.*${exclude}).)*$`);
+        const new_include = include ? `(?=.*(${include}))` : "";
+        const new_exclude = exclude ? `(?!.*(${exclude}))` : "";
+        regex_cache.set(key, `^${new_include}${new_exclude}.*$`);
     }
     return regex_cache.get(key);
 }
@@ -103,9 +105,9 @@ const buildGroup = (overrides) => ({
     "expected-status":  "200/204/302",
     timeout:            999,  // ms
     "max-failed-times": 2,
-    //"exclude-filter":   "0.[0-9][倍xX✕✖⨉]",
-    //"exclude-filter":   "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]",
-    //"exclude-filter":   "[2-9][倍xX✕✖⨉]",
+    //"exclude-filter":   "[^.0][1-9][倍xX✕✖⨉]",
+    //"exclude-filter":   "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]",
+    //"exclude-filter":   "([.0][1-9]|1)[倍xX✕✖⨉]",
     tolerance:          50,   // ms
     ...overrides,
 });
@@ -129,12 +131,12 @@ const exit_groups = [
     { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
     { name: "FLBK HKSGUSJP", type: "fallback", use: [], proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
     { name: "FLBK (LBCH HKSGUSJP)", type: "fallback", use: [], proxies: ["LBCH HK", "LBCH SG", "LBCH US", "LBCH JP"]},
-    //{ name: "LBCH JP_(1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter":  "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
+    //{ name: "LBCH JP_(1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter": "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
     { name: "LBCH HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
     { name: "LBCH SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
     { name: "LBCH JP", type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500, lazy: false },
     { name: "LBCH US", type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500, lazy: false },
-    //{ name: "AUTO JP_(1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "(?:0\.[1-9]|[2-9])[倍xX✕✖⨉]", hidden: true },
+    //{ name: "AUTO JP_(1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]", hidden: true },
     { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), lazy: false, hidden: true },
     { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), lazy: false, hidden: true },
     { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
@@ -939,10 +941,10 @@ Icons.ios = {
 Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = g.icon ?? Icons.get(g.name)) };
 
 const replacement = [
-    { pattern: "[\\u4e00-\\u9fff ]*", target: "" },
-    { pattern: "[-|：:]", target: "" },
+    { pattern: "[-|： :]", target: "" },
+    { pattern: "([.0]*[1-9])[倍xX✕✖⨉]", target: " x $1" },
+    { pattern: "[\\u4e00-\\u9fa5]", target: "" },
     { pattern: "(AWS|BGP|CM|CT|CU|hy2|HY2|ip|IP)", target: "" },
-    { pattern: "(0\\.[0]*[0-9])[xX]*", target: " x $1" },
     ...Object.entries(Filter).map(([k, v]) => ({ pattern: v, target: k.toUpperCase() })),
 ];
 Units.shortProxyNames = { overrideFinal: (config) => Object.values(config["proxy-providers"]).forEach(v => v["override"]["proxy-name"] = replacement) };
