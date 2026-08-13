@@ -113,15 +113,14 @@ const buildGroup = (overrides) => ({
 });
 
 const relay_groups = [
-    { name: "FLBK HKSGJPUS", type: "fallback", use: [], proxies: ["AUTO HK", "AUTO SG", "AUTO JP", "AUTO US"] },
+    { name: "FLBK HKSGJPUS", type: "fallback", use: [], proxies: ["AUTO HKSG", "AUTO JP", "AUTO US"] },
     { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
     { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
     { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
     { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
-    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), lazy: false, hidden: true },
-    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), lazy: false, hidden: true },
-    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
-    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
+    { name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), lazy: false, hidden: true },
+    { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
+    { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
     //{ name: "AUTO !JP",  type: "url-test", filter: buildRegex("", `${Filter.exclude}|${Filter.jp}`), hidden: true },
     //{ name: "AUTO ALL",  type: "url-test", filter: buildRegex(""), hidden: true },
 ];
@@ -129,18 +128,16 @@ const relay_groups = [
 const exit_groups = [
     { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
     { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
-    { name: "FLBK HKSGUSJP", type: "fallback", use: [], proxies: ["AUTO HK", "AUTO SG", "AUTO US", "AUTO JP"] },
-    { name: "FLBK (LBCH HKSGUSJP)", type: "fallback", use: [], proxies: ["LBCH HK", "LBCH SG", "LBCH US", "LBCH JP"]},
+    { name: "FLBK HKSGUSJP", type: "fallback", use: [], proxies: ["AUTO HKSG", "AUTO US", "AUTO JP"] },
+    { name: "FLBK (LBCH HKSGUSJP)", type: "fallback", use: [], proxies: ["LBCH HKSG", "LBCH US", "LBCH JP"]},
     //{ name: "LBCH JP_(1X)", type: "load-balance", filter: buildRegex(Filter.jp), "exclude-filter": "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]", strategy: "consistent-hashing", timeout: 500 },
-    { name: "LBCH HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
-    { name: "LBCH SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
+    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
     { name: "LBCH JP", type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500, lazy: false },
     { name: "LBCH US", type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500, lazy: false },
     //{ name: "AUTO JP_(1X)", type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]", hidden: true },
-    { name: "AUTO HK", type: "url-test", filter: buildRegex(Filter.hk), lazy: false, hidden: true },
-    { name: "AUTO SG", type: "url-test", filter: buildRegex(Filter.sg), lazy: false, hidden: true },
-    { name: "AUTO JP", type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
-    { name: "AUTO US", type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
+    { name: "AUTO HKSG", type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), lazy: false, hidden: true },
+    { name: "AUTO JP",   type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
+    { name: "AUTO US",   type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
 ];
 
 const buildGroupsWithProviders = (proxies = [], groups = [], providerKeys = [], prefix = "", selector = "") => {
