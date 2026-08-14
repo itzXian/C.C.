@@ -35,6 +35,7 @@ const options = [
     "youtube",
     "google_fcm",
     "google",
+    "apple_cn",
     "apple",
     "twitter_media",
     "twitter",
@@ -360,24 +361,6 @@ Units.configHosts = { override: (config) => Object.assign(config, { hosts: confi
 const config_exit_provider = {};
 Units.configExitProvider = { override: () => config_exit_provider.enable = true };
 
-const fake_ip_filter= [
-    "+.m2m", "+.bogon","injections.adguard.org", "local.adguard.org","+.internal","+.sslip.io","+.nip.io", "*.home.arpa",
-    "+.lan", "+.local", "*.lan", "*.localdomain", "*.example", "*.invalid", "*.localhost", "*.test", "*.local",
-    "time.*.com", "time.*.gov", "time.*.edu.cn", "time.*.apple.com", "time-ios.apple.com",
-    "time1.*.com", "time2.*.com", "time3.*.com", "time4.*.com", "time5.*.com", "time6.*.com", "time7.*.com",
-    "ntp.*.com", "ntp1.*.com", "ntp2.*.com", "ntp3.*.com", "ntp4.*.com", "ntp5.*.com", "ntp6.*.com", "ntp7.*.com",
-    "*.time.edu.cn", "*.ntp.org.cn", "+.pool.ntp.org", "*.pool.ntp.org",
-    "time1.cloud.tencent.com", "+.msftconnecttest.com", "+.msftncsi.com", "localhost.ptlogin2.qq.com", "localhost.sec.qq.com",
-    "+.srv.nintendo.net", "*.n.n.srv.nintendo.net", "+.cdn.nintendo.net",
-    "+.stun.playstation.net", "xbox.*.*.microsoft.com", "*.*.xboxlive.com", "xbox.*.microsoft.com", "xnotify.xboxlive.com",
-    "stun.*.*", "stun.*.*.*", "+.stun.*.*", "+.stun.*.*.*", "+.stun.*.*.*.*", "+.stun.*.*.*.*.*",
-    "heartbeat.belkin.com", "*.linksys.com", "*.linksyssmartwifi.com", "*.router.asus.com",
-    "mesu.apple.com", "swscan.apple.com", "swquery.apple.com", "swdownload.apple.com", "swcdn.apple.com", "swdist.apple.com", "+.push.apple.com",
-    "proxy.golang.org", "lens.l.google.com", "stun.l.google.com", "na.b.g-tun.com", "+.nflxvideo.net",
-    "*.square-enix.com", "*.finalfantasyxiv.com", "*.ffxiv.com", "*.ff14.sdo.com", "ff.dorado.sdo.com",
-    "+.cmbchina.com", "+.cmbimg.com", "+.sandai.net", "+.n0808.com", "+.uu.163.com", "ps.res.netease.com",
-    "+.wilds.monsterhunter.com", "+.playfabapi.com", "*.*.cloudapp.azure.com", "Mijia Cloud",
-];
 const direct_dns    = ["https://dns.alidns.com/dns-query", "https://doh.pub/dns-query"];
 const proxy_dns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-query"];
 const adblock_dns   = ["https://dns.adguard-dns.com/dns-query"];
@@ -396,10 +379,11 @@ const config_dns = {
     "fake-ip-range":       "198.18.0.1/16",
     "fake-ip-filter-mode": "rule",
     "fake-ip-filter": [
-        "RULE-SET, fake_ip_filter,     real-ip",
         "GEOSITE,  private,            real-ip",
         "GEOSITE,  connectivity-check, real-ip",
         "GEOSITE,  category-ntp,       real-ip",
+        "GEOSITE,  category-stun,      real-ip",
+        "GEOSITE,  category-ddns,      real-ip",
         "MATCH,                        fake-ip",
     ],
     "nameserver-policy":       {},
@@ -407,10 +391,7 @@ const config_dns = {
     "proxy-server-nameserver": direct_dns,
     "direct-nameserver":       direct_dns,
 };
-Units.configDns = {
-    "rule-providers": { fake_ip_filter: buildRuleSet(fake_ip_filter, { behavior: "domain" }) },
-    override: (config) => Object.assign(config, { dns: config_dns }),
-};
+Units.configDns = { override: (config) => Object.assign(config, { dns: config_dns }) };
 
 Units.configAdblockDns = { override: (config) => config.dns.nameserver = adblock_dns };
 
@@ -420,7 +401,7 @@ const config_tun = {
     "auto-route":            true,
     "auto-redirect":         true,
     "auto-detect-interfact": true,
-    "dns-hijack":            [ "any:53", "tcp://any:53" ],
+    "dns-hijack":            ["any:53", "tcp://any:53"],
     "strict-route":          true,
 };
 Units.configTun = { override: (config) => Object.assign(config, { tun: config_tun }) };
@@ -481,66 +462,9 @@ Units.sbcz = {
     //"proxy-groups": [{ name: "SBCZ", proxies: "DIRECT" }],
 };
 
-const miui_ad = [
-    // Avlyun / sec.miui CSE
-    "miui-fxcse.avlyun.com",     "update.avlyun.sec.miui.com",
-    "sdkconf.avlyun.com",        "ixav-cse.avlyun.com",
-    "miav-cse.avlyun.com",       "logupdate.avlyun.sec.miui.com",
-    // ByteDance
-    "tbm.snssdk.com",            "toblog.ctobsnssdk.com",
-    "ug.snssdk.com",             "tobapplog.ctobsnssdk.com",
-    // Xunlei / Sandai
-    "hub5pn.wap.sandai.net",     "master.wap.dphub.sandai.net",
-    "hub5u.wap.sandai.net",      "idx.m.hub.sandai.net",
-    "tw13b093.sandai.net",       "uploadlog.xlmc.sandai.net",
-    "t03-api.xlmc.xunlei.com",   "pre.api.tw06.xlmc.sandai.net",
-    "guid-xldw-ssl.n0808.com",
-    // MIUI Browser
-    "api.browser.miui.com",      "ssl-cdn.static.browser.mi-img.com",
-    "hot.browser.miui.com",      "security.browser.miui.com",
-    "r.browser.miui.com",        "hd.browser.miui.com",
-    "c3-cache.browser.miui.com", "api-ipv4.browser.miui.com",
-    "qsb.browser.miui.com",      "global-search.browser.miui.com",
-    "qsb.browser.miui.srv",
-    // QuickApp
-    "statres.quickapp.cn",       "qr.quickapp.cn",
-    // Xiaomi / MIUI telemetry & ads
-    "api.installer.xiaomi.com",  "tracking.miui.com",   "data.mistat.xiaomi.com",
-    "diagnosis.ad.xiaomi.com",   "log.ad.xiaomi.com",   "m.track.ad.xiaomi.com",
-    "sdkconfig.ad.xiaomi.com",   "api.ad.xiaomi.com",   "tracker.ai.xiaomi.com",
-    "grayconfig.ai.xiaomi.com",  "mazu.sec.miui.com",   "adinfo.ra1.xlmc.sec.miui.com",
-    "auth.be.sec.miui.com",      "flash.sec.miui.com",  "port.sec.miui.com",
-    "data.sec.miui.com",         "update.miui.com",     "api.hybrid.xiaomi.com",
-    "hybrid.xiaomi.com",         "hybrid.miui.com",     "o2o.api.xiaomi.com",
-    "test.ad.xiaomi.com",        "api.sec.miui.com",
-    // Other Xiaomi services
-    "api.developer.xiaomi.com",  "sentry.d.xiaomi.net", "rom.pt.miui.srv",
-    "global.search.xiaomi.net",  "ccc.sys.miui.com",
-    "jupiter.sys.miui.com",      "metok.sys.miui.com",
-    // Tencent SDK / ads
-    "tmfsdk.m.qq.com",           "tmfsdk4.m.qq.com",    "tmfsdktcp.m.qq.com",
-    "tmfsdktcpv4.m.qq.com",      "h.trace.qq.com",      "othstr.beacon.qq.com",
-    "tools.3g.qq.com",           "tdid.m.qq.com",       "api.yky.qq.com",
-    "sdk.e.qq.com",              "tangram.e.qq.com",    "us.l.qq.com",
-    "tpstelemetry.tencent.com",  "tmeadcomm.y.qq.com",
-    "cfg.imtt.qq.com",           "android.bugly.qq.com",
-    // Misc
-    "beacon-api.aliyuncs.com",   "s1.irs03.com",        "pssn.alicdn.com",
-    "mpush-api.aliyun.com",      "up.cm.ksmobile.com",  "dl.cm.ksmobile.com",
-    "dw-online.ksosoft.com",     "zzhc.vnet.cn",        "t7z.cupid.iqiyi.com",
-    "rdt.tfogc.com",             "pgdt.gtimg.cn",       "worldwide.sogou.com",
-    "www.pangolin-dsp-toutiao.com",
-];
 Units.ad = {
-    "rule-providers": { miui_ad: buildRuleSet(miui_ad, { behavior: "domain" }) },
-    "rules": [
-        "RULE-SET,      miui_ad,            MIUI_AD",
-        "GEOSITE,       category-ads-all,   AD",
-    ],
-    "proxy-groups": [
-        { name: "MIUI_AD", proxies: "REJECT" },
-        { name: "AD", proxies: "REJECT" },
-    ],
+    "rules": ["GEOSITE,       category-ads-all,   AD"],
+    "proxy-groups": [{ name: "AD", proxies: "REJECT" }],
 };
 Units.browser = {
     "rule-providers": {
@@ -549,7 +473,7 @@ Units.browser = {
             "PROCESS-NAME,org.torproject.torbrowser",
         ]),
     },
-    "rules": [ "SUB-RULE,(RULE-SET,browser),sub_browser", ],
+    "rules": ["SUB-RULE,(RULE-SET,browser),sub_browser"],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
     "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)" }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
@@ -564,20 +488,20 @@ Units.downloader = {
             "PROCESS-NAME-REGEX,.*qbittorrent.*",
         ]),
     },
-    "rules": [ "SUB-RULE,(RULE-SET,downloader),sub_downloader", ],
+    "rules": ["SUB-RULE,(RULE-SET,downloader),sub_downloader"],
     "sub-rules": { sub_downloader: buildCommonSubRules("DOWNLOADER") },
     "proxy-groups": [{ name: "DOWNLOADER", proxies: "LBRR", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxy_dns }),
 };
 
 Units.ehentai = {
-    "rules": [ "GEOSITE,       ehentai,            EHENTAI", ],
+    "rules": ["GEOSITE,       ehentai,            EHENTAI"],
     "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)", url: "https://e-hentai.org" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
 Units.ehentai_media = {
-    "rules": [ "DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA", ],
+    "rules": ["DOMAIN-SUFFIX, hath.network,       EHENTAI_MEDIA"],
     "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "LBRR", url: "http://hath.network" }],
 };
 
@@ -590,7 +514,7 @@ Units.github = {
 };
 
 Units.microsoft = {
-    "rules": [ "GEOSITE,       microsoft,          MICROSOFT", ],
+    "rules": ["GEOSITE,       microsoft,          MICROSOFT"],
     "proxy-groups": [{ name: "MICROSOFT" }],
 };
 
@@ -603,28 +527,28 @@ Units.steam_cn = {
 };
 
 Units.steam = {
-    "rules": [ "GEOSITE,       steam,              STEAM", ],
+    "rules": ["GEOSITE,       steam,              STEAM"],
     "proxy-groups": [{ name: "STEAM" }],
 };
 
 Units.pixiv = {
-    "rules": [ "GEOSITE,       pixiv,              PIXIV", ],
+    "rules": ["GEOSITE,       pixiv,              PIXIV"],
     "proxy-groups": [{ name: "PIXIV" }],
     override: (config) => addNameserverPolicy(config, { "+.pximg.net": proxy_dns }),
 };
 
 Units.ai = {
-    "rules": [ "GEOSITE,       category-ai-!cn,    AI", ],
+    "rules": ["GEOSITE,       category-ai-!cn,    AI"],
     "proxy-groups": [{ name: "AI" }],
 };
 
 Units.youtube = {
-    "rules": [ "GEOSITE,       youTube,            YOUTUBE", ],
+    "rules": ["GEOSITE,       youTube,            YOUTUBE"],
     "proxy-groups": [{ name: "YOUTUBE" }],
 };
 
 Units.youtube_media = {
-    "rules": [ "GEOSITE,       youTube,            YOUTUBE", ],
+    "rules": ["GEOSITE,       youTube,            YOUTUBE"],
     "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "RELAY" }],
     override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxy_dns }),
 };
@@ -713,16 +637,20 @@ Units.telegram_media = {
 };
 
 Units.discord = {
-    "rules": [ "GEOSITE,       discord,            DISCORD", ],
+    "rules": ["GEOSITE,       discord,            DISCORD"],
     "proxy-groups": [{ name: "DISCORD" }],
     override: (config) => addNameserverPolicy(config, { "cdn.discordapp.com": proxy_dns }),
 };
 
 Units.discord_media = {
-    "rules": [ "DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA", ],
+    "rules": ["DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA"],
     "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "RELAY" }],
 };
 
+Units.apple_cn = {
+    "rules": ["GEOSITE,       apple-cn,           APPLE_CN"],
+    "proxy-groups": [{ name: "APPLE_CN", proxies: "DIRECT" }],
+},
 Units.apple = {
     "rules": [
         "GEOSITE,       apple,              APPLE",
@@ -739,7 +667,7 @@ Units.non_jp = {
             "+.kotobank.jp",
         ], { behavior: "domain" }),
     },
-    "rules": [ "RULE-SET,      non_jp,             NON_JP", ],
+    "rules": ["RULE-SET,      non_jp,             NON_JP"],
     "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)" }],
 };
 
@@ -758,7 +686,7 @@ Units.jp = {
 };
 
 Units.non_cn = {
-    "rules": [ "GEOSITE,       geolocation-!cn,    FINAL", ],
+    "rules": ["GEOSITE,       geolocation-!cn,    FINAL"],
 };
 
 Units.cn = {
@@ -773,7 +701,7 @@ Units.cn = {
 };
 
 Units.final = {
-    "rules": [ "MATCH,                             FINAL", ],
+    "rules": ["MATCH,                             FINAL"],
     "proxy-groups": [{ name: "FINAL" }],
 };
 
@@ -874,7 +802,6 @@ Icons.old = {
     EHENTAI: Icons.favicon("https://e-hentai.org"),
     EHENTAI_MEDIA: Icons.favicon("https://e-hentai.org"),
     AD: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
-    MIUI_AD: Icons.favicon("https://www.mi.com/"),
     PIXIV: Icons.favicon("https://www.pixiv.net"),
     AI: "https://play-lh.googleusercontent.com/lmG9HlI0awHie0cyBieWXeNjpyXvHPwDBb8MNOVIyp0P8VEh95AiBHtUZSDVR3HLe3A",
     STEAM: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg",
@@ -886,6 +813,7 @@ Icons.old = {
     GOOGLE: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
     GOOGLE_FCM: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg",
     APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
+    APPLE_CN: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
     TWITTER: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
     TWITTER_MEDIA: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
     TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
@@ -911,7 +839,6 @@ Icons.ios = {
     //EHENTAI: "",
     //EHENTAI_MEDIA: "",
     AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/81/8f/6a818fb6-1521-2a89-60cd-07239c6230ad/Placeholder.mill/400x400ia-75.webp",
-    MIUI_AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/36/83/3b/36833b79-3066-63e4-ea2b-797b09843d18/Placeholder.mill/400x400ia-75.webp",
     PIXIV: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
     AI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/85/eb/b3/85ebb3df-5d4c-7216-ea4f-919fe9987cad/Placeholder.mill/400x400bb-75.webp",
     STEAM: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
@@ -923,6 +850,7 @@ Icons.ios = {
     GOOGLE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     GOOGLE_FCM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     //APPLE: "",
+    //APPLE_CN: "",
     TWITTER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
     TWITTER_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
     TELEGRAM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
