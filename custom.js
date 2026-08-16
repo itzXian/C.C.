@@ -866,10 +866,10 @@ Icons.ios = {
 Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = g.icon ?? Icons.get(g.name)) };
 
 const replacement = [
-    { pattern: "[-|： :]", target: "" },
-    { pattern: "([.0]*[1-9])[倍xX✕✖⨉]", target: " x $1" },
+    { pattern: "[-： :]", target: "" },
+    { pattern: "(.*)(专线)(.*)", target: "$1$3 " },
+    { pattern: "(.*?)([.0]*[1-9])[倍xX✕✖⨉](.*)", target: "$1$3 x $2" },
     { pattern: "[\\u4e00-\\u9fa5]", target: "" },
-    { pattern: "(AWS|BGP|CM|CT|CU|hy2|HY2|ip|IP)", target: "" },
     ...Object.entries(Filter).map(([k, v]) => ({ pattern: v, target: k.toUpperCase() })),
 ];
 Units.shortProxyNames = { overrideFinal: (config) => Object.values(config["proxy-providers"]).forEach(v => v["override"]["proxy-name"] = replacement) };
