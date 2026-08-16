@@ -475,7 +475,7 @@ Units.browser = {
     },
     "rules": ["SUB-RULE,(RULE-SET,browser),sub_browser"],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
-    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)" }],
+    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)", "include-all": true }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
 };
 
@@ -496,7 +496,7 @@ Units.downloader = {
 
 Units.ehentai = {
     "rules": ["GEOSITE,       ehentai,            EHENTAI"],
-    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)", url: "https://e-hentai.org" }],
+    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)", "include-all": true, url: "https://e-hentai.org" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
@@ -668,7 +668,7 @@ Units.non_jp = {
         ], { behavior: "domain" }),
     },
     "rules": ["RULE-SET,      non_jp,             NON_JP"],
-    "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)" }],
+    "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)", "include-all": true }],
 };
 
 Units.jp = {
