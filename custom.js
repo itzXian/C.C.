@@ -317,13 +317,18 @@ const config_base = {
     "unified-delay":       true,
     "tcp-concurrent":      true,
     sniffer: {
-        enable: true,
+        enable:                 true,
+        "force-dns-mapping":    true,
+        "parse-pure-ip":        true,
+        "override-destination": false,
         sniff: {
             HTTP: { ports: [80, "8080-8880"], "override-destination": true },
             TLS:  { ports: [443, 8443] },
             QUIC: { ports: [443, 8443] },
         },
         "skip-domain": ["Mijia Cloud", "+.push.apple.com"],
+        "skip-src-address": ["192.168.0.3/32"],
+        "skip-dst-address": ["192.168.0.3/32"],
     },
 };
 Units.configBase = { override: (config) => Object.assign(config, config_base) };
@@ -367,9 +372,11 @@ const proxy_dns     = ["https://1.1.1.1/dns-query", "https://dns.google/dns-quer
 const adblock_dns   = ["https://dns.adguard-dns.com/dns-query"];
 const config_dns = {
     enable:                true,
+    "cache-algorithm":     "arc",
     "use-hosts":           true,
     "use-system-hosts":    true,
-    "prefer-h3":           true,
+    "prefer-h3":           false,
+    "respect-rules":       true,
     ipv6:                  false,
     "default-nameserver":  [
         "https://223.5.5.5/dns-query",
