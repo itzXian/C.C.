@@ -236,6 +236,7 @@ const buildProxiesGroupsProviders = (proxies = [], providers = {}) => {
         {
             name: "SELECTOR",
             proxies: [...groupNames, "PASS", "DIRECT", "REJECT"],
+            "include-all": true,
         },
     ].map(g => buildGroup({ ...g, type: "select", hidden: false }));
 
@@ -482,7 +483,7 @@ Units.browser = {
     },
     "rules": ["SUB-RULE,(RULE-SET,browser),sub_browser"],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
-    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)", "include-all": true }],
+    "proxy-groups": [{ name: "BROWSER", proxies: "(HKSG|HK|SG)" }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:browser": proxy_dns }),
 };
 
@@ -497,13 +498,13 @@ Units.downloader = {
     },
     "rules": ["SUB-RULE,(RULE-SET,downloader),sub_downloader"],
     "sub-rules": { sub_downloader: buildCommonSubRules("DOWNLOADER") },
-    "proxy-groups": [{ name: "DOWNLOADER", proxies: "LBRR", "include-all": true }],
+    "proxy-groups": [{ name: "DOWNLOADER", proxies: "LBRR" }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxy_dns }),
 };
 
 Units.ehentai = {
     "rules": ["GEOSITE,       ehentai,            EHENTAI"],
-    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)", "include-all": true, url: "https://e-hentai.org" }],
+    "proxy-groups": [{ name: "EHENTAI", proxies: "(HKSG|HK|SG)" }],
     override: (config) => addNameserverPolicy(config, { "GEOSITE:ehentai": proxy_dns }),
 };
 
@@ -517,7 +518,7 @@ Units.github = {
         "GEOSITE,       npmjs,              FINAL",
         "GEOSITE,       github,             GITHUB",
     ],
-    "proxy-groups": [{ name: "GITHUB", proxies: "RELAY", "include-all": true, url: "https://avatars.githubusercontent.com/0" }],
+    "proxy-groups": [{ name: "GITHUB", proxies: "RELAY", url: "https://avatars.githubusercontent.com/0" }],
 };
 
 Units.microsoft = {
@@ -675,7 +676,7 @@ Units.non_jp = {
         ], { behavior: "domain" }),
     },
     "rules": ["RULE-SET,      non_jp,             NON_JP"],
-    "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)", "include-all": true }],
+    "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)" }],
 };
 
 Units.jp = {
@@ -694,6 +695,7 @@ Units.jp = {
 
 Units.non_cn = {
     "rules": ["GEOSITE,       geolocation-!cn,    FINAL"],
+    "proxy-groups": [{ name: "NON_CN" }],
 };
 
 Units.cn = {
@@ -830,6 +832,7 @@ Icons.old = {
     TIKTOK: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tiktok_icon.svg",
     NON_JP: "https://upload.wikimedia.org/wikipedia/commons/4/45/Wikimania2019_flower_icon.svg",
     JP: "https://upload.wikimedia.org/wikipedia/commons/5/54/Noto_Emoji_v2.034_1f338.svg",
+    NON_CN: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Noto_Emoji_v2.034_1f31f.svg",
     CN: "https://upload.wikimedia.org/wikipedia/commons/8/8b/Noto_Emoji_v2.034_2b50.svg",
     FINAL: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Emoji_u1f52f.svg",
 };
@@ -867,6 +870,7 @@ Icons.ios = {
     TIKTOK: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/19/43/1b/19431ba4-7ac5-7e31-e6f3-ea5dcd4e419c/Placeholder.mill/400x400ia-75.webp",
     //NON_JP: "",
     //JP: "",
+    //NON_CN: "",
     //CN: "",
     //FINAL: "",
 };
@@ -908,6 +912,7 @@ const applyConfig = (config, options = []) => {
         if (!Array.isArray(group.proxies)) {
             group["default-selected"] = base.prebuiltProxies.prefer(group.proxies);
             group.proxies = base.prebuiltProxies.default;
+            group["include-all"] = group?.["include-all"] || true;
         }
         return group;
     });
