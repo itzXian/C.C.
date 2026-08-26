@@ -801,7 +801,7 @@ const Icons = {
 Icons.old = {
     _EXIT: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Send_icon.svg",
     RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
-    SELECTOR: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Noto_Emoji_v2.034_1f3af.svg",
+    SELECTOR: "https://upload.wikimedia.org/wikipedia/commons/8/84/Noto_Emoji_v2.034_1f4cc.svg",
     TAILSCALE: Icons.favicon("https://tailscale.com"),
     BROWSER: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     DOWNLOADER: "https://upload.wikimedia.org/wikipedia/commons/0/08/Paomedia_small-n-flat_cloud-down.svg",
