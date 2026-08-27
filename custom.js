@@ -131,10 +131,10 @@ const buildGroup = (overrides) => ({
     name:               overrides.name,
     hidden:             true,
     url:                "https://www.google.com/generate_204",
-    interval:           1800, // s
+    interval:           300,  // s
     "expected-status":  "200/204/302",
-    timeout:            999,  // ms
-    "max-failed-times": 2,
+    timeout:            998,  // ms
+    "max-failed-times": 1,
     //"exclude-filter":   "[^.0][1-9][倍xX✕✖⨉]",
     //"exclude-filter":   "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]",
     //"exclude-filter":   "([.0][1-9]|1)[倍xX✕✖⨉]",
