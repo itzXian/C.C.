@@ -279,10 +279,10 @@ const buildCommonSubRules = (target) => [
     "RULE-SET,      non_jp,             PASS",
     "RULE-SET,      jp,                 PASS",
     `GEOSITE,       geolocation-!cn,    ${target}`,
-    "GEOSITE,       private,            CN",
-    "GEOSITE,       CN,                 CN",
-    "GEOIP,         private,            CN,              no-resolve",
-    "GEOIP,         CN,                 CN,              no-resolve",
+    "GEOSITE,       private,            PASS",
+    "GEOSITE,       CN,                 PASS",
+    "GEOIP,         private,            PASS,            no-resolve",
+    "GEOIP,         CN,                 PASS,            no-resolve",
     `MATCH,                             ${target}`,
 ];
 
@@ -694,7 +694,7 @@ Units.jp = {
 };
 
 Units.non_cn = {
-    "rules": ["GEOSITE,       geolocation-!cn,    FINAL"],
+    "rules": ["GEOSITE,       geolocation-!cn,    NON_CN"],
     "proxy-groups": [{ name: "NON_CN" }],
 };
 
