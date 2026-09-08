@@ -268,16 +268,10 @@ https://wiki.metacubex.one/config/proxies/dialer-proxy
 https://wiki.metacubex.one/config/proxies/tailscale
 */
 
-const buildRuleSet = (rules = [], options = {}) => ({
-    type:     "inline",
-    behavior: "classical",
-    payload:  rules,
-    ...options,
-});
-
 const buildCommonSubRules = (target) => [
     "RULE-SET,      non_jp,             PASS",
-    "RULE-SET,      jp,                 PASS",
+    "RULE-SET,      jp_domain,          PASS",
+    "RULE-SET,      jp_geosite,         PASS",
     `GEOSITE,       geolocation-!cn,    ${target}`,
     "GEOSITE,       private,            PASS",
     "GEOSITE,       CN,                 PASS",
@@ -416,7 +410,7 @@ Units.configTun = { override: (config) => Object.assign(config, { tun: config_tu
 
 Units.hoyo = {
     "rule-providers": {
-        hoyo_proxy: buildRuleSet([
+        hoyo_proxy: { type: "inline", behavior: "classical", payload: [
             "DOMAIN,dispatchosglobal.yuanshen.com", // GI
             "DOMAIN,oseurodispatch.yuanshen.com",   // GI
             "DOMAIN,osusadispatch.yuanshen.com",    // GI
@@ -424,8 +418,8 @@ Units.hoyo = {
             "DOMAIN,autopatchhk.yuanshen.com",      // GI
             "DOMAIN,osasiadispatch.yuanshen.com",   // GI
             "AND,((DST-PORT,8999),(NETWORK,tcp))",  // GI
-        ]),
-        hoyo_direct: buildRuleSet([
+        ]},
+        hoyo_direct: { type: "inline", behavior: "classical", payload: [
             "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com", // don't know why but this reduces ping...?
             //"DOMAIN,minor-api-os.hoyoverse.com",
             //"DOMAIN,asia-ugc-api.hoyoverse.com",
@@ -435,7 +429,7 @@ Units.hoyo = {
             "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
             "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
             "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
-        ]),
+        ]},
     },
     "rules": [
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
@@ -457,12 +451,12 @@ Units.hoyo = {
 
 Units.sbcz = {
     "rule-providers": {
-        sbcz: buildRuleSet([
+        sbcz: { type: "inline", behavior: "classical", payload: [
             "DOMAIN-SUFFIX,xoyo.games",
             "DOMAIN-SUFFIX,amazingseasun.com",
             "DOMAIN-SUFFIX,amazingseasuncdn.com",
             "AND,((PROCESS-NAME,com.seasun.snowbreak.google),(DST-PORT,1883))",
-        ]),
+        ]},
     },
     "rules": [
         "RULE-SET,      sbcz,               DIRECT",
@@ -476,10 +470,10 @@ Units.ad = {
 };
 Units.browser = {
     "rule-providers": {
-        browser: buildRuleSet([
+        browser: { type: "inline", behavior: "classical", payload: [
             "PROCESS-NAME,net.quetta.browser",
             "PROCESS-NAME,org.torproject.torbrowser",
-        ]),
+        ]},
     },
     "rules": ["SUB-RULE,(RULE-SET,browser),sub_browser"],
     "sub-rules": { sub_browser: buildCommonSubRules("BROWSER") },
@@ -489,12 +483,12 @@ Units.browser = {
 
 Units.downloader = {
     "rule-providers": {
-        downloader: buildRuleSet([
+        downloader: { type: "inline", behavior: "classical", payload: [
             "PROCESS-NAME,idm.internet.download.manager",
             "PROCESS-NAME,com.gianlu.aria2app",
             "PROCESS-NAME,aria2c",
             "PROCESS-NAME-REGEX,.*qbittorrent.*",
-        ]),
+        ]},
     },
     "rules": ["SUB-RULE,(RULE-SET,downloader),sub_downloader"],
     "sub-rules": { sub_downloader: buildCommonSubRules("DOWNLOADER") },
@@ -591,10 +585,10 @@ const google_fcm_hosts = {
 };
 Units.google_fcm = {
     "rule-providers": {
-        google_fcm: buildRuleSet([
+        google_fcm: { type: "inline", behavior: "domain", payload: [
             "+.mobile-gtalk.l.google.com",
             "+.mobile-gtalk4.l.google.com",
-        ], { behavior: "domain" }),
+        ]},
     },
     "rules": [
         "RULE-SET,      google_fcm,         GOOGLE_FCM",
@@ -669,11 +663,11 @@ Units.apple = {
 
 Units.non_jp = {
     "rule-providers": {
-        non_jp: buildRuleSet([
+        non_jp: { type: "inline", behavior: "domain", payload: [
             "+.hinative.com",
             "+.game8.jp",
             "+.kotobank.jp",
-        ], { behavior: "domain" }),
+        ]},
     },
     "rules": ["RULE-SET,      non_jp,             NON_JP"],
     "proxy-groups": [{ name: "NON_JP", proxies: "(HKSG|HK|SG)" }],
@@ -681,13 +675,12 @@ Units.non_jp = {
 
 Units.jp = {
     "rule-providers": {
-        jp: buildRuleSet([
-            //".jp",
-            "+.syosetu.com",
-        ], { behavior: "domain" }),
+        jp_domain:  { type: "http", behavior: "domain",    format: "text", url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/rules/jp_domain.txt" },
+        jp_geosite: { type: "http", behavior: "classical", format: "text", url: "https://raw.githubusercontent.com/itzXian/C.C./refs/heads/master/rules/jp_geosite.txt" },
     },
     "rules": [
-        "RULE-SET,      jp,                 JP",
+        "RULE-SET,      jp_domain,          JP",
+        "RULE-SET,      jp_geosite,         JP",
         "GEOIP,         JP,                 JP,              no-resolve",
     ],
     "proxy-groups": [{ name: "JP" }],
@@ -778,10 +771,10 @@ const tailscale_override = (config) => {
 };
 Units.tailscale = {
     "rule-providers": {
-        tailscale: buildRuleSet([
+        tailscale: { type: "inline", behavior: "domain", payload: [
             "*.ts.net",
             "*.*.ts.net",
-        ], { behavior: "domain" }),
+        ]},
     },
     "rules": [
         // https://tailscale.com/docs/reference/ip-pool
