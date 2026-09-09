@@ -867,14 +867,20 @@ Icons.ios = {
 };
 Units.addIcons = { overrideFinal: (config) => config["proxy-groups"].forEach(g => g.icon = g.icon ?? Icons.get(g.name)) };
 
-const replacement = [
+const shortProxyNames_replacement = [
     { pattern: "[-： :]", target: "" },
     { pattern: "(.*)(专线)(.*)", target: "$1$3 " },
     { pattern: "(.*?)([.0]*[1-9])[倍xX✕✖⨉](.*)", target: "$1$3 x $2" },
     { pattern: "[\\u4e00-\\u9fa5]", target: "" },
     ...Object.entries(Filter).map(([k, v]) => ({ pattern: v, target: k.toUpperCase() })),
 ];
-Units.shortProxyNames = { overrideFinal: (config) => Object.values(config["proxy-providers"]).forEach(v => v["override"]["proxy-name"] = replacement) };
+const shortProxyNames_overrideFinal = (config) => {
+    for (const v of Object.values(config["proxy-providers"])) {
+        if(!v?.["override"]) { v["override"] = {} };
+        v["override"]["proxy-name"] = shortProxyNames_replacement;
+    }
+};
+Units.shortProxyNames = { overrideFinal: (config) => { shortProxyNames_overrideFinal(config) } };
 
 const applyConfig = (config, options = []) => {
     const merged = {
