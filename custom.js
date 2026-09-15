@@ -62,13 +62,9 @@ const hasValue = (value) => {
 
 const mergeInto = (target, source) => {
     for (const key of Object.keys(source)) {
-        if (Array.isArray(target[key])) {
-            target[key] = target[key].concat(source[key]);
-        } else if (typeof target[key] === "object") {
-            Object.assign(target[key], source[key]);
-        } else {
-            target[key] = source[key];
-        }
+        if      (Array.isArray(target[key]))      { target[key] = target[key].concat(source[key]); }
+        else if (typeof target[key] === "object") { Object.assign(target[key], source[key]); }
+        else                                      { target[key] = source[key]; }
     }
 };
 
@@ -183,8 +179,7 @@ const buildGroupsWithProvidersWrapper = (proxies = [], groups = [], providerKeys
 const excludeProviders = (providers = {}, filter = "") => {
     const resultProviders = {};
     for (const [key, value] of Object.entries(providers)) {
-        if ((value?.custom ?? "").includes(filter)) continue;
-        resultProviders[key] = { ...value };
+        if (!(value?.custom ?? "").includes(filter)) resultProviders[key] = { ...value };
     }
     return resultProviders;
 };
@@ -279,9 +274,7 @@ const buildCommonSubRules = (target) => [
 ];
 
 const addNameserverPolicy = (config, obj) => {
-    if (config?.dns) {
-        config.dns["nameserver-policy"] = { ...config.dns["nameserver-policy"], ...obj };
-    }
+    if (config?.dns) { config.dns["nameserver-policy"] = { ...config.dns["nameserver-policy"], ...obj }; }
 };
 
 const Units = {
@@ -759,13 +752,9 @@ const tailscale_override = (config) => {
     config.dns["fake-ip-filter"] = config.dns["fake-ip-filter"] || [];
     const fake_ip_filter      = config.dns["fake-ip-filter"];
     const fake_ip_filter_mode = config.dns?.["fake-ip-filter-mode"];
-    if (fake_ip_filter_mode === "rule") {
-        fake_ip_filter.unshift("RULE-SET,tailscale,fake-ip");
-    } else if (fake_ip_filter_mode === "whitelist") {
-        fake_ip_filter.unshift("RULE-SET,tailscale");
-    } else {
-        console.log(tailscale_override_tips);
-    }
+    if      (fake_ip_filter_mode === "rule")      { fake_ip_filter.unshift("RULE-SET,tailscale,fake-ip"); }
+    else if (fake_ip_filter_mode === "whitelist") { fake_ip_filter.unshift("RULE-SET,tailscale"); }
+    else                                          { console.log(tailscale_override_tips); }
 };
 Units.tailscale = {
     "rule-providers": {
@@ -893,11 +882,8 @@ const applyConfig = (config, options = []) => {
     };
 
     for (const option of options) {
-        if (Units[option]) {
-            mergeInto(merged, Units[option]);
-        } else {
-            console.warn(`[applyConfig] Unknown option: "${option}"`);
-        }
+        if (Units[option]) { mergeInto(merged, Units[option]); }
+        else { console.warn(`[applyConfig] Unknown option: "${option}"`); }
     }
 
     merged.override.forEach(fn => fn(config));
