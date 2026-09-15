@@ -1,4 +1,4 @@
-#.jp
+.jp
 +.syosetu.com
 
 +.animax.co.jp

@@ -1,2 +1,3 @@
 GEOSITE,abema
 GEOSITE,dmm
+GEOSITE,niconico
