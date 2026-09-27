@@ -462,7 +462,7 @@ Units.ad = {
 };
 Units.browser = {
     "rule-providers": {
-        firefox: { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,org.mozilla.firefox" ]},
+        firefox: { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME-REGEX,(?:org.mozilla.)?firefox" ]},
         quetta:  { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,net.quetta.browser" ]},
         tor:     { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,org.torproject.torbrowser" ]},
     },
