@@ -39,7 +39,6 @@ const options = [
     "apple",
     "twitter_media",
     "twitter",
-    "telegram_media",
     "telegram",
     "discord_media",
     "discord",
@@ -632,13 +631,6 @@ Units.telegram = {
         "GEOIP,         telegram,           TELEGRAM,        no-resolve",
     ],
     "proxy-groups": [{ name: "TELEGRAM" }],
-};
-
-Units.telegram_media = {
-    "rules": [
-        "IP-CIDR,       91.108.56.200/32,   TELEGRAM_MEDIA,    no-resolve",
-    ],
-    "proxy-groups": [{ name: "TELEGRAM_MEDIA", proxies: "RELAY" }],
 };
 
 Units.discord = {
