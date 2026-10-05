@@ -20,6 +20,7 @@ const options = [
     //"tailscale",
     "browser",
     "downloader",
+    "bittorrent",
     "hoyo",
     "sbcz",
     "ehentai_media",
@@ -39,7 +40,6 @@ const options = [
     "apple",
     "twitter_media",
     "twitter",
-    "telegram_media",
     "telegram",
     "discord_media",
     "discord",
@@ -490,7 +490,6 @@ Units.downloader = {
             "PROCESS-NAME,idm.internet.download.manager",
             "PROCESS-NAME,com.gianlu.aria2app",
             "PROCESS-NAME,aria2c",
-            "PROCESS-NAME-REGEX,.*qbittorrent.*",
         ]},
     },
     "rules": ["SUB-RULE,(RULE-SET,downloader),sub_downloader"],
@@ -498,6 +497,17 @@ Units.downloader = {
     "proxy-groups": [{ name: "DOWNLOADER", proxies: "LBRR" }],
     override: (config) => addNameserverPolicy(config, { "RULE-SET:downloader": proxy_dns }),
 };
+
+Units.bittorrent = {
+    "rule-providers": {
+        bittorrent: { type: "inline", behavior: "classical", payload: [
+            "PROCESS-NAME-REGEX,.*qbittorrent.*",
+        ]},
+    },
+    "rules": ["RULE-SET,       bittorrent,         BITTORRENT"],
+    "proxy-groups": [{ name: "BITTORRENT"}],
+    override: (config) => addNameserverPolicy(config, { "RULE-SET:bittorrent": proxy_dns }),
+}
 
 Units.ehentai = {
     "rules": ["GEOSITE,       ehentai,            EHENTAI"],
@@ -548,12 +558,12 @@ Units.ai = {
 };
 
 Units.youtube = {
-    "rules": ["GEOSITE,       youTube,            YOUTUBE"],
+    "rules": ["GEOSITE,       youtube,            YOUTUBE"],
     "proxy-groups": [{ name: "YOUTUBE" }],
 };
 
 Units.youtube_media = {
-    "rules": ["GEOSITE,       youTube,            YOUTUBE"],
+    "rules": ["DOMAIN-SUFFIX, googlevideo.com,    GOOGLE_VIDEO"],
     "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "RELAY" }],
     override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxy_dns }),
 };
@@ -632,13 +642,6 @@ Units.telegram = {
         "GEOIP,         telegram,           TELEGRAM,        no-resolve",
     ],
     "proxy-groups": [{ name: "TELEGRAM" }],
-};
-
-Units.telegram_media = {
-    "rules": [
-        "IP-CIDR,       91.108.56.200/32,   TELEGRAM_MEDIA,    no-resolve",
-    ],
-    "proxy-groups": [{ name: "TELEGRAM_MEDIA", proxies: "RELAY" }],
 };
 
 Units.discord = {
@@ -820,7 +823,6 @@ Icons.old = {
     TWITTER: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
     TWITTER_MEDIA: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg",
     TELEGRAM: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
-    TELEGRAM_MEDIA: "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg",
     DISCORD: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
     DISCORD_MEDIA: "https://upload.wikimedia.org/wikipedia/fr/4/4f/Discord_Logo_sans_texte.svg",
     TIKTOK: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Tiktok_icon.svg",
@@ -839,6 +841,7 @@ Icons.ios = {
     QUETTA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
     TOR: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/56/fc/65/56fc6597-5a25-ed55-544e-43095013946f/Placeholder.mill/400x400bb-75.webp",
     DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
+    BITTORRENT: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/c2/8c/68c28c11-4ffa-1fae-c42b-204b17cf3400/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     //HOYO_PROXY: "",
     //HOYO_DIRECT: "",
     SBCZ: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/10/5f/0e/105f0e8f-7942-0fde-c2e0-79345827aa58/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
@@ -860,7 +863,6 @@ Icons.ios = {
     TWITTER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
     TWITTER_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/31/4e/98/314e9863-7df7-236f-4159-0fb7f28e2b23/Placeholder.mill/400x400ia-75.webp",
     TELEGRAM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
-    TELEGRAM_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d2/0c/9b/d20c9b91-830b-cc6c-aacd-8ab622116e39/Placeholder.mill/400x400ia-75.webp",
     DISCORD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
     DISCORD_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/db/29/bc/db29bc45-4500-e891-cd9e-5ac441798ea0/Placeholder.mill/400x400bb-75.webp",
     TIKTOK: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/19/43/1b/19431ba4-7ac5-7e31-e6f3-ea5dcd4e419c/Placeholder.mill/400x400ia-75.webp",
