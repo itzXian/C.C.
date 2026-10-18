@@ -465,23 +465,32 @@ Units.browser = {
         firefox: { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME-REGEX,(?:org.mozilla.)?firefox" ]},
         quetta:  { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,net.quetta.browser" ]},
         tor:     { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,org.torproject.torbrowser" ]},
+        via:     { type: "inline", behavior: "classical", payload: [ "PROCESS-NAME,mark.via.gp" ]},
     },
     "rules": [
         "SUB-RULE,(RULE-SET,firefox),sub_firefox",
         "SUB-RULE,(RULE-SET,quetta),sub_quetta",
         "SUB-RULE,(RULE-SET,tor),sub_tor",
+        "SUB-RULE,(RULE-SET,via),sub_via",
     ],
     "sub-rules": {
         sub_firefox: buildCommonSubRules("FIREFOX"),
         sub_quetta:  buildCommonSubRules("QUETTA"),
         sub_tor:     buildCommonSubRules("TOR"),
+        sub_via:     buildCommonSubRules("VIA"),
     },
     "proxy-groups": [
         { name: "FIREFOX", proxies: "(HKSG|HK|SG)" },
         { name: "QUETTA",  proxies: "(HKSG|HK|SG)" },
         { name: "TOR",     proxies: "(HKSG|HK|SG)" },
+        { name: "VIA",     proxies: "(HKSG|HK|SG)" },
     ],
-    override: (config) => addNameserverPolicy(config, { "RULE-SET:quetta": proxy_dns }),
+    override: (config) => addNameserverPolicy(config, {
+        "RULE-SET:firefox": proxy_dns,
+        "RULE-SET:quetta":  proxy_dns,
+        "RULE-SET:tor":     proxy_dns,
+        "RULE-SET:via":     proxy_dns,
+    }),
 };
 
 Units.downloader = {
@@ -801,6 +810,7 @@ Icons.old = {
     FIREFOX: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     QUETTA: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     TOR: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+    VIA: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     DOWNLOADER: "https://upload.wikimedia.org/wikipedia/commons/0/08/Paomedia_small-n-flat_cloud-down.svg",
     HOYO_PROXY: Icons.favicon("https://hoyoverse.com"),
     HOYO_DIRECT: Icons.favicon("https://hoyoverse.com"),
@@ -840,6 +850,7 @@ Icons.ios = {
     FIREFOX: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/2a/99/88/2a99882a-42d9-3741-43b7-ec121913935e/Placeholder.mill/400x400bb-75.webp",
     QUETTA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
     TOR: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/56/fc/65/56fc6597-5a25-ed55-544e-43095013946f/Placeholder.mill/400x400bb-75.webp",
+    VIA: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4f/90/e3/4f90e32c-7139-fad9-a48c-47b5e7ef219e/AppIcon-0-0-1x_U007emarketing-0-8-0-0-85-220.png/400x400ia-75.webp",
     DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
     BITTORRENT: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/c2/8c/68c28c11-4ffa-1fae-c42b-204b17cf3400/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     //HOYO_PROXY: "",
