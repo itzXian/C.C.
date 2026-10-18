@@ -117,12 +117,12 @@ const lbch_groups = [
     { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500, lazy: false },
 ];
 const relay_groups = [
-    ...lbch_groups, //...flbk_groups,
+    ...lbch_groups, ...flbk_groups,
     { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
     { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
 ];
 const exit_groups = [
-    ...lbch_groups, //...flbk_groups,
+    ...lbch_groups, ...flbk_groups,
 ];
 
 const buildGroup = (overrides) => ({
