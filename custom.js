@@ -112,14 +112,14 @@ const flbk_groups = [
 ];
 const lbch_groups = [
     { name: "FLBK (LBCH HKSGJPUS)", type: "fallback", use: [], proxies: ["LBCH HKSG", "LBCH JP", "LBCH US"] },
-    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 500, lazy: false, hidden: true },
-    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 500, lazy: false },
-    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 500, lazy: false },
+    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 1000, lazy: false, hidden: true },
+    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 1000, lazy: false },
+    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 1000, lazy: false },
 ];
 const relay_groups = [
     ...lbch_groups, ...flbk_groups,
-    { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 500 },
-    { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 500 },
+    { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 1000 },
+    { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 1000 },
 ];
 const exit_groups = [
     ...lbch_groups, ...flbk_groups,
@@ -129,9 +129,9 @@ const buildGroup = (overrides) => ({
     name:               overrides.name,
     hidden:             true,
     url:                "https://www.google.com/generate_204",
-    interval:           300,  // s
+    interval:           300,   // s
     "expected-status":  "200/204/302",
-    timeout:            998,  // ms
+    timeout:            3000,  // ms
     "max-failed-times": 1,
     //"exclude-filter":   "[^.0][1-9][倍xX✕✖⨉]",
     //"exclude-filter":   "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]",
@@ -758,7 +758,7 @@ const tailscale_proxy_providers = {
         enable: true,
         url: "https://hello.ts.net",
         "expected-status": "200/204/302",
-        timeout: 999,
+        timeout: 3000,
         interval: 1800,
     },
     payload: [
