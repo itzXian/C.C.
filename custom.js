@@ -18,6 +18,7 @@ const options = [
     "addIcons",
     //"shortProxyNames",
     //"tailscale",
+    //"chromium",
     //"firefox",
     //"quetta",
     //"tor",
@@ -465,6 +466,16 @@ Units.ad = {
     "proxy-groups": [{ name: "AD", proxies: "REJECT" }],
 };
 
+Units.chromium = {
+    "rule-providers": {
+        chromium: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,chromium"]},
+    },
+    "rules": ["SUB-RULE,(RULE-SET,chromium),sub_chromium"],
+    "sub-rules": { sub_chromium: buildCommonSubRules("CHROMIUM") },
+    "proxy-groups": [{ name: "CHROMIUM", proxies: "(HKSG|HK|SG)" }],
+    override: (config) => addNameserverPolicy(config, { "RULE-SET:chromium": proxy_dns }),
+};
+
 Units.firefox = {
     "rule-providers": {
         firefox: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME-REGEX,(?:org.mozilla.)?firefox"]},
@@ -829,6 +840,7 @@ Icons.old = {
     RELAY: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Noto_Emoji_v2.034_1f517.svg",
     SELECTOR: "https://upload.wikimedia.org/wikipedia/commons/8/84/Noto_Emoji_v2.034_1f4cc.svg",
     TAILSCALE: Icons.favicon("https://tailscale.com"),
+    CHROMIUM: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     FIREFOX: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     QUETTA: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     TOR: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
@@ -870,6 +882,7 @@ Icons.ios = {
     //RELAY: "",
     //SELECTOR: "",
     TAILSCALE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/00/3e/bf/003ebf6e-1348-c7e2-ce3a-3d8109f67d51/Placeholder.mill/400x400bb-75.webp",
+    CHROMIUM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1d/8a/f0/1d8af0cf-38d6-ab20-69ba-288f81d1088f/Placeholder.mill/400x400Icon.ApSiOS01-75.webp",
     FIREFOX: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/2a/99/88/2a99882a-42d9-3741-43b7-ec121913935e/Placeholder.mill/400x400bb-75.webp",
     QUETTA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
     TOR: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/56/fc/65/56fc6597-5a25-ed55-544e-43095013946f/Placeholder.mill/400x400bb-75.webp",
