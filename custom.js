@@ -28,6 +28,7 @@ const options = [
     "bittorrent",
     "hoyo",
     "sbcz",
+    //"rdma",
     "ehentai_media",
     "ehentai",
     "ad",
@@ -562,6 +563,11 @@ Units.ehentai_media = {
     "proxy-groups": [{ name: "EHENTAI_MEDIA", proxies: "LBRR", url: "http://hath.network" }],
 };
 
+Units.rdma = {
+    "rules": ["DOMAIN,        rdma.ooguy.com,     RIDDLE_MASTER_ASSISTANT"],
+    "proxy-groups": [{ name: "RIDDLE_MASTER_ASSISTANT", proxies:"(HKSG|HK|SG)" , url: "https://rdma.ooguy.com/status", "include-all": true }],
+};
+
 Units.github = {
     "rules": [
         "GEOSITE,       npmjs,              FINAL",
@@ -850,6 +856,7 @@ Icons.old = {
     HOYO_PROXY: Icons.favicon("https://hoyoverse.com"),
     HOYO_DIRECT: Icons.favicon("https://hoyoverse.com"),
     SBCZ: Icons.favicon("https://snowbreak.amazingseasun.com"),
+    RIDDLE_MASTER_ASSISTANT: Icons.favicon("https://e-hentai.org"),
     EHENTAI: Icons.favicon("https://e-hentai.org"),
     EHENTAI_MEDIA: Icons.favicon("https://e-hentai.org"),
     AD: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Codex_icon_Block_red.svg",
@@ -893,6 +900,7 @@ Icons.ios = {
     //HOYO_PROXY: "",
     //HOYO_DIRECT: "",
     SBCZ: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/10/5f/0e/105f0e8f-7942-0fde-c2e0-79345827aa58/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
+    //RIDDLE_MASTER_ASSISTANT: "",
     //EHENTAI: "",
     //EHENTAI_MEDIA: "",
     AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/81/8f/6a818fb6-1521-2a89-60cd-07239c6230ad/Placeholder.mill/400x400ia-75.webp",
