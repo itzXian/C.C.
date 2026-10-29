@@ -468,9 +468,7 @@ Units.ad = {
 };
 
 Units.chromium = {
-    "rule-providers": {
-        chromium: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,chromium"]},
-    },
+    "rule-providers": { chromium: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,chromium"]} },
     "rules": ["SUB-RULE,(RULE-SET,chromium),sub_chromium"],
     "sub-rules": { sub_chromium: buildCommonSubRules("CHROMIUM") },
     "proxy-groups": [{ name: "CHROMIUM", proxies: "(HKSG|HK|SG)" }],
@@ -478,9 +476,7 @@ Units.chromium = {
 };
 
 Units.firefox = {
-    "rule-providers": {
-        firefox: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME-REGEX,(?:org.mozilla.)?firefox"]},
-    },
+    "rule-providers": { firefox: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME-REGEX,(?:org.mozilla.)?firefox"]} },
     "rules": ["SUB-RULE,(RULE-SET,firefox),sub_firefox"],
     "sub-rules": { sub_firefox: buildCommonSubRules("FIREFOX") },
     "proxy-groups": [{ name: "FIREFOX", proxies: "(HKSG|HK|SG)" }],
@@ -488,9 +484,7 @@ Units.firefox = {
 };
 
 Units.quetta = {
-    "rule-providers": {
-        quetta: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,net.quetta.browser"]},
-    },
+    "rule-providers": { quetta: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,net.quetta.browser"]} },
     "rules": ["SUB-RULE,(RULE-SET,quetta),sub_quetta"],
     "sub-rules": { sub_quetta:  buildCommonSubRules("QUETTA") },
     "proxy-groups": [{ name: "QUETTA",  proxies: "(HKSG|HK|SG)" }],
@@ -498,9 +492,7 @@ Units.quetta = {
 };
 
 Units.tor = {
-    "rule-providers": {
-        tor: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,org.torproject.torbrowser"]},
-    },
+    "rule-providers": { tor: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,org.torproject.torbrowser"]} },
     "rules": ["SUB-RULE,(RULE-SET,tor),sub_tor"],
     "sub-rules": { sub_tor: buildCommonSubRules("TOR") },
     "proxy-groups": [{ name: "TOR", proxies: "(HKSG|HK|SG)" }],
@@ -508,9 +500,7 @@ Units.tor = {
 };
 
 Units.via = {
-    "rule-providers": {
-        via: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,mark.via.gp"]},
-    },
+    "rule-providers": { via: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,mark.via.gp"]} },
     "rules": ["SUB-RULE,(RULE-SET,via),sub_via"],
     "sub-rules": { sub_via: buildCommonSubRules("VIA") },
     "proxy-groups": [{ name: "VIA", proxies: "(HKSG|HK|SG)" }],
@@ -518,9 +508,7 @@ Units.via = {
 };
 
 Units.yandex = {
-    "rule-providers": {
-        yandex: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,com.yandex.browser"]},
-    },
+    "rule-providers": { yandex: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,com.yandex.browser"]} },
     "rules": ["SUB-RULE,(RULE-SET,yandex),sub_yandex"],
     "sub-rules": { sub_yandex: buildCommonSubRules("YANDEX") },
     "proxy-groups": [{ name: "YANDEX", proxies: "(HKSG|HK|SG)" }],
