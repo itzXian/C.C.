@@ -18,6 +18,7 @@ const options = [
     "addIcons",
     //"shortProxyNames",
     //"tailscale",
+    //"rdma",
     //"chromium",
     //"firefox",
     //"quetta",
@@ -28,7 +29,6 @@ const options = [
     "bittorrent",
     "hoyo",
     "sbcz",
-    //"rdma",
     "ehentai_media",
     "ehentai",
     "ad",
@@ -553,7 +553,7 @@ Units.ehentai_media = {
 
 Units.rdma = {
     "rules": ["DOMAIN,        rdma.ooguy.com,     RIDDLE_MASTER_ASSISTANT"],
-    "proxy-groups": [{ name: "RIDDLE_MASTER_ASSISTANT", proxies:"(HKSG|HK|SG)" , url: "https://rdma.ooguy.com/status", "include-all": true }],
+    "proxy-groups": [{ name: "RIDDLE_MASTER_ASSISTANT", proxies:"LBRR" , url: "https://rdma.ooguy.com/status", "include-all": true }],
 };
 
 Units.github = {
