@@ -24,6 +24,7 @@ const options = [
     //"quetta",
     //"tor",
     //"via",
+    //"vivaldi",
     //"yandex",
     "downloader",
     "bittorrent",
@@ -507,6 +508,14 @@ Units.via = {
     override: (config) => addNameserverPolicy(config, { "RULE-SET:via": proxy_dns }),
 };
 
+Units.vivaldi = {
+    "rule-providers": { vivaldi: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME-REGEX,(com.vivaldi.browser|vivaldi)"]} },
+    "rules": ["SUB-RULE,(RULE-SET,vivaldi),sub_vivaldi"],
+    "sub-rules": { sub_vivaldi: buildCommonSubRules("VIVALDI") },
+    "proxy-groups": [{ name: "VIVALDI", proxies: "(HKSG|HK|SG)" }],
+    override: (config) => addNameserverPolicy(config, { "RULE-SET:vivaldi": proxy_dns }),
+};
+
 Units.yandex = {
     "rule-providers": { yandex: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,com.yandex.browser"]} },
     "rules": ["SUB-RULE,(RULE-SET,yandex),sub_yandex"],
@@ -839,6 +848,7 @@ Icons.old = {
     QUETTA: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     TOR: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     VIA: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
+    VIVALDI: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     YANDEX: "https://upload.wikimedia.org/wikipedia/commons/c/c0/Noto_Emoji_v2.034_1f537.svg",
     DOWNLOADER: "https://upload.wikimedia.org/wikipedia/commons/0/08/Paomedia_small-n-flat_cloud-down.svg",
     HOYO_PROXY: Icons.favicon("https://hoyoverse.com"),
@@ -882,6 +892,7 @@ Icons.ios = {
     QUETTA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/48/45/ca/4845cac1-dd89-fc30-3c08-652f2aed934c/Placeholder.mill/400x400bb-75.webp",
     TOR: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/56/fc/65/56fc6597-5a25-ed55-544e-43095013946f/Placeholder.mill/400x400bb-75.webp",
     VIA: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4f/90/e3/4f90e32c-7139-fad9-a48c-47b5e7ef219e/AppIcon-0-0-1x_U007emarketing-0-8-0-0-85-220.png/400x400ia-75.webp",
+    VIVALDI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/17/9c/c6/179cc6bb-8b38-d9c9-a129-813d7ac70f91/Placeholder.mill/400x400Icon.ApSiOS01-75.webp",
     YANDEX: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/9d/2b/46/9d2b4610-0bd1-d3c3-bb41-0edfc68723ae/Placeholder.mill/400x400bb-75.webp",
     DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
     BITTORRENT: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/c2/8c/68c28c11-4ffa-1fae-c42b-204b17cf3400/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
