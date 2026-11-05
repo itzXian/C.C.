@@ -121,8 +121,7 @@ const lbch_groups = [
 ];
 const relay_groups = [
     ...lbch_groups, ...flbk_groups,
-    { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 1000 },
-    { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 1000 },
+    { name: "LBRR HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "round-robin", timeout: 1000 },
     { name: "LBSS HKSGJPUS", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}|${Filter.jp}|${Filter.us}`), strategy: "sticky-sessions", timeout: 1000 },
 ];
 const exit_groups = [
