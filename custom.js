@@ -123,6 +123,7 @@ const relay_groups = [
     ...lbch_groups, ...flbk_groups,
     { name: "LBRR HK", type: "load-balance", filter: buildRegex(Filter.hk), strategy: "round-robin", timeout: 1000 },
     { name: "LBRR SG", type: "load-balance", filter: buildRegex(Filter.sg), strategy: "round-robin", timeout: 1000 },
+    { name: "LBSS HKSGJPUS", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}|${Filter.jp}|${Filter.us}`), strategy: "sticky-sessions", timeout: 1000 },
 ];
 const exit_groups = [
     ...lbch_groups, ...flbk_groups,
@@ -562,7 +563,7 @@ Units.ehentai_media = {
 
 Units.rdma = {
     "rules": ["DOMAIN,        rdma.ooguy.com,     RIDDLE_MASTER_ASSISTANT"],
-    "proxy-groups": [{ name: "RIDDLE_MASTER_ASSISTANT", proxies:"LBRR" , url: "https://rdma.ooguy.com/status", "include-all": true }],
+    "proxy-groups": [{ name: "RIDDLE_MASTER_ASSISTANT", proxies:"LBSS" , url: "https://rdma.ooguy.com/status", "include-all": true }],
 };
 
 Units.github = {
