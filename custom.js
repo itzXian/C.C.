@@ -103,19 +103,19 @@ const buildRegex = (include = "", exclude = "") => {
 
 const flbk_groups = [
     { name: "FLBK HKSGJPUS", type: "fallback", use: [], proxies: ["AUTO HKSG", "AUTO JP", "AUTO US"] },
-    { name: "FLBK HKSG",     type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), lazy: false, hidden: true },
+    { name: "FLBK HKSG",     type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), hidden: true },
     { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
     { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
-    { name: "AUTO HKSG",     type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), lazy: false, hidden: true },
-    { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp), lazy: false, hidden: true },
-    { name: "AUTO US",       type: "url-test", filter: buildRegex(Filter.us), lazy: false, hidden: true },
+    { name: "AUTO HKSG",     type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), hidden: true },
+    { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
+    { name: "AUTO US",       type: "url-test", filter: buildRegex(Filter.us), hidden: true },
     //{ name: "AUTO JP (1X)",  type: "url-test", filter: buildRegex(Filter.jp), "exclude-filter": "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]", hidden: true },
     //{ name: "AUTO !JP",      type: "url-test", filter: buildRegex("", `${Filter.exclude}|${Filter.jp}`), hidden: true },
     //{ name: "AUTO ALL",      type: "url-test", filter: buildRegex(""), hidden: true },
 ];
 const lbch_groups = [
     { name: "FLBK (LBCH HKSGJPUS)", type: "fallback", use: [], proxies: ["LBCH HKSG", "LBCH JP", "LBCH US"] },
-    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 1000, lazy: false, hidden: true },
+    { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 1000, hidden: true },
     { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 1000, lazy: false },
     { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 1000, lazy: false },
 ];
@@ -139,7 +139,7 @@ const buildGroup = (overrides) => ({
     //"exclude-filter":   "[^.0][1-9][倍xX✕✖⨉]",
     //"exclude-filter":   "([.0][1-9]|[^.0][2-9])[倍xX✕✖⨉]",
     //"exclude-filter":   "([.0][1-9]|1)[倍xX✕✖⨉]",
-    tolerance:          50,   // ms
+    tolerance:          100,   // ms
     ...overrides,
 });
 
