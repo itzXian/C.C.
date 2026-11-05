@@ -116,8 +116,8 @@ const flbk_groups = [
 const lbch_groups = [
     { name: "FLBK (LBCH HKSGJPUS)", type: "fallback", use: [], proxies: ["LBCH HKSG", "LBCH JP", "LBCH US"] },
     { name: "LBCH HKSG", type: "load-balance", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), strategy: "consistent-hashing", timeout: 1000, hidden: true },
-    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 1000, lazy: false },
-    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 1000, lazy: false },
+    { name: "LBCH JP",   type: "load-balance", filter: buildRegex(Filter.jp), strategy: "consistent-hashing", timeout: 1000 },
+    { name: "LBCH US",   type: "load-balance", filter: buildRegex(Filter.us), strategy: "consistent-hashing", timeout: 1000 },
 ];
 const relay_groups = [
     ...lbch_groups, ...flbk_groups,
