@@ -704,7 +704,11 @@ Units.discord = {
 };
 
 Units.discord_media = {
-    "rules": ["DOMAIN,        cdn.discordapp.com, DISCORD_MEDIA"],
+    discord_media: { type: "inline", behavior: "classical", payload: [
+        "DOMAIN,cdn.discordapp.com",
+        "DOMAIN-REGEX,(media|images)[\\w-]*.discordapp.net",
+    ]},
+    "rules": ["RULE-SET,      discord_media,      DISCORD_MEDIA"],
     "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "RELAY" }],
 };
 
