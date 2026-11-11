@@ -410,35 +410,43 @@ Units.configTun = { override: (config) => Object.assign(config, { tun: config_tu
 Units.hoyo = {
     "rule-providers": {
         hoyo_proxy: { type: "inline", behavior: "classical", payload: [
+            "AND,((DST-PORT,8999),(NETWORK,tcp))",  // GI
+        ]},
+        hoyo_etc_ys: { type: "inline", behavior: "classical", payload: [
             "DOMAIN,dispatchosglobal.yuanshen.com", // GI
             "DOMAIN,oseurodispatch.yuanshen.com",   // GI
             "DOMAIN,osusadispatch.yuanshen.com",    // GI
             "DOMAIN,osuspider.yuanshen.com",        // GI
             "DOMAIN,autopatchhk.yuanshen.com",      // GI
             "DOMAIN,osasiadispatch.yuanshen.com",   // GI
-            "AND,((DST-PORT,8999),(NETWORK,tcp))",  // GI
         ]},
         hoyo_direct: { type: "inline", behavior: "classical", payload: [
-            "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com", // don't know why but this reduces ping...?
-            //"DOMAIN,minor-api-os.hoyoverse.com",
-            //"DOMAIN,asia-ugc-api.hoyoverse.com",
-            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
-            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
-            "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
             "AND,((DST-PORT,22101-22102),(NETWORK,udp))",     // GI
             "AND,((DST-PORT,23301/23801),(NETWORK,udp))",     // HSR
             "AND,((DST-PORT,20501),(NETWORK,udp))",           // ZZZ
         ]},
+        hoyo_etc_gi: { type: "inline", behavior: "classical", payload: [
+            "DOMAIN-REGEX,[\\w-]*log-upload-os\\.hoyoverse\\.com", // don't know why but this reduces ping...?
+            "DOMAIN,minor-api-os.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api.hoyoverse.com",
+            //"DOMAIN,asia-ugc-upload.hoyoverse.com",
+            //"DOMAIN,asia-ugc-api-static.hoyoverse.com",
+            "DOMAIN-REGEX,asia-ugc[\\w-]*\\.hoyoverse\\.com", // GI UGC
+        ]},
     },
     "rules": [
         "RULE-SET,      hoyo_direct,        HOYO_DIRECT",
+        "RULE-SET,      hoyo_etc_gi,        HOYO_ETC_GI",
         "RULE-SET,      hoyo_proxy,         HOYO_PROXY",
+        "RULE-SET,      hoyo_etc_ys,        HOYO_ETC_YS",
         "GEOSITE,       mihoyo-cn,          HOYO_DIRECT",
         "GEOSITE,       mihoyo,             HOYO_PROXY",
     ],
     "proxy-groups": [
         { name: "HOYO_PROXY", proxies: "RELAY", url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_ETC_YS", proxies: ["HOYO_PROXY", "DIRECT"], url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
         { name: "HOYO_DIRECT", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
+        { name: "HOYO_ETC_GI", proxies: ["DIRECT", "HOYO_PROXY"], url: "https://sdk.hoyoverse.com/hk4e/announcement/index.html?detect=123" },
     ],
     override: (config) => addNameserverPolicy(config, {
         "RULE-SET:hoyo_direct": direct_dns,
@@ -897,7 +905,9 @@ Icons.ios = {
     DOWNLOADER: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d9/92/7d/d9927d0e-9eba-0922-dbb6-d0b8eaf82aa4/Placeholder.mill/400x400ia-75.webp",
     BITTORRENT: "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/68/c2/8c/68c28c11-4ffa-1fae-c42b-204b17cf3400/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     //HOYO_PROXY: "",
+    HOYO_ETC_YS: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/50/ce/30/50ce3066-8581-7fd7-0522-387c55f84f32/Placeholder.mill/400x400Icon.ApSiOS01-75.webp",
     //HOYO_DIRECT: "",
+    HOYO_ETC_GI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/50/ce/30/50ce3066-8581-7fd7-0522-387c55f84f32/Placeholder.mill/400x400Icon.ApSiOS01-75.webp",
     SBCZ: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/10/5f/0e/105f0e8f-7942-0fde-c2e0-79345827aa58/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     //RIDDLE_MASTER_ASSISTANT: "",
     //EHENTAI: "",
