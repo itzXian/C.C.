@@ -25,6 +25,7 @@ const options = [
     //"tor",
     //"via",
     //"vivaldi",
+    //"waterfox",
     //"yandex",
     "downloader",
     "bittorrent",
@@ -524,6 +525,14 @@ Units.vivaldi = {
     override: (config) => addNameserverPolicy(config, { "RULE-SET:vivaldi": proxy_dns }),
 };
 
+Units.waterfox = {
+    "rule-providers": { waterfox: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME-REGEX,(net.waterfox.android.release|waterfox)"]} },
+    "rules": ["SUB-RULE,(RULE-SET,waterfox),sub_waterfox"],
+    "sub-rules": { sub_waterfox: buildCommonSubRules("WATERFOX") },
+    "proxy-groups": [{ name: "WATERFOX", proxies: "(HKSG|HK|SG)" }],
+    override: (config) => addNameserverPolicy(config, { "RULE-SET:waterfox": proxy_dns }),
+};
+
 Units.yandex = {
     "rule-providers": { yandex: { type: "inline", behavior: "classical", payload: ["PROCESS-NAME,com.yandex.browser"]} },
     "rules": ["SUB-RULE,(RULE-SET,yandex),sub_yandex"],
@@ -704,10 +713,12 @@ Units.discord = {
 };
 
 Units.discord_media = {
-    discord_media: { type: "inline", behavior: "classical", payload: [
+    "rule-providers": {
+        discord_media: { type: "inline", behavior: "classical", payload: [
         "DOMAIN,cdn.discordapp.com",
         "DOMAIN-REGEX,(media|images)[\\w-]*.discordapp.net",
-    ]},
+        ]},
+    },
     "rules": ["RULE-SET,      discord_media,      DISCORD_MEDIA"],
     "proxy-groups": [{ name: "DISCORD_MEDIA", proxies: "RELAY" }],
 };
@@ -859,6 +870,7 @@ Icons.old = {
     RIDDLE_MASTER_ASSISTANT: Icons.favicon("https://e-hentai.org"),
     EHENTAI: Icons.favicon("https://e-hentai.org"),
     EHENTAI_MEDIA: Icons.favicon("https://e-hentai.org"),
+    WATERFOX: "https://www.waterfox.com/_astro/app-icon.CPYA1KFh.png",
     APPLE: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
     APPLE_CN: "https://upload.wikimedia.org/wikipedia/commons/8/84/Apple_Computer_Logo_rainbow.svg",
     NON_JP: "https://upload.wikimedia.org/wikipedia/commons/4/45/Wikimania2019_flower_icon.svg",
