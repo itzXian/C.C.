@@ -35,6 +35,7 @@ const options = [
     "ehentai",
     "ad",
     "pixiv",
+    //"deepseek",
     "ai",
     "steam_cn",
     "steam",
@@ -614,6 +615,11 @@ Units.pixiv = {
     override: (config) => addNameserverPolicy(config, { "+.pximg.net": proxy_dns }),
 };
 
+Units.deepseek = {
+    "rules": ["GEOSITE,       deepseek,           DEEPSEEK"],
+    "proxy-groups": [{ name: "DEEPSEEK" }],
+};
+
 Units.ai = {
     "rules": ["GEOSITE,       category-ai-!cn,    AI"],
     "proxy-groups": [{ name: "AI" }],
@@ -903,6 +909,7 @@ Icons.ios = {
     //EHENTAI_MEDIA: "",
     AD: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/81/8f/6a818fb6-1521-2a89-60cd-07239c6230ad/Placeholder.mill/400x400ia-75.webp",
     PIXIV: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7e/6e/d7/7e6ed73e-6d98-574e-56ff-91d9b46615eb/Placeholder.mill/400x400ia-75.webp",
+    DEEPSEEK: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6a/98/78/6a98783d-d44c-0622-e941-302c2f8b4ca5/Placeholder.mill/400x400Icon.ApSiOS01-75.webp",
     AI: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/85/eb/b3/85ebb3df-5d4c-7216-ea4f-919fe9987cad/Placeholder.mill/400x400bb-75.webp",
     STEAM: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
     STEAM_CN: "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/7b/be/a9/7bbea9f7-8f0a-19e4-8c04-0cd7d8aab7ff/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/400x400ia-75.webp",
