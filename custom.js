@@ -546,8 +546,8 @@ Units.downloader = {
     "rule-providers": {
         downloader: { type: "inline", behavior: "classical", payload: [
             "PROCESS-NAME,idm.internet.download.manager",
-            "PROCESS-NAME,com.gianlu.aria2app",
-            "PROCESS-NAME,aria2c",
+            "PROCESS-NAME,(com.gianlu.aria2app|aria2c)",
+            "PROCESS-NAME-REGEX,(com.fluxdown.app|fluxdownd)",
         ]},
     },
     "rules": ["SUB-RULE,(RULE-SET,downloader),sub_downloader"],
