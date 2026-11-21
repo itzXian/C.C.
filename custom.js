@@ -41,7 +41,7 @@ const options = [
     "steam",
     "github",
     "microsoft",
-    "youtube_media",
+    "google_media",
     "youtube",
     "google_fcm",
     "google",
@@ -630,9 +630,18 @@ Units.youtube = {
     "proxy-groups": [{ name: "YOUTUBE" }],
 };
 
-Units.youtube_media = {
-    "rules": ["DOMAIN-SUFFIX, googlevideo.com,    GOOGLE_VIDEO"],
-    "proxy-groups": [{ name: "GOOGLE_VIDEO", proxies: "RELAY" }],
+Units.google_media = {
+    "rule-providers": {
+        google_media: { type: "inline", behavior: "classical", payload: [
+            "DOMAIN-SUFFIX,googlevideo.com",
+            "DOMAIN-SUFFIX,xn--ngstr-lra8j.com",
+            "DOMAIN-SUFFIX,googleusercontent.com",
+            "DOMAIN-SUFFIX,gvt1.com",
+            "DOMAIN-REGEX,dl.[\w-]*google.com",
+        ]},
+    },
+    "rules": ["RULE-SET,      google_media,       GOOGLE_MEDIA"],
+    "proxy-groups": [{ name: "GOOGLE_MEDIA", proxies: "RELAY" }],
     override: (config) => addNameserverPolicy(config, { "+.googlevideo.com": proxy_dns }),
 };
 
@@ -916,7 +925,7 @@ Icons.ios = {
     GITHUB: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/d0/5f/bb/d05fbb11-a1e2-795d-af2f-5e48b13949bb/Placeholder.mill/400x400ia-75.webp",
     MICROSOFT: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/a3/b2/f9/a3b2f994-953b-3d78-52ec-392a4ada4114/Placeholder.mill/400x400ia-75.webp",
     YOUTUBE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a6/09/6b/a6096b82-e4ed-4213-e7d9-1a7882b6146e/Placeholder.mill/400x400ia-75.webp",
-    GOOGLE_VIDEO: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a6/09/6b/a6096b82-e4ed-4213-e7d9-1a7882b6146e/Placeholder.mill/400x400ia-75.webp",
+    GOOGLE_MEDIA: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     GOOGLE: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     GOOGLE_FCM: "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/77/05/af/7705af6e-4b3e-f2d9-c68f-779f0d7c1a86/Placeholder.mill/400x400ia-75.webp",
     //APPLE: "",
