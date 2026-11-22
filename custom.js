@@ -104,10 +104,10 @@ const buildRegex = (include = "", exclude = "") => {
 }
 
 const flbk_groups = [
-    { name: "FLBK HKSGJPUS", type: "fallback", use: [], proxies: ["AUTO HKSG", "AUTO JP", "AUTO US"] },
+    { name: "FLBK HKSGJPUS", type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}|${Filter.jp}|${Filter.us}`), proxies: ["AUTO HKSG", "AUTO JP", "AUTO US"] },
     { name: "FLBK HKSG",     type: "fallback", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), hidden: true },
-    { name: "FLBK JP",       type: "fallback", use: [], proxies: ["AUTO JP"] },
-    { name: "FLBK US",       type: "fallback", use: [], proxies: ["AUTO US"] },
+    { name: "FLBK JP",       type: "fallback", filter: buildRegex(`${Filter.jp}`), proxies: ["AUTO JP"] },
+    { name: "FLBK US",       type: "fallback", filter: buildRegex(`${Filter.us}`), proxies: ["AUTO US"] },
     { name: "AUTO HKSG",     type: "url-test", filter: buildRegex(`${Filter.hk}|${Filter.sg}`), hidden: true },
     { name: "AUTO JP",       type: "url-test", filter: buildRegex(Filter.jp), hidden: true },
     { name: "AUTO US",       type: "url-test", filter: buildRegex(Filter.us), hidden: true },
